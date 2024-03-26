@@ -6,6 +6,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 final class Composer
 {
+
+    private null|string $name = null;
+    private null|string $description = null;
+    private null|string $type = null;
+    private null|string $minimumStability = null;
     private ArrayCollection $require;
     private ArrayCollection $config;
     private ArrayCollection $autoload;
@@ -16,12 +21,7 @@ final class Composer
     private ArrayCollection $extra;
     private ArrayCollection $requireDev;
 
-    public function __construct(
-        private null|string $name = null,
-        private null|string $description = null,
-        private null|string $type = null,
-        private string      $minimumStability
-    )
+    public function __construct()
     {
         $this->require = new ArrayCollection();
         $this->config = new ArrayCollection();
@@ -167,7 +167,7 @@ final class Composer
             ...$this->getDevRequires()
         ]);
 
-        return $packages->findFirst(fn(Package $package) => $name === $package->getName());
+        return $packages->findFirst(fn(int $key, Package $package) => $name === $package->getName());
     }
 
 }

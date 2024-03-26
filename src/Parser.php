@@ -9,36 +9,59 @@ use ComposerJsonParser\Model\Autoload;
 use ComposerJsonParser\Model\Composer;
 use ComposerJsonParser\Model\Package;
 use ComposerJsonParser\Model\Script;
+use ComposerJsonParser\VersionParser\VersionParser;
 
 final readonly class Parser
 {
 
     public function __invoke(): Composer
     {
-        $composerJsonData = json_decode(file_get_contents(realpath(__DIR__ . '/../../../../../composer.json')), true);
+        $composerJsonData = json_decode(getcwd(). '/composer.json', true);
 
-        $composer = new Composer(
-            name: $composerJsonData['name'],
-            description: $composerJsonData['description'],
-            type: $composerJsonData['type'],
-            minimumStability: $composerJsonData['minimum-stability'],
-        );
+        $composer = new Composer();
 
-        $this->extractRequirePackages(composerRequirePackages: $composerJsonData['require'], composerRequireDevPackages: $composerJsonData['require-dev'], composer: $composer);
-        $this->extractAutoloads(composerAutoload: $composerJsonData['autoload']['psr-4'], composerDevAutoload: $composerJsonData['autoload-dev']['psr-4'], composer: $composer);
-        $this->extractScripts(composerScripts: $composerJsonData['scripts'], composer: $composer);
+        if (array_key_exists(key: 'name', array: $composerJsonData)) {
+            $composer->setName($composerJsonData['name']);
+        }
+
+        if (array_key_exists(key: 'description', array: $composerJsonData)) {
+            $composer->setName($composerJsonData['description']);
+        }
+
+        if (array_key_exists(key: 'type', array: $composerJsonData)) {
+            $composer->setName($composerJsonData['type']);
+        }
+
+        if (array_key_exists(key: 'minimum-stability', array: $composerJsonData)) {
+            $composer->setName($composerJsonData['minimum-stability']);
+        }
+
+        if (array_key_exists(key: 'require', array: $composerJsonData)) {
+            $this->extractRequirePackages(composerRequirePackages: $composerJsonData['require'], composerRequireDevPackages: $composerJsonData['require-dev'], composer: $composer);
+        }
+
+        if (array_key_exists(key: 'autoload', array: $composerJsonData)) {
+            $this->extractAutoloads(composerAutoload: $composerJsonData['autoload']['psr-4'], composerDevAutoload: $composerJsonData['autoload-dev']['psr-4'], composer: $composer);
+        }
+
+        if (array_key_exists(key: 'scripts', array: $composerJsonData)) {
+            $this->extractScripts(composerScripts: $composerJsonData['scripts'], composer: $composer);
+        }
+
         return $composer;
     }
 
     private function extractRequirePackages(array $composerRequirePackages, array $composerRequireDevPackages, Composer $composer): void
     {
+        $versionParser = new VersionParser();
+
         foreach ($composerRequirePackages as $name => $version) {
-            $package = new Package(name: $name, version: $version, type: PackageTypeEnum::DEVELOPMENT);
+            $package = new Package(name: $name, version: $versionParser->parseVersionString($version), type: PackageTypeEnum::DEVELOPMENT);
             $composer->addRequire($package);
         }
 
         foreach ($composerRequireDevPackages as $name => $version) {
-            $package = new Package(name: $name, version: $version, type: PackageTypeEnum::REQUIRE);
+            $package = new Package(name: $name, version: $versionParser->parseVersionString($version), type: PackageTypeEnum::REQUIRE);
             $composer->addDevRequire($package);
         }
     }

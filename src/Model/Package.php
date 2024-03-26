@@ -10,8 +10,8 @@ final readonly class Package
 {
     public function __construct(
         private string $name,
-        private string $version,
         private PackageTypeEnum $type,
+        private null|PackageVersion $version = null
     )
     {
     }
@@ -21,7 +21,7 @@ final readonly class Package
         return $this->name;
     }
 
-    public function getVersion(): string
+    public function getVersion(): null|PackageVersion
     {
         return $this->version;
     }
