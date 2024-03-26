@@ -55,10 +55,13 @@ class ComposerStaticInite89693ae5912580ab2c46b03c143b338
             'Doctrine\\Common\\' => 16,
             'DeepCopy\\' => 9,
         ),
+        'C' => 
+        array (
+            'ComposerJsonParser\\' => 19,
+        ),
         'A' => 
         array (
             'App\\Tests\\' => 10,
-            'App\\' => 4,
         ),
     );
 
@@ -160,13 +163,13 @@ class ComposerStaticInite89693ae5912580ab2c46b03c143b338
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
         ),
+        'ComposerJsonParser\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'App\\Tests\\' => 
         array (
             0 => __DIR__ . '/../..' . '/tests',
-        ),
-        'App\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

@@ -1,7 +1,7 @@
 <?php return array(
     'root' => array(
         'name' => 'eventpoints/composer-json-parser',
-        'pretty_version' => '1.0.0+no-version-set',
+        'pretty_version' => '1.0.0',
         'version' => '1.0.0.0',
         'reference' => NULL,
         'type' => 'library',
@@ -110,7 +110,7 @@
             'dev_requirement' => false,
         ),
         'eventpoints/composer-json-parser' => array(
-            'pretty_version' => '1.0.0+no-version-set',
+            'pretty_version' => '1.0.0',
             'version' => '1.0.0.0',
             'reference' => NULL,
             'type' => 'library',
