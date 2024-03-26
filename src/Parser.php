@@ -4,19 +4,30 @@ declare(strict_types=1);
 
 namespace ComposerJsonParser;
 
+use ComposerJsonParser\ComposerJsonFinder\ComposerJsonFinder;
 use ComposerJsonParser\Enum\PackageTypeEnum;
 use ComposerJsonParser\Model\Autoload;
 use ComposerJsonParser\Model\Composer;
 use ComposerJsonParser\Model\Package;
 use ComposerJsonParser\Model\Script;
 use ComposerJsonParser\VersionParser\VersionParser;
+use Exception;
 
 final readonly class Parser
 {
 
+    /**
+     * @throws Exception
+     */
     public function __invoke(): Composer
     {
-        $composerJsonData = json_decode(file_get_contents(getcwd() . '/../composer.json'), true);
+        $composerFinder = new ComposerJsonFinder();
+        $composerJsonData = $composerFinder->getComposerJsonData();
+
+        if(!is_array($composerJsonData)){
+            throw new Exception('can not find composer.json');
+        }
+
         $composer = new Composer();
         $versionParser = new VersionParser();
 
