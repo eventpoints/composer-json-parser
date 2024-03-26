@@ -25,11 +25,11 @@ final readonly class Parser
         }
 
         if (array_key_exists(key: 'description', array: $composerJsonData)) {
-            $composer->setName($composerJsonData['description']);
+            $composer->setDescription($composerJsonData['description']);
         }
 
         if (array_key_exists(key: 'type', array: $composerJsonData)) {
-            $composer->setName($composerJsonData['type']);
+            $composer->setType($composerJsonData['type']);
         }
 
         if (array_key_exists(key: 'minimum-stability', array: $composerJsonData)) {
