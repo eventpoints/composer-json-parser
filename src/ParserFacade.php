@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ComposerJsonParser;
 
 use ComposerJsonParser\Model\Composer;

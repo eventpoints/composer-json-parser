@@ -28,6 +28,6 @@ return array(
     'Doctrine\\Common\\Collections\\' => array($vendorDir . '/doctrine/collections/src'),
     'Doctrine\\Common\\' => array($vendorDir . '/doctrine/event-manager/src'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
+    'ComposerJsonParser\\Tests\\' => array($baseDir . '/tests'),
     'ComposerJsonParser\\' => array($baseDir . '/src'),
-    'App\\Tests\\' => array($baseDir . '/tests'),
 );
