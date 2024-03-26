@@ -19,7 +19,8 @@ use ComposerJsonParser\ParserFacade;
 class ExampleClass
 {
 
-     public function someMethod(){
+     public function someMethod() : void 
+     {
         $composer = (new ParserFacade())->extract();
         $package = $composer->getPackageByName('rector/rector');
         
