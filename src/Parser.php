@@ -33,7 +33,7 @@ final readonly class Parser
         }
 
         if (array_key_exists(key: 'minimum-stability', array: $composerJsonData)) {
-            $composer->setName($composerJsonData['minimum-stability']);
+            $composer->setMinimumStability($composerJsonData['minimum-stability']);
         }
 
         if (array_key_exists(key: 'require', array: $composerJsonData)) {
