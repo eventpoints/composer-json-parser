@@ -19,12 +19,17 @@ use ComposerJsonParser\ParserFacade;
 class ExampleClass
 {
 
-  
      public function someMethod(){
         $composer = (new ParserFacade())->extract();
-        $composer->getPackageByName(name: 'rector/rector')
+        $package = $composer->getPackageByName('rector/rector');
         
-        var_dump($rectorPackage?->getVersion()); // string(7) "^0.18.1"
+        var_dump($package->getPackageVersion());
+        
+//        object(ComposerJsonParser\Model\PackageVersion)#29 (2) {
+//            ["version"] => float(0.18)
+//            ["versionConstraints"] => string(1) "^" 
+//       }
+        
      }
     
 }
