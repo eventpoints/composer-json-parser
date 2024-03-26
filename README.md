@@ -21,7 +21,7 @@ class ExampleClass
 
   
      public function someMethod(){
-        $composer = new ParserFacade();
+        $composer = (new ParserFacade())->extract();
         $composer->getPackageByName(name: 'rector/rector')
         
         var_dump($rectorPackage?->getVersion()); // string(7) "^0.18.1"
