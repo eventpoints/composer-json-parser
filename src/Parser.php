@@ -61,12 +61,12 @@ final readonly class Parser
         $versionParser = new VersionParser();
 
         foreach ($composerRequirePackages as $name => $version) {
-            $package = new Package(name: $name, version: $versionParser->parseVersionString($version), type: PackageTypeEnum::DEVELOPMENT);
+            $package = new Package(name: $name, packageVersion: $versionParser->parseVersionString($version), type: PackageTypeEnum::DEVELOPMENT);
             $composer->addRequire($package);
         }
 
         foreach ($composerRequireDevPackages as $name => $version) {
-            $package = new Package(name: $name, version: $versionParser->parseVersionString($version), type: PackageTypeEnum::REQUIRE);
+            $package = new Package(name: $name, packageVersion: $versionParser->parseVersionString($version), type: PackageTypeEnum::REQUIRE);
             $composer->addDevRequire($package);
         }
     }
