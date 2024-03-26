@@ -17,8 +17,9 @@ final readonly class Parser
     public function __invoke(): Composer
     {
         $composerJsonData = json_decode(file_get_contents(getcwd() . '/../composer.json'), true);
-
         $composer = new Composer();
+        $versionParser = new VersionParser();
+
 
         if (array_key_exists(key: 'name', array: $composerJsonData)) {
             $composer->setName($composerJsonData['name']);
@@ -30,6 +31,10 @@ final readonly class Parser
 
         if (array_key_exists(key: 'type', array: $composerJsonData)) {
             $composer->setType($composerJsonData['type']);
+        }
+
+        if (array_key_exists(key: 'version', array: $composerJsonData)) {
+            $composer->setVersion($versionParser->parseVersionString($composerJsonData['version']));
         }
 
         if (array_key_exists(key: 'minimum-stability', array: $composerJsonData)) {

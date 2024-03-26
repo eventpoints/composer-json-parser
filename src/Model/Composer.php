@@ -10,6 +10,7 @@ final class Composer
     private null|string $name = null;
     private null|string $description = null;
     private null|string $type = null;
+    private null|PackageVersion $version = null;
     private null|string $minimumStability = null;
     private ArrayCollection $require;
     private ArrayCollection $config;
@@ -42,6 +43,16 @@ final class Composer
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getVersion(): ?PackageVersion
+    {
+        return $this->version;
+    }
+
+    public function setVersion(?PackageVersion $version): void
+    {
+        $this->version = $version;
     }
 
     public function getDescription(): string
