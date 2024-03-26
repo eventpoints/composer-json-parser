@@ -16,7 +16,7 @@ final readonly class Parser
 
     public function __invoke(): Composer
     {
-        $composerJsonData = json_decode(getcwd(). '/composer.json', true);
+        $composerJsonData = json_decode(file_get_contents(getcwd(). '/composer.json'), true);
 
         $composer = new Composer();
 

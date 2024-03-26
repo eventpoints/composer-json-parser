@@ -9,7 +9,7 @@ use ComposerJsonParser\Model\Composer;
 final readonly class ParserFacade
 {
 
-    public function extract() : Composer
+    public function __invoke() : Composer
     {
         return (new Parser())();
     }
