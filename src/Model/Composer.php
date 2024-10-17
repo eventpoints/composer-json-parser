@@ -15,7 +15,7 @@ final class Composer
     private ArrayCollection $require;
     private ArrayCollection $config;
     private ArrayCollection $autoload;
-    private ArrayCollection $devAutoloads;
+    private ArrayCollection $devAutoload;
     private ArrayCollection $replace;
     private ArrayCollection $scripts;
     private ArrayCollection $conflict;
@@ -27,7 +27,7 @@ final class Composer
         $this->require = new ArrayCollection();
         $this->config = new ArrayCollection();
         $this->autoload = new ArrayCollection();
-        $this->devAutoloads = new ArrayCollection();
+        $this->devAutoload = new ArrayCollection();
         $this->replace = new ArrayCollection();
         $this->scripts = new ArrayCollection();
         $this->conflict = new ArrayCollection();
@@ -88,7 +88,7 @@ final class Composer
     /**
      * @return ArrayCollection<int, Package>
      */
-    public function getRequires(): ArrayCollection
+    public function getRequire(): ArrayCollection
     {
         return $this->require;
     }
@@ -101,7 +101,7 @@ final class Composer
     /**
      * @return ArrayCollection<int, Package>
      */
-    public function getDevRequires(): ArrayCollection
+    public function getRequireDev(): ArrayCollection
     {
         return $this->requireDev;
     }
@@ -124,7 +124,7 @@ final class Composer
     /**
      * @return ArrayCollection<int, Autoload>
      */
-    public function getAutoloads(): ArrayCollection
+    public function getAutoload(): ArrayCollection
     {
         return $this->autoload;
     }
@@ -137,14 +137,14 @@ final class Composer
     /**
      * @return ArrayCollection<int, Autoload>
      */
-    public function getDevAutoloads(): ArrayCollection
+    public function getDevAutoload(): ArrayCollection
     {
-        return $this->devAutoloads;
+        return $this->devAutoload;
     }
 
     public function addDevAutoload(Autoload $autoload): void
     {
-        $this->devAutoloads->add($autoload);
+        $this->devAutoload->add($autoload);
     }
 
     /**
@@ -163,19 +163,19 @@ final class Composer
 
     public function getRequirePackageByName(string $name): null|Package
     {
-        return $this->getRequires()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
+        return $this->getRequire()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
     }
 
     public function getDevPackageByName(string $name): null|Package
     {
-        return $this->getDevRequires()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
+        return $this->getRequireDev()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
     }
 
     public function getPackageByName(string $name): null|Package
     {
         $packages = new ArrayCollection([
-            ...$this->getRequires(),
-            ...$this->getDevRequires()
+            ...$this->getRequire(),
+            ...$this->getRequireDev()
         ]);
 
         return $packages->findFirst(fn(int $key, Package $package) => $name === $package->getName());

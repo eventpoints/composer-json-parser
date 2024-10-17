@@ -13,101 +13,121 @@ use ComposerJsonParser\Model\Script;
 use ComposerJsonParser\VersionParser\VersionParser;
 use Exception;
 
-final readonly class Parser
+final class Parser
 {
+    private Composer $composer;
+    private array $composerJsonData;
+    private VersionParser $versionParser;
 
-    /**
-     * @throws Exception
-     */
-    public function __invoke(): Composer
+
+    public function __construct()
     {
-        $composerFinder = new ComposerJsonFinder();
-        $composerJsonData = $composerFinder->getComposerJsonData();
-
-        if(!is_array($composerJsonData)){
-            throw new Exception('can not find composer.json');
-        }
-
-        $composer = new Composer();
-        $versionParser = new VersionParser();
-
-
-        if (array_key_exists(key: 'name', array: $composerJsonData)) {
-            $composer->setName($composerJsonData['name']);
-        }
-
-        if (array_key_exists(key: 'description', array: $composerJsonData)) {
-            $composer->setDescription($composerJsonData['description']);
-        }
-
-        if (array_key_exists(key: 'type', array: $composerJsonData)) {
-            $composer->setType($composerJsonData['type']);
-        }
-
-        if (array_key_exists(key: 'version', array: $composerJsonData)) {
-            $composer->setVersion($versionParser->parseVersionString($composerJsonData['version']));
-        }
-
-        if (array_key_exists(key: 'minimum-stability', array: $composerJsonData)) {
-            $composer->setMinimumStability($composerJsonData['minimum-stability']);
-        }
-
-        if (array_key_exists(key: 'require', array: $composerJsonData)) {
-            $this->extractRequirePackages(composerRequirePackages: $composerJsonData['require'], composerRequireDevPackages: $composerJsonData['require-dev'], composer: $composer);
-        }
-
-        if (array_key_exists(key: 'autoload', array: $composerJsonData)) {
-            $this->extractAutoloads(composerAutoload: $composerJsonData['autoload']['psr-4'], composerDevAutoload: $composerJsonData['autoload-dev']['psr-4'], composer: $composer);
-        }
-
-        if (array_key_exists(key: 'scripts', array: $composerJsonData)) {
-            $this->extractScripts(composerScripts: $composerJsonData['scripts'], composer: $composer);
-        }
-
-        return $composer;
+        $this->composerJsonData = (new ComposerJsonFinder())->getComposerJsonData();
+        $this->versionParser = new VersionParser();
+        $this->composer = new Composer();
     }
 
-    private function extractRequirePackages(array $composerRequirePackages, array $composerRequireDevPackages, Composer $composer): void
+    public function getComposer(): Composer
     {
-        $versionParser = new VersionParser();
+        return $this->composer;
+    }
 
+    public function withName(): self
+    {
+        if (array_key_exists('name', $this->composerJsonData)) {
+            $this->composer->setName($this->composerJsonData['name']);
+        }
+        return $this;
+    }
+
+    public function withDescription(): self
+    {
+        if (array_key_exists('description', $this->composerJsonData)) {
+            $this->composer->setDescription($this->composerJsonData['description']);
+        }
+        return $this;
+    }
+
+    public function withType(): self
+    {
+        if (array_key_exists('type', $this->composerJsonData)) {
+            $this->composer->setType($this->composerJsonData['type']);
+        }
+
+        return $this;
+    }
+
+    public function withVersion(): self
+    {
+        if (array_key_exists('version', $this->composerJsonData)) {
+            $this->composer->setVersion($this->versionParser->parseVersionString($this->composerJsonData['version']));
+        }
+        return $this;
+    }
+
+    public function withMinimumStability(): self
+    {
+        if (array_key_exists('minimum-stability', $this->composerJsonData)) {
+            $this->composer->setMinimumStability($this->composerJsonData['minimum-stability']);
+        }
+        return $this;
+    }
+
+    public function withRequire(): self
+    {
+        if (array_key_exists('require', $this->composerJsonData)) {
+            $this->extractRequirePackages($this->composerJsonData['require']);
+        }
+        return $this;
+    }
+
+    public function withAutoloads(): self
+    {
+        if (array_key_exists('autoload', $this->composerJsonData) &&
+            array_key_exists('psr-4', $this->composerJsonData['autoload'])) {
+
+            $this->extractAutoloads($this->composerJsonData['autoload']['psr-4']);
+        }
+        return $this;
+    }
+
+    public function withScripts(): self
+    {
+        if (array_key_exists('scripts', $this->composerJsonData)) {
+            $this->extractScripts($this->composerJsonData['scripts']);
+        }
+        return $this;
+    }
+
+    private function extractRequirePackages(array $composerRequirePackages): void
+    {
         foreach ($composerRequirePackages as $name => $version) {
-            $package = new Package(name: $name, packageVersion: $versionParser->parseVersionString($version), type: PackageTypeEnum::DEVELOPMENT);
-            $composer->addRequire($package);
-        }
-
-        foreach ($composerRequireDevPackages as $name => $version) {
-            $package = new Package(name: $name, packageVersion: $versionParser->parseVersionString($version), type: PackageTypeEnum::REQUIRE);
-            $composer->addDevRequire($package);
+            $package = new Package(
+                name: $name,
+                type: PackageTypeEnum::DEVELOPMENT,
+                packageVersion: $this->versionParser->parseVersionString($version)
+            );
+            $this->composer->addRequire($package);
         }
     }
 
-    private function extractAutoloads(array $composerAutoload, array $composerDevAutoload, Composer $composer): void
+    private function extractAutoloads(array $composerAutoload): void
     {
         foreach ($composerAutoload as $namespace => $path) {
             $autoload = new Autoload(namespace: $namespace, path: $path);
-            $composer->addAutoload($autoload);
-        }
-
-
-        foreach ($composerDevAutoload as $namespace => $path) {
-            $autoload = new Autoload(namespace: $namespace, path: $path);
-            $composer->addDevAutoload($autoload);
+            $this->composer->addAutoload($autoload);
         }
     }
 
-    private function extractScripts(array $composerScripts, Composer $composer): void
+    private function extractScripts(array $composerScripts): void
     {
         foreach ($composerScripts as $name => $command) {
-
             if (is_array($command)) {
                 continue;
             }
 
             $script = new Script(name: $name, command: $command);
-
-            $composer->addScript($script);
+            $this->composer->addScript($script);
         }
     }
-
 }

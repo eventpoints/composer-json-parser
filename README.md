@@ -2,7 +2,6 @@
 
 ## Convert your composer.json file to an object and find any data quickly.
 
-
 ### Install
 
 `composer require eventpoints/composer-json-parser`
@@ -14,22 +13,31 @@ declare(strict_types=1);
 
 namespace App;
 
-use ComposerJsonParser\ParserFacade;
+use ComposerJsonParser\Parser;
 
 class ExampleClass
 {
 
      public function someMethod() : void 
      {
-        $composer = (new ParserFacade())->extract();
-        $package = $composer->getPackageByName('rector/rector');
-        
-        var_dump($package->getPackageVersion());
-        
-//        object(ComposerJsonParser\Model\PackageVersion)#29 (2) {
-//            ["version"] => float(0.18)
-//            ["versionConstraints"] => string(1) "^" 
-//       }
+        $composer = (new Parser())->withRequire()->getComposer();
+        $doctrineOrmPackage = $composer->getRequire()->findFirst(fn (int $key, Package $package) =>  $package->getName() == 'php');
+        var_dump($doctrineOrmPackage);
+           
+//        object(ComposerJsonParser\Model\Package)#22 (3) {
+//          ["name":"ComposerJsonParser\Model\Package":private]=>
+//          string(12) "doctrine/orm"
+//          ["type":"ComposerJsonParser\Model\Package":private]=>
+//          enum(ComposerJsonParser\Enum\PackageTypeEnum::DEVELOPMENT)
+//          ["packageVersion":"ComposerJsonParser\Model\Package":private]=>
+//          object(ComposerJsonParser\Model\PackageVersion)#23 (2) {
+//            ["version"]=>
+//            float(3.1)
+//            ["versionConstraints"]=>
+//            string(1) "^"
+//          }
+//        }
+
         
      }
     
