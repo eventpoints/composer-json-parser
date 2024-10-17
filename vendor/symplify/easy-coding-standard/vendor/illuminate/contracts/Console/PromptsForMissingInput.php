@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Console;
+namespace ECSPrefix202410\Illuminate\Contracts\Console;
 
 interface PromptsForMissingInput
 {

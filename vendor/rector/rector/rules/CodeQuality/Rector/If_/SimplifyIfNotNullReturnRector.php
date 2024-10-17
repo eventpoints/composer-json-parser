@@ -5,12 +5,13 @@ namespace Rector\CodeQuality\Rector\If_;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Stmt\Else_;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Return_;
-use Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface;
-use Rector\Core\NodeManipulator\IfManipulator;
-use Rector\Core\PhpParser\Node\Value\ValueResolver;
-use Rector\Core\Rector\AbstractRector;
+use Rector\Contract\PhpParser\Node\StmtsAwareInterface;
+use Rector\NodeManipulator\IfManipulator;
+use Rector\PhpParser\Node\Value\ValueResolver;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -20,12 +21,12 @@ final class SimplifyIfNotNullReturnRector extends AbstractRector
 {
     /**
      * @readonly
-     * @var \Rector\Core\NodeManipulator\IfManipulator
+     * @var \Rector\NodeManipulator\IfManipulator
      */
     private $ifManipulator;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\Value\ValueResolver
+     * @var \Rector\PhpParser\Node\Value\ValueResolver
      */
     private $valueResolver;
     public function __construct(IfManipulator $ifManipulator, ValueResolver $valueResolver)
@@ -63,6 +64,12 @@ CODE_SAMPLE
     {
         foreach ((array) $node->stmts as $key => $stmt) {
             if (!$stmt instanceof If_) {
+                continue;
+            }
+            if ($stmt->else instanceof Else_) {
+                continue;
+            }
+            if ($stmt->elseifs !== []) {
                 continue;
             }
             if (!isset($node->stmts[$key + 1])) {

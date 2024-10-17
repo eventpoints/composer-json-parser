@@ -47,7 +47,7 @@ echo "Hello!";
         $content = $tokens->generateCode();
         // replace all <? with <?php to replace all short open tags even without short_open_tag option enabled
         $newContent = Preg::replace('/<\\?(?:phP|pHp|pHP|Php|PhP|PHp|PHP)?(\\s|$)/', '<?php$1', $content, -1, $count);
-        if (!$count) {
+        if (0 === $count) {
             return;
         }
         /* the following code is magic to revert previous replacements which should NOT be replaced, for example incorrectly replacing

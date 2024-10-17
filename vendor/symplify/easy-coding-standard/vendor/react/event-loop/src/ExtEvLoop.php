@@ -1,12 +1,12 @@
 <?php
 
-namespace ECSPrefix202402\React\EventLoop;
+namespace ECSPrefix202410\React\EventLoop;
 
 use Ev;
 use EvIo;
 use EvLoop;
-use ECSPrefix202402\React\EventLoop\Tick\FutureTickQueue;
-use ECSPrefix202402\React\EventLoop\Timer\Timer;
+use ECSPrefix202410\React\EventLoop\Tick\FutureTickQueue;
+use ECSPrefix202410\React\EventLoop\Timer\Timer;
 use SplObjectStorage;
 /**
  * An `ext-ev` based event loop.

@@ -16,6 +16,9 @@ use PhpCsFixer\ConfigurationException\InvalidFixerConfigurationException;
 use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverInterface;
 /**
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
+ *
+ * @template TFixerInputConfig of array<string, mixed>
+ * @template TFixerComputedConfig of array<string, mixed>
  */
 interface ConfigurableFixerInterface extends \PhpCsFixer\Fixer\FixerInterface
 {
@@ -31,7 +34,7 @@ interface ConfigurableFixerInterface extends \PhpCsFixer\Fixer\FixerInterface
      * eg `php_unit_strict` fixer allows to configure which methods should be fixed.
      * Finally, some fixers need configuration to work, eg `header_comment`.
      *
-     * @param array<string, mixed> $configuration configuration depends on Fixer
+     * @param TFixerInputConfig $configuration configuration depends on Fixer
      *
      * @throws InvalidFixerConfigurationException
      */

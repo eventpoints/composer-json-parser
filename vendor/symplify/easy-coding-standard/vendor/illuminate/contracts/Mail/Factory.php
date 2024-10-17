@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Mail;
+namespace ECSPrefix202410\Illuminate\Contracts\Mail;
 
 interface Factory
 {

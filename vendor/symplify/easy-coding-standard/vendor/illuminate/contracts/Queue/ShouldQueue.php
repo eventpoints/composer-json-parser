@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Queue;
+namespace ECSPrefix202410\Illuminate\Contracts\Queue;
 
 interface ShouldQueue
 {

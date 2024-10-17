@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Database\Query;
+namespace ECSPrefix202410\Illuminate\Contracts\Database\Query;
 
 /**
  * This interface is intentionally empty and exists to improve IDE support.

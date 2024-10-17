@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\SniffRunner\ValueObject\Error;
 
 use Symplify\EasyCodingStandard\Parallel\ValueObject\Name;
-use ECSPrefix202402\Symplify\EasyParallel\Contract\SerializableInterface;
+use ECSPrefix202410\Symplify\EasyParallel\Contract\SerializableInterface;
 final class CodingStandardError implements SerializableInterface
 {
     /**
@@ -54,18 +54,22 @@ final class CodingStandardError implements SerializableInterface
     {
         return $this->relativeFilePath;
     }
+    public function getAbsoluteFilePath() : ?string
+    {
+        return \realpath($this->relativeFilePath) ?: null;
+    }
     /**
-     * @return array{line: int, message: string, checker_class: string, relative_file_path: string}
+     * @return array{line: int, message: string, checker_class: string, absolute_file_path: string|null, relative_file_path: string}
      */
     public function jsonSerialize() : array
     {
-        return [Name::LINE => $this->line, Name::MESSAGE => $this->message, Name::CHECKER_CLASS => $this->checkerClass, Name::RELATIVE_FILE_PATH => $this->relativeFilePath];
+        return [Name::LINE => $this->line, Name::MESSAGE => $this->message, Name::CHECKER_CLASS => $this->checkerClass, Name::ABSOLUTE_FILE_PATH => $this->getAbsoluteFilePath(), Name::RELATIVE_FILE_PATH => $this->relativeFilePath];
     }
     /**
      * @param array{line: int, message: string, checker_class: string, relative_file_path: string} $json
      * @return $this
      */
-    public static function decode(array $json) : \ECSPrefix202402\Symplify\EasyParallel\Contract\SerializableInterface
+    public static function decode(array $json) : \ECSPrefix202410\Symplify\EasyParallel\Contract\SerializableInterface
     {
         return new self($json[Name::LINE], $json[Name::MESSAGE], $json[Name::CHECKER_CLASS], $json[Name::RELATIVE_FILE_PATH]);
     }

@@ -20,10 +20,10 @@ use Symplify\CodingStandard\TokenAnalyzer\Naming\MethodNameResolver;
 use Symplify\CodingStandard\TokenRunner\Analyzer\FixerAnalyzer\BlockFinder;
 use Symplify\CodingStandard\TokenRunner\Transformer\FixerTransformer\LineLengthTransformer;
 use Symplify\CodingStandard\TokenRunner\ValueObject\BlockInfo;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\LineLength\LineLengthFixer\LineLengthFixerTest
  * @see \Symplify\CodingStandard\Tests\Fixer\LineLength\LineLengthFixer\ConfiguredLineLengthFixerTest

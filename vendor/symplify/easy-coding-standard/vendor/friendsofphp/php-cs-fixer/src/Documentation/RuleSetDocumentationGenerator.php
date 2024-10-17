@@ -31,7 +31,7 @@ final class RuleSetDocumentationGenerator
         $this->locator = $locator;
     }
     /**
-     * @param FixerInterface[] $fixers
+     * @param list<FixerInterface> $fixers
      */
     public function generateRuleSetsDocumentation(RuleSetDescriptionInterface $definition, array $fixers) : string
     {
@@ -69,7 +69,7 @@ RST;
         if ([] !== $warnings) {
             $warningsHeader = 1 === \count($warnings) ? 'Warning' : 'Warnings';
             $warningsHeaderLine = \str_repeat('-', \strlen($warningsHeader));
-            $doc .= "\n\n" . \implode("\n", \array_filter(\array_merge([$warningsHeader, $warningsHeaderLine], $warnings)));
+            $doc .= "\n\n" . \implode("\n", \array_merge([$warningsHeader, $warningsHeaderLine], $warnings));
         }
         $rules = $definition->getRules();
         if ([] === $rules) {

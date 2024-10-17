@@ -11,13 +11,19 @@
  */
 namespace PHP_CodeSniffer\Files;
 
+use Countable;
+use FilesystemIterator;
+use Iterator;
 use PHP_CodeSniffer\Autoload;
-use PHP_CodeSniffer\Util;
-use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Exceptions\DeepExitException;
+use PHP_CodeSniffer\Ruleset;
+use PHP_CodeSniffer\Util\Common;
+use RecursiveArrayIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReturnTypeWillChange;
-class FileList implements \Iterator, \Countable
+class FileList implements Iterator, Countable
 {
     /**
      * A list of file paths that are included in the list.
@@ -63,15 +69,15 @@ class FileList implements \Iterator, \Countable
         $this->config = $config;
         $paths = $config->files;
         foreach ($paths as $path) {
-            $isPharFile = Util\Common::isPharFile($path);
+            $isPharFile = Common::isPharFile($path);
             if (\is_dir($path) === \true || $isPharFile === \true) {
                 if ($isPharFile === \true) {
                     $path = 'phar://' . $path;
                 }
                 $filterClass = $this->getFilterClass();
-                $di = new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS);
+                $di = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS);
                 $filter = new $filterClass($di, $path, $config, $ruleset);
-                $iterator = new \RecursiveIteratorIterator($filter);
+                $iterator = new RecursiveIteratorIterator($filter);
                 foreach ($iterator as $file) {
                     $this->files[$file->getPathname()] = null;
                     $this->numFiles++;
@@ -106,9 +112,9 @@ class FileList implements \Iterator, \Countable
             return;
         }
         $filterClass = $this->getFilterClass();
-        $di = new \RecursiveArrayIterator([$path]);
+        $di = new RecursiveArrayIterator([$path]);
         $filter = new $filterClass($di, $path, $this->config, $this->ruleset);
-        $iterator = new \RecursiveIteratorIterator($filter);
+        $iterator = new RecursiveIteratorIterator($filter);
         foreach ($iterator as $path) {
             $this->files[$path] = $file;
             $this->numFiles++;

@@ -1,19 +1,19 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\Console\Command;
+namespace Rector\Console\Command;
 
-use RectorPrefix202312\Nette\Utils\Json;
+use RectorPrefix202410\Nette\Utils\Json;
 use Rector\ChangesReporting\Output\ConsoleOutputFormatter;
-use Rector\Core\Configuration\Option;
-use Rector\Core\Contract\Rector\RectorInterface;
+use Rector\Configuration\Option;
+use Rector\Contract\Rector\RectorInterface;
 use Rector\PostRector\Contract\Rector\PostRectorInterface;
 use Rector\Skipper\SkipCriteriaResolver\SkippedClassResolver;
-use RectorPrefix202312\Symfony\Component\Console\Command\Command;
-use RectorPrefix202312\Symfony\Component\Console\Input\InputInterface;
-use RectorPrefix202312\Symfony\Component\Console\Input\InputOption;
-use RectorPrefix202312\Symfony\Component\Console\Output\OutputInterface;
-use RectorPrefix202312\Symfony\Component\Console\Style\SymfonyStyle;
+use RectorPrefix202410\Symfony\Component\Console\Command\Command;
+use RectorPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use RectorPrefix202410\Symfony\Component\Console\Input\InputOption;
+use RectorPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use RectorPrefix202410\Symfony\Component\Console\Style\SymfonyStyle;
 final class ListRulesCommand extends Command
 {
     /**
@@ -45,6 +45,7 @@ final class ListRulesCommand extends Command
     {
         $this->setName('list-rules');
         $this->setDescription('Show loaded Rectors');
+        $this->setAliases(['show-rules']);
         $this->addOption(Option::OUTPUT_FORMAT, null, InputOption::VALUE_REQUIRED, 'Select output format', ConsoleOutputFormatter::NAME);
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
@@ -54,7 +55,7 @@ final class ListRulesCommand extends Command
         $outputFormat = $input->getOption(Option::OUTPUT_FORMAT);
         if ($outputFormat === 'json') {
             $data = ['rectors' => $rectorClasses, 'skipped-rectors' => $skippedClasses];
-            echo Json::encode($data, Json::PRETTY) . \PHP_EOL;
+            echo Json::encode($data, \true) . \PHP_EOL;
             return Command::SUCCESS;
         }
         $this->symfonyStyle->title('Loaded Rector rules');

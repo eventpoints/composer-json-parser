@@ -9,22 +9,22 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Expression;
 use PHPStan\Reflection\ReflectionProvider;
-use Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\Contract\PhpParser\Node\StmtsAwareInterface;
+use Rector\PhpParser\Node\BetterNodeFinder;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
+use Rector\ValueObject\PolyfillPackage;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
+use Rector\VersionBonding\Contract\RelatedPolyfillInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://tomasvotruba.com/blog/2018/08/16/whats-new-in-php-73-in-30-seconds-in-diffs/#2-first-and-last-array-key
- *
  * This needs to removed 1 floor above, because only nodes in arrays can be removed why traversing,
  * see https://github.com/nikic/PHP-Parser/issues/389
  *
  * @see \Rector\Tests\Php73\Rector\FuncCall\ArrayKeyFirstLastRector\ArrayKeyFirstLastRectorTest
  */
-final class ArrayKeyFirstLastRector extends AbstractRector implements MinPhpVersionInterface
+final class ArrayKeyFirstLastRector extends AbstractRector implements MinPhpVersionInterface, RelatedPolyfillInterface
 {
     /**
      * @readonly
@@ -33,7 +33,7 @@ final class ArrayKeyFirstLastRector extends AbstractRector implements MinPhpVers
     private $reflectionProvider;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
@@ -89,6 +89,10 @@ CODE_SAMPLE
     {
         return PhpVersionFeature::ARRAY_KEY_FIRST_LAST;
     }
+    public function providePolyfillPackage() : string
+    {
+        return PolyfillPackage::PHP_73;
+    }
     private function processArrayKeyFirstLast(StmtsAwareInterface $stmtsAware, bool $hasChanged, int $jumpToKey = 0) : ?StmtsAwareInterface
     {
         if ($stmtsAware->stmts === null) {
@@ -98,6 +102,7 @@ CODE_SAMPLE
         \end($stmtsAware->stmts);
         /** @var int $totalKeys */
         $totalKeys = \key($stmtsAware->stmts);
+        \reset($stmtsAware->stmts);
         for ($key = $jumpToKey; $key < $totalKeys; ++$key) {
             if (!isset($stmtsAware->stmts[$key], $stmtsAware->stmts[$key + 1])) {
                 break;

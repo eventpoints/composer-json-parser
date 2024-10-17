@@ -70,7 +70,7 @@ class LineLengthSniff implements Sniff
         }
         $this->checkLineLength($phpcsFile, $tokens, $i);
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
     /**

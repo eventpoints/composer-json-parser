@@ -25,7 +25,7 @@ final class DataProviderAnalyzer
 {
     private const REGEX_CLASS = '(?:\\\\?+' . TypeExpression::REGEX_IDENTIFIER . '(\\\\' . TypeExpression::REGEX_IDENTIFIER . ')*+)';
     /**
-     * @return array<DataProviderAnalysis>
+     * @return list<DataProviderAnalysis>
      */
     public function getDataProviders(Tokens $tokens, int $startIndex, int $endIndex) : array
     {
@@ -37,9 +37,7 @@ final class DataProviderAnalyzer
                 continue;
             }
             Preg::matchAll('/@dataProvider\\h+((' . self::REGEX_CLASS . '::)?' . TypeExpression::REGEX_IDENTIFIER . ')/', $tokens[$docCommentIndex]->getContent(), $matches);
-            /** @var array<string> $matches */
-            $matches = $matches[1];
-            foreach ($matches as $dataProviderName) {
+            foreach ($matches[1] as $dataProviderName) {
                 $dataProviders[$dataProviderName][] = $docCommentIndex;
             }
         }

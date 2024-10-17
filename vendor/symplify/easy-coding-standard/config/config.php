@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202402;
+namespace ECSPrefix202410;
 
 use Symplify\EasyCodingStandard\Application\Version\StaticVersionResolver;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
@@ -13,4 +13,4 @@ if (StaticVersionResolver::PACKAGE_VERSION !== '@package_version@') {
 // $ecsConfig->parallel();
 // make cache individual per project
 $cacheNamespace = \str_replace(\DIRECTORY_SEPARATOR, '_', \getcwd());
-return ECSConfig::configure()->withSpacing(Option::INDENTATION_SPACES, \PHP_EOL)->withCache($cacheDirectory, $cacheNamespace)->withFileExtensions(['php'])->withSkip([])->withPaths([]);
+return ECSConfig::configure()->withParallel()->withSpacing(Option::INDENTATION_SPACES, \PHP_EOL)->withCache($cacheDirectory, $cacheNamespace)->withFileExtensions(['php'])->withSkip([])->withPaths([])->withRealPathReporting(\false);

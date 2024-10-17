@@ -3,12 +3,14 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console;
 
-use ECSPrefix202402\Composer\XdebugHandler\XdebugHandler;
-use ECSPrefix202402\Symfony\Component\Console\Application;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Composer\XdebugHandler\XdebugHandler;
+use PHP_CodeSniffer\Config as PHP_CodeSniffer;
+use PhpCsFixer\Console\Application as PhpCsFixer;
+use ECSPrefix202410\Symfony\Component\Console\Application;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Application\Version\StaticVersionResolver;
 use Symplify\EasyCodingStandard\Console\Command\CheckCommand;
 use Symplify\EasyCodingStandard\Console\Command\ListCheckersCommand;
@@ -45,7 +47,13 @@ final class EasyCodingStandardConsoleApplication extends Application
         if ($this->shouldPrintMetaInformation($input)) {
             $output->writeln($this->getLongVersion());
         }
-        return parent::doRun($input, $output);
+        $exitCode = parent::doRun($input, $output);
+        // Append to the output of --version
+        if ($exitCode === 0 && $input->hasParameterOption(['--version', '-V'], \true)) {
+            $output->writeln(\sprintf('+ %s <info>%s</info>', 'PHP_CodeSniffer', PHP_CodeSniffer::VERSION));
+            $output->writeln(\sprintf('+ %s <info>%s</info>', 'PHP-CS-Fixer', PhpCsFixer::VERSION));
+        }
+        return $exitCode;
     }
     protected function getDefaultInputDefinition() : InputDefinition
     {
@@ -56,15 +64,11 @@ final class EasyCodingStandardConsoleApplication extends Application
     private function shouldPrintMetaInformation(InputInterface $input) : bool
     {
         $hasNoArguments = $input->getFirstArgument() === null;
-        $hasVersionOption = $input->hasParameterOption('--version');
-        if ($hasVersionOption) {
-            return \false;
-        }
         if ($hasNoArguments) {
             return \false;
         }
         $outputFormat = $input->getParameterOption('--' . Option::OUTPUT_FORMAT);
-        return $outputFormat === ConsoleOutputFormatter::NAME;
+        return $outputFormat === ConsoleOutputFormatter::getName();
     }
     private function addExtraOptions(InputDefinition $inputDefinition) : void
     {

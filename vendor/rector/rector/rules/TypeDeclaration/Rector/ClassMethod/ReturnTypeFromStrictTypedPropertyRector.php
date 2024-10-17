@@ -8,18 +8,18 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\StaticPropertyFetch;
 use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\Stmt\Return_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\Php\PhpPropertyReflection;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\Type;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
-use Rector\Core\Rector\AbstractScopeAwareRector;
-use Rector\Core\Reflection\ReflectionResolver;
-use Rector\Core\ValueObject\PhpVersionFeature;
 use Rector\NodeTypeResolver\PHPStan\Type\TypeFactory;
+use Rector\PhpParser\Node\BetterNodeFinder;
 use Rector\PHPStanStaticTypeMapper\Enum\TypeKind;
+use Rector\Rector\AbstractScopeAwareRector;
+use Rector\Reflection\ReflectionResolver;
 use Rector\StaticTypeMapper\StaticTypeMapper;
+use Rector\TypeDeclaration\NodeAnalyzer\ReturnAnalyzer;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VendorLocker\NodeVendorLocker\ClassMethodReturnTypeOverrideGuard;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
@@ -36,7 +36,7 @@ final class ReturnTypeFromStrictTypedPropertyRector extends AbstractScopeAwareRe
     private $typeFactory;
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
@@ -46,7 +46,7 @@ final class ReturnTypeFromStrictTypedPropertyRector extends AbstractScopeAwareRe
     private $classMethodReturnTypeOverrideGuard;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
@@ -54,13 +54,19 @@ final class ReturnTypeFromStrictTypedPropertyRector extends AbstractScopeAwareRe
      * @var \Rector\StaticTypeMapper\StaticTypeMapper
      */
     private $staticTypeMapper;
-    public function __construct(TypeFactory $typeFactory, ReflectionResolver $reflectionResolver, ClassMethodReturnTypeOverrideGuard $classMethodReturnTypeOverrideGuard, BetterNodeFinder $betterNodeFinder, StaticTypeMapper $staticTypeMapper)
+    /**
+     * @readonly
+     * @var \Rector\TypeDeclaration\NodeAnalyzer\ReturnAnalyzer
+     */
+    private $returnAnalyzer;
+    public function __construct(TypeFactory $typeFactory, ReflectionResolver $reflectionResolver, ClassMethodReturnTypeOverrideGuard $classMethodReturnTypeOverrideGuard, BetterNodeFinder $betterNodeFinder, StaticTypeMapper $staticTypeMapper, ReturnAnalyzer $returnAnalyzer)
     {
         $this->typeFactory = $typeFactory;
         $this->reflectionResolver = $reflectionResolver;
         $this->classMethodReturnTypeOverrideGuard = $classMethodReturnTypeOverrideGuard;
         $this->betterNodeFinder = $betterNodeFinder;
         $this->staticTypeMapper = $staticTypeMapper;
+        $this->returnAnalyzer = $returnAnalyzer;
     }
     public function getRuleDefinition() : RuleDefinition
     {
@@ -100,7 +106,7 @@ CODE_SAMPLE
      */
     public function refactorWithScope(Node $node, Scope $scope) : ?Node
     {
-        if ($node->returnType !== null) {
+        if ($node->returnType instanceof Node) {
             return null;
         }
         if ($this->classMethodReturnTypeOverrideGuard->shouldSkipClassMethod($node, $scope)) {
@@ -131,8 +137,7 @@ CODE_SAMPLE
      */
     private function resolveReturnPropertyType(ClassMethod $classMethod) : array
     {
-        /** @var Return_[] $returns */
-        $returns = $this->betterNodeFinder->findInstancesOfInFunctionLikeScoped($classMethod, Return_::class);
+        $returns = $this->betterNodeFinder->findReturnsScoped($classMethod);
         $propertyTypes = [];
         foreach ($returns as $return) {
             if (!$return->expr instanceof Expr) {
@@ -149,7 +154,10 @@ CODE_SAMPLE
             if ($phpPropertyReflection->getNativeType() instanceof MixedType) {
                 return [];
             }
-            $propertyTypes[] = $phpPropertyReflection->getNativeType();
+            $propertyTypes[] = $this->nodeTypeResolver->getNativeType($return->expr);
+        }
+        if (!$this->returnAnalyzer->hasOnlyReturnWithExpr($classMethod, $returns)) {
+            return [];
         }
         return $propertyTypes;
     }

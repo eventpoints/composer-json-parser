@@ -6,15 +6,13 @@ namespace Rector\Php55\Rector\ClassConstFetch;
 use PhpParser\Node;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Stmt\Class_;
-use Rector\Core\Enum\ObjectReference;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\Enum\ObjectReference;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://wiki.php.net/rfc/class_name_scalars
- * @changelog https://3v4l.org/AHr9C#v5.5.0
  * @see \Rector\Tests\Php55\Rector\ClassConstFetch\StaticToSelfOnFinalClassRector\StaticToSelfOnFinalClassRectorTest
  */
 final class StaticToSelfOnFinalClassRector extends AbstractRector implements MinPhpVersionInterface

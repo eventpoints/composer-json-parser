@@ -19,32 +19,32 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\MixedType;
-use Rector\Core\NodeAnalyzer\ExprAnalyzer;
-use Rector\Core\Php\ReservedKeywordAnalyzer;
-use Rector\Core\PhpParser\AstResolver;
-use Rector\Core\Rector\AbstractScopeAwareRector;
-use Rector\Core\Reflection\ReflectionResolver;
+use Rector\NodeAnalyzer\ExprAnalyzer;
+use Rector\Php\ReservedKeywordAnalyzer;
+use Rector\PhpParser\AstResolver;
+use Rector\Rector\AbstractScopeAwareRector;
+use Rector\Reflection\ReflectionResolver;
 use Rector\TypeDeclaration\TypeInferer\PropertyTypeInferer\AllAssignNodePropertyTypeInferer;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @see \Rector\Tests\CodeQuality\Rector\Empty_\SimplifyEmptyCheckOnEmptyArrayRectorTest\SimplifyEmptyCheckOnEmptyArrayRectorTest
+ * @see \Rector\Tests\CodeQuality\Rector\Empty_\SimplifyEmptyCheckOnEmptyArrayRector\SimplifyEmptyCheckOnEmptyArrayRectorTest
  */
 final class SimplifyEmptyCheckOnEmptyArrayRector extends AbstractScopeAwareRector
 {
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\ExprAnalyzer
+     * @var \Rector\NodeAnalyzer\ExprAnalyzer
      */
     private $exprAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\AstResolver
+     * @var \Rector\PhpParser\AstResolver
      */
     private $astResolver;
     /**
@@ -54,7 +54,7 @@ final class SimplifyEmptyCheckOnEmptyArrayRector extends AbstractScopeAwareRecto
     private $allAssignNodePropertyTypeInferer;
     /**
      * @readonly
-     * @var \Rector\Core\Php\ReservedKeywordAnalyzer
+     * @var \Rector\Php\ReservedKeywordAnalyzer
      */
     private $reservedKeywordAnalyzer;
     public function __construct(ExprAnalyzer $exprAnalyzer, ReflectionResolver $reflectionResolver, AstResolver $astResolver, AllAssignNodePropertyTypeInferer $allAssignNodePropertyTypeInferer, ReservedKeywordAnalyzer $reservedKeywordAnalyzer)
@@ -125,7 +125,7 @@ CODE_SAMPLE
         if (!$expr->name instanceof Identifier) {
             return \false;
         }
-        $classReflection = $this->reflectionResolver->resolveClassReflection($expr);
+        $classReflection = $this->reflectionResolver->resolveClassReflectionSourceObject($expr);
         if (!$classReflection instanceof ClassReflection) {
             return \false;
         }
@@ -148,7 +148,7 @@ CODE_SAMPLE
         if (!$property instanceof Property) {
             return \false;
         }
-        $type = $this->allAssignNodePropertyTypeInferer->inferProperty($property, $classReflection);
+        $type = $this->allAssignNodePropertyTypeInferer->inferProperty($property, $classReflection, $this->file);
         return $type instanceof ArrayType;
     }
 }

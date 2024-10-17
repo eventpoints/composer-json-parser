@@ -8,23 +8,23 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Command;
+namespace ECSPrefix202410\Symfony\Component\Console\Command;
 
-use ECSPrefix202402\Symfony\Component\Console\Application;
-use ECSPrefix202402\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202402\Symfony\Component\Console\Completion\CompletionInput;
-use ECSPrefix202402\Symfony\Component\Console\Completion\CompletionSuggestions;
-use ECSPrefix202402\Symfony\Component\Console\Completion\Suggestion;
-use ECSPrefix202402\Symfony\Component\Console\Exception\ExceptionInterface;
-use ECSPrefix202402\Symfony\Component\Console\Exception\InvalidArgumentException;
-use ECSPrefix202402\Symfony\Component\Console\Exception\LogicException;
-use ECSPrefix202402\Symfony\Component\Console\Helper\HelperInterface;
-use ECSPrefix202402\Symfony\Component\Console\Helper\HelperSet;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Application;
+use ECSPrefix202410\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202410\Symfony\Component\Console\Completion\CompletionInput;
+use ECSPrefix202410\Symfony\Component\Console\Completion\CompletionSuggestions;
+use ECSPrefix202410\Symfony\Component\Console\Completion\Suggestion;
+use ECSPrefix202410\Symfony\Component\Console\Exception\ExceptionInterface;
+use ECSPrefix202410\Symfony\Component\Console\Exception\InvalidArgumentException;
+use ECSPrefix202410\Symfony\Component\Console\Exception\LogicException;
+use ECSPrefix202410\Symfony\Component\Console\Helper\HelperInterface;
+use ECSPrefix202410\Symfony\Component\Console\Helper\HelperSet;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * Base class for all commands.
  *

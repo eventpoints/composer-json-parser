@@ -15,15 +15,14 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
 use Rector\Php70\EregToPcreTransformer;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use RectorPrefix202410\Webmozart\Assert\Assert;
 /**
- * @changelog http://php.net/reference.pcre.pattern.posix https://stackoverflow.com/a/17033826/1348344 https://docstore.mik.ua/orelly/webprog/pcook/ch13_02.htm
- *
  * @see \Rector\Tests\Php70\Rector\FuncCall\EregToPregMatchRector\EregToPregMatchRectorTest
  */
 final class EregToPregMatchRector extends AbstractRector implements MinPhpVersionInterface
@@ -91,7 +90,8 @@ final class EregToPregMatchRector extends AbstractRector implements MinPhpVersio
         $pattern = $string->value;
         $pattern = $this->eregToPcreTransformer->transform($pattern, $this->isCaseInsensitiveFunction($functionName));
         $firstArg = $funcCall->getArgs()[0];
-        $firstArg->value = new String_($pattern);
+        Assert::isInstanceOf($firstArg->value, String_::class);
+        $firstArg->value->value = $pattern;
     }
     private function processVariablePattern(FuncCall $funcCall, Variable $variable, string $functionName) : void
     {

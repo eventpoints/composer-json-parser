@@ -9,8 +9,8 @@
  */
 namespace PHP_CodeSniffer\Tests;
 
-use ECSPrefix202402\PHPUnit\Framework\TestSuite as PHPUnit_TestSuite;
-use ECSPrefix202402\PHPUnit\Framework\TestResult;
+use ECSPrefix202410\PHPUnit\Framework\TestResult;
+use ECSPrefix202410\PHPUnit\Framework\TestSuite as PHPUnit_TestSuite;
 class TestSuite extends PHPUnit_TestSuite
 {
     /**

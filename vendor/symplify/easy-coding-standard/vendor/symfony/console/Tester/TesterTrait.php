@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Tester;
+namespace ECSPrefix202410\Symfony\Component\Console\Tester;
 
-use ECSPrefix202402\PHPUnit\Framework\Assert;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleOutput;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\StreamOutput;
-use ECSPrefix202402\Symfony\Component\Console\Tester\Constraint\CommandIsSuccessful;
+use ECSPrefix202410\PHPUnit\Framework\Assert;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleOutput;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\StreamOutput;
+use ECSPrefix202410\Symfony\Component\Console\Tester\Constraint\CommandIsSuccessful;
 /**
  * @author Amrouche Hamza <hamza.simperfit@gmail.com>
  */

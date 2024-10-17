@@ -5,10 +5,10 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202312\Nette\Utils;
+namespace RectorPrefix202410\Nette\Utils;
 
-use RectorPrefix202312\JetBrains\PhpStorm\Language;
-use RectorPrefix202312\Nette;
+use RectorPrefix202410\JetBrains\PhpStorm\Language;
+use RectorPrefix202410\Nette;
 use function is_array, is_int, is_object, count;
 /**
  * Array tools library.
@@ -21,7 +21,7 @@ class Arrays
      * @template T
      * @param  array<T>  $array
      * @param  array-key|array-key[]  $key
-     * @param  ?T  $default
+     * @param mixed $default
      * @return ?T
      * @throws Nette\InvalidArgumentException if item does not exist and default value is not provided
      */
@@ -80,8 +80,7 @@ class Arrays
     }
     /**
      * Returns zero-indexed position of given array key. Returns null if key is not found.
-     * @param  array-key  $key
-     * @return int|null offset if it is found, null otherwise
+     * @param string|int $key
      */
     public static function getKeyOffset(array $array, $key) : ?int
     {
@@ -96,36 +95,76 @@ class Arrays
     }
     /**
      * Tests an array for the presence of value.
-     * @param  mixed  $value
+     * @param mixed $value
      */
     public static function contains(array $array, $value) : bool
     {
         return \in_array($value, $array, \true);
     }
     /**
-     * Returns the first item from the array or null if array is empty.
-     * @template T
-     * @param  array<T>  $array
-     * @return ?T
+     * Returns the first item (matching the specified predicate if given). If there is no such item, it returns result of invoking $else or null.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  ?callable(V, K, array<K, V>): bool  $predicate
+     * @return ?V
      */
-    public static function first(array $array)
+    public static function first(array $array, ?callable $predicate = null, ?callable $else = null)
     {
-        return count($array) ? \reset($array) : null;
+        $key = self::firstKey($array, $predicate);
+        return $key === null ? $else ? $else() : null : $array[$key];
     }
     /**
-     * Returns the last item from the array or null if array is empty.
-     * @template T
-     * @param  array<T>  $array
-     * @return ?T
+     * Returns the last item (matching the specified predicate if given). If there is no such item, it returns result of invoking $else or null.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  ?callable(V, K, array<K, V>): bool  $predicate
+     * @return ?V
      */
-    public static function last(array $array)
+    public static function last(array $array, ?callable $predicate = null, ?callable $else = null)
     {
-        return count($array) ? \end($array) : null;
+        $key = self::lastKey($array, $predicate);
+        return $key === null ? $else ? $else() : null : $array[$key];
+    }
+    /**
+     * Returns the key of first item (matching the specified predicate if given) or null if there is no such item.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  ?callable(V, K, array<K, V>): bool  $predicate
+     * @return ?K
+     */
+    public static function firstKey(array $array, ?callable $predicate = null)
+    {
+        if (!$predicate) {
+            \reset($array);
+            return \key($array);
+        }
+        foreach ($array as $k => $v) {
+            if ($predicate($v, $k, $array)) {
+                return $k;
+            }
+        }
+        return null;
+    }
+    /**
+     * Returns the key of last item (matching the specified predicate if given) or null if there is no such item.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  ?callable(V, K, array<K, V>): bool  $predicate
+     * @return ?K
+     */
+    public static function lastKey(array $array, ?callable $predicate = null)
+    {
+        \end($array);
+        return $predicate ? self::firstKey(\array_reverse($array, \true), $predicate) : \key($array);
     }
     /**
      * Inserts the contents of the $inserted array into the $array immediately after the $key.
      * If $key is null (or does not exist), it is inserted at the beginning.
-     * @param  array-key|null  $key
+     * @param string|int|null $key
      */
     public static function insertBefore(array &$array, $key, array $inserted) : void
     {
@@ -135,7 +174,7 @@ class Arrays
     /**
      * Inserts the contents of the $inserted array into the $array before the $key.
      * If $key is null (or does not exist), it is inserted at the end.
-     * @param  array-key|null  $key
+     * @param string|int|null $key
      */
     public static function insertAfter(array &$array, $key, array $inserted) : void
     {
@@ -146,8 +185,8 @@ class Arrays
     }
     /**
      * Renames key in array.
-     * @param  array-key  $oldKey
-     * @param  array-key  $newKey
+     * @param string|int $oldKey
+     * @param string|int $newKey
      */
     public static function renameKey(array &$array, $oldKey, $newKey) : bool
     {
@@ -166,6 +205,7 @@ class Arrays
      * Returns only those array items, which matches a regular expression $pattern.
      * @param  string[]  $array
      * @return string[]
+     * @param bool|int $invert
      */
     public static function grep(
         array $array,
@@ -173,9 +213,10 @@ class Arrays
          * @language
          */
         string $pattern,
-        int $flags = 0
+        $invert = \false
     ) : array
     {
+        $flags = $invert ? \PREG_GREP_INVERT : 0;
         return Strings::pcre('preg_grep', [$pattern, $array, $flags]);
     }
     /**
@@ -194,7 +235,8 @@ class Arrays
     }
     /**
      * Checks if the array is indexed in ascending order of numeric keys from zero, a.k.a list.
-     * @param  mixed  $value
+     * @return ($value is list ? true : false)
+     * @param mixed $value
      */
     public static function isList($value) : bool
     {
@@ -219,7 +261,7 @@ class Arrays
     /**
      * Reformats table to associative tree. Path looks like 'field|field[]field->field=field'.
      * @param  string|string[]  $path
-     * @return array|\stdClass
+     * @return mixed[]|\stdClass
      */
     public static function associate(array $array, $path)
     {
@@ -261,7 +303,7 @@ class Arrays
     }
     /**
      * Normalizes array to associative array. Replace numeric keys with their values, the new value will be $filling.
-     * @param  mixed  $filling
+     * @param mixed $filling
      */
     public static function normalize(array $array, $filling = null) : array
     {
@@ -276,10 +318,10 @@ class Arrays
      * or returns $default, if provided.
      * @template T
      * @param  array<T>  $array
-     * @param  array-key  $key
-     * @param  ?T  $default
+     * @param mixed $default
      * @return ?T
      * @throws Nette\InvalidArgumentException if item does not exist and default value is not provided
+     * @param string|int $key
      */
     public static function pick(array &$array, $key, $default = null)
     {
@@ -294,40 +336,91 @@ class Arrays
         }
     }
     /**
-     * Tests whether at least one element in the array passes the test implemented by the
-     * provided callback with signature `function ($value, $key, array $array): bool`.
+     * Tests whether at least one element in the array passes the test implemented by the provided function.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  callable(V, K, array<K, V>): bool  $predicate
      */
-    public static function some(iterable $array, callable $callback) : bool
+    public static function some(iterable $array, callable $predicate) : bool
     {
         foreach ($array as $k => $v) {
-            if ($callback($v, $k, $array)) {
+            if ($predicate($v, $k, $array)) {
                 return \true;
             }
         }
         return \false;
     }
     /**
-     * Tests whether all elements in the array pass the test implemented by the provided function,
-     * which has the signature `function ($value, $key, array $array): bool`.
+     * Tests whether all elements in the array pass the test implemented by the provided function.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  callable(V, K, array<K, V>): bool  $predicate
      */
-    public static function every(iterable $array, callable $callback) : bool
+    public static function every(iterable $array, callable $predicate) : bool
     {
         foreach ($array as $k => $v) {
-            if (!$callback($v, $k, $array)) {
+            if (!$predicate($v, $k, $array)) {
                 return \false;
             }
         }
         return \true;
     }
     /**
-     * Calls $callback on all elements in the array and returns the array of return values.
-     * The callback has the signature `function ($value, $key, array $array): bool`.
+     * Returns a new array containing all key-value pairs matching the given $predicate.
+     * @template K of int|string
+     * @template V
+     * @param  array<K, V>  $array
+     * @param  callable(V, K, array<K, V>): bool  $predicate
+     * @return array<K, V>
      */
-    public static function map(iterable $array, callable $callback) : array
+    public static function filter(array $array, callable $predicate) : array
     {
         $res = [];
         foreach ($array as $k => $v) {
-            $res[$k] = $callback($v, $k, $array);
+            if ($predicate($v, $k, $array)) {
+                $res[$k] = $v;
+            }
+        }
+        return $res;
+    }
+    /**
+     * Returns an array containing the original keys and results of applying the given transform function to each element.
+     * @template K of int|string
+     * @template V
+     * @template R
+     * @param  array<K, V>  $array
+     * @param  callable(V, K, array<K, V>): R  $transformer
+     * @return array<K, R>
+     */
+    public static function map(iterable $array, callable $transformer) : array
+    {
+        $res = [];
+        foreach ($array as $k => $v) {
+            $res[$k] = $transformer($v, $k, $array);
+        }
+        return $res;
+    }
+    /**
+     * Returns an array containing new keys and values generated by applying the given transform function to each element.
+     * If the function returns null, the element is skipped.
+     * @template K of int|string
+     * @template V
+     * @template ResK of int|string
+     * @template ResV
+     * @param  array<K, V>  $array
+     * @param  callable(V, K, array<K, V>): ?array{ResK, ResV}  $transformer
+     * @return array<ResK, ResV>
+     */
+    public static function mapWithKeys(array $array, callable $transformer) : array
+    {
+        $res = [];
+        foreach ($array as $k => $v) {
+            $pair = $transformer($v, $k, $array);
+            if ($pair) {
+                $res[$pair[0]] = $pair[1];
+            }
         }
         return $res;
     }
@@ -361,7 +454,7 @@ class Arrays
      * @param  T  $object
      * @return T
      */
-    public static function toObject(iterable $array, $object)
+    public static function toObject(iterable $array, object $object) : object
     {
         foreach ($array as $k => $v) {
             $object->{$k} = $v;
@@ -370,8 +463,8 @@ class Arrays
     }
     /**
      * Converts value to array key.
-     * @param  mixed  $value
-     * @return array-key
+     * @return int|string
+     * @param mixed $value
      */
     public static function toKey($value)
     {

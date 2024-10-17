@@ -8,10 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Tester;
+namespace ECSPrefix202410\Symfony\Component\Console\Tester;
 
-use ECSPrefix202402\Symfony\Component\Console\Application;
-use ECSPrefix202402\Symfony\Component\Console\Input\ArrayInput;
+use ECSPrefix202410\Symfony\Component\Console\Application;
+use ECSPrefix202410\Symfony\Component\Console\Input\ArrayInput;
 /**
  * Eases the testing of console applications.
  *

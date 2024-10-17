@@ -9,10 +9,10 @@
  */
 namespace PHP_CodeSniffer\Tests\Core;
 
-use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Files\DummyFile;
+use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Tests\ConfigDouble;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 /**
  * Tests for PHP_CodeSniffer error suppression tags.
  *
@@ -466,7 +466,7 @@ EOD;
     public static function dataSuppressFile()
     {
         return [
-            'no suppression' => ['before' => '', 'after' => '', 'expectedErrors' => 1],
+            'no suppression' => ['before' => '', 'after' => '', 'expectedWarnings' => 1],
             // Process with suppression.
             'ignoreFile: start of file, slash comment' => ['before' => '// phpcs:ignoreFile'],
             'ignoreFile: start of file, slash comment, with @' => ['before' => '// @phpcs:ignoreFile'],

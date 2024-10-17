@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Helper;
+namespace ECSPrefix202410\Symfony\Component\Console\Helper;
 
-use ECSPrefix202402\Symfony\Component\Console\Cursor;
-use ECSPrefix202402\Symfony\Component\Console\Exception\LogicException;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleSectionOutput;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Terminal;
+use ECSPrefix202410\Symfony\Component\Console\Cursor;
+use ECSPrefix202410\Symfony\Component\Console\Exception\LogicException;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleSectionOutput;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Terminal;
 /**
  * The ProgressBar provides helpers to display progress output.
  *
@@ -238,9 +238,9 @@ final class ProgressBar
     {
         $this->messages[$name] = $message;
     }
-    public function getMessage(string $name = 'message') : string
+    public function getMessage(string $name = 'message') : ?string
     {
-        return $this->messages[$name];
+        return $this->messages[$name] ?? null;
     }
     public function getStartTime() : int
     {

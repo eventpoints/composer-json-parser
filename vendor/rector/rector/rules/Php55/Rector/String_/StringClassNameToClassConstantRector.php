@@ -12,16 +12,14 @@ use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\ClassConst;
 use PhpParser\NodeTraverser;
 use PHPStan\Reflection\ReflectionProvider;
-use Rector\Core\Contract\Rector\ConfigurableRectorInterface;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\Contract\Rector\ConfigurableRectorInterface;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
-use RectorPrefix202312\Webmozart\Assert\Assert;
+use RectorPrefix202410\Webmozart\Assert\Assert;
 /**
- * @changelog https://wiki.php.net/rfc/class_name_scalars https://github.com/symfony/symfony/blob/2.8/UPGRADE-2.8.md#form
- *
  * @see \Rector\Tests\Php55\Rector\String_\StringClassNameToClassConstantRector\StringClassNameToClassConstantRectorTest
  */
 final class StringClassNameToClassConstantRector extends AbstractRector implements MinPhpVersionInterface, ConfigurableRectorInterface
@@ -79,7 +77,7 @@ class SomeClass
     }
 }
 CODE_SAMPLE
-, ['ClassName', 'AnotherClassName', \Rector\Php55\Rector\String_\StringClassNameToClassConstantRector::SHOULD_KEEP_PRE_SLASH => \false])]);
+, ['ClassName', 'AnotherClassName', self::SHOULD_KEEP_PRE_SLASH => \false])]);
     }
     /**
      * @return array<class-string<Node>>
@@ -96,12 +94,7 @@ CODE_SAMPLE
     {
         // allow class strings to be part of class const arrays, as probably on purpose
         if ($node instanceof ClassConst) {
-            $this->traverseNodesWithCallable($node->consts, static function (Node $subNode) {
-                if ($subNode instanceof String_) {
-                    $subNode->setAttribute(self::IS_UNDER_CLASS_CONST, \true);
-                }
-                return null;
-            });
+            $this->decorateClassConst($node);
             return null;
         }
         // keep allowed string as condition
@@ -173,5 +166,14 @@ CODE_SAMPLE
             }
         }
         return \false;
+    }
+    private function decorateClassConst(ClassConst $classConst) : void
+    {
+        $this->traverseNodesWithCallable($classConst->consts, static function (Node $subNode) {
+            if ($subNode instanceof String_) {
+                $subNode->setAttribute(self::IS_UNDER_CLASS_CONST, \true);
+            }
+            return null;
+        });
     }
 }

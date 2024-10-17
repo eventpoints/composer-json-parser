@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Command;
 
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Application\EasyCodingStandardApplication;
 use Symplify\EasyCodingStandard\Configuration\ConfigInitializer;
 use Symplify\EasyCodingStandard\Configuration\ConfigurationFactory;

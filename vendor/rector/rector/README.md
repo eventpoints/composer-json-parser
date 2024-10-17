@@ -43,19 +43,18 @@ And modify it:
 
 ```php
 use Rector\Config\RectorConfig;
-use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromStrictConstructorRector;
 
-return static function (RectorConfig $rectorConfig): void {
+return RectorConfig::configure()
     // register single rule
-    $rectorConfig->rule(TypedPropertyFromStrictConstructorRector::class);
-
-    // here we can define, what sets of rules will be applied
-    // tip: use "SetList" class to autocomplete sets with your IDE
-    $rectorConfig->sets([
-        SetList::CODE_QUALITY
-    ]);
-};
+    ->withRules([
+        TypedPropertyFromStrictConstructorRector::class
+    ])
+    // here we can define, what prepared sets of rules will be applied
+    ->withPreparedSets(
+        deadCode: true,
+        codeQuality: true
+    );
 ```
 
 Then dry run Rector:
@@ -73,7 +72,7 @@ vendor/bin/rector process src
 ## Documentation
 
 * Find [full documentation here](https://getrector.com/documentation/).
-* [Explore Rector Rules](/docs/rector_rules_overview.md)
+* [Explore Rector Rules](https://getrector.com/find-rule)
 
 <br>
 
@@ -101,6 +100,8 @@ Among there projects belong:
 * [laminas/laminas-servicemanager-migration](https://github.com/laminas/laminas-servicemanager-migration)
 * [cakephp/upgrade](https://github.com/cakephp/upgrade)
 * [driftingly/rector-laravel](https://github.com/driftingly/rector-laravel)
+* [contao/contao-rector](https://github.com/contao/contao-rector)
+* [php-static-analysis/rector-rule](https://github.com/php-static-analysis/rector-rule)
 
 <br>
 
@@ -143,12 +144,6 @@ $node = new String_('hello world!');
 
 // prints node to string, as PHP code displays it
 print_node($node);
-
-// dump nested node object with nested properties
-dump_node($node);
-
-// 2nd argument is how deep the nesting is - this makes sure the dump is short and useful
-dump_node($node, 1);
 ```
 
 <br>
@@ -157,7 +152,7 @@ dump_node($node, 1);
 
 * Rector uses [nikic/php-parser](https://github.com/nikic/PHP-Parser/), built on technology called an *abstract syntax tree* (AST). An AST doesn't know about spaces and when written to a file it produces poorly formatted code in both PHP and docblock annotations.
 
-* Rector in parallel mode will work most of the times for most OS. On Windows, you may encounter issues unresolvable despite of following the [Troubleshooting Parallel](https://getrector.com/documentation/troubleshooting-parallel) guide. In such case, check if you are using Powershell 7 (pwsh). Change your terminal to command prompt (cmd) or bash for Windows. 
+* Rector in parallel mode will work most of the times for most OS. On Windows, you may encounter issues unresolvable despite of following the [Troubleshooting Parallel](https://getrector.com/documentation/troubleshooting-parallel) guide. In such case, check if you are using Powershell 7 (pwsh). Change your terminal to command prompt (cmd) or bash for Windows.
 
 ### How to Apply Coding Standards?
 

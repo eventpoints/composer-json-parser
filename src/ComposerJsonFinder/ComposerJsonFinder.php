@@ -1,16 +1,17 @@
 <?php
 
-namespace ComposerJsonParser\ComposerJsonFinder;
+declare(strict_types=1);
+
+namespace KerrialNewham\ComposerJsonParser\ComposerJsonFinder;
 
 final class ComposerJsonFinder
 {
-
     private function findComposerJson(string $cwd): null|string
     {
         while ($cwd !== DIRECTORY_SEPARATOR) {
             $composerJsonPath = $cwd . DIRECTORY_SEPARATOR . 'composer.json';
 
-            if (!file_exists($composerJsonPath)) {
+            if (! file_exists($composerJsonPath)) {
                 $cwd = dirname($cwd);
                 continue;
             }
@@ -25,7 +26,7 @@ final class ComposerJsonFinder
     {
         $composerJsonPath = $this->findComposerJson(getcwd());
 
-        if (!empty($composerJsonPath)) {
+        if (! empty($composerJsonPath)) {
             $composerJsonContents = file_get_contents($composerJsonPath);
             $composerJsonData = json_decode($composerJsonContents, true);
             return $composerJsonData;
@@ -33,6 +34,4 @@ final class ComposerJsonFinder
 
         return null;
     }
-
-
 }

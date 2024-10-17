@@ -9,10 +9,10 @@
  * the LICENSE file that was distributed with this source code.
  */
 declare (strict_types=1);
-namespace ECSPrefix202402\Composer\XdebugHandler;
+namespace ECSPrefix202410\Composer\XdebugHandler;
 
-use ECSPrefix202402\Psr\Log\LoggerInterface;
-use ECSPrefix202402\Psr\Log\LogLevel;
+use ECSPrefix202410\Psr\Log\LoggerInterface;
+use ECSPrefix202410\Psr\Log\LogLevel;
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
  * @internal
@@ -69,12 +69,32 @@ class Status
     public function report(string $op, ?string $data) : void
     {
         if ($this->logger !== null || $this->debug) {
-            $callable = [$this, 'report' . $op];
-            if (!\is_callable($callable)) {
-                throw new \InvalidArgumentException('Unknown op handler: ' . $op);
+            $param = (string) $data;
+            switch ($op) {
+                case self::CHECK:
+                    $this->reportCheck($param);
+                    break;
+                case self::ERROR:
+                    $this->reportError($param);
+                    break;
+                case self::INFO:
+                    $this->reportInfo($param);
+                    break;
+                case self::NORESTART:
+                    $this->reportNoRestart();
+                    break;
+                case self::RESTART:
+                    $this->reportRestart();
+                    break;
+                case self::RESTARTED:
+                    $this->reportRestarted();
+                    break;
+                case self::RESTARTING:
+                    $this->reportRestarting($param);
+                    break;
+                default:
+                    throw new \InvalidArgumentException('Unknown op handler: ' . $op);
             }
-            $params = $data !== null ? [$data] : [];
-            \call_user_func_array($callable, $params);
         }
     }
     /**
@@ -154,7 +174,7 @@ class Status
     {
         $text = \sprintf('Process restarting (%s)', $this->getEnvAllow());
         $this->output($text);
-        $text = 'Running ' . $command;
+        $text = 'Running: ' . $command;
         $this->output($text);
     }
     /**

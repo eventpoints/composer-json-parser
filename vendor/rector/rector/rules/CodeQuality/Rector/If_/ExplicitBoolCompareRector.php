@@ -22,17 +22,15 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\ElseIf_;
 use PhpParser\Node\Stmt\If_;
+use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
-use Rector\Core\PhpParser\Node\Value\ValueResolver;
-use Rector\Core\Rector\AbstractRector;
 use Rector\NodeTypeResolver\TypeAnalyzer\ArrayTypeAnalyzer;
 use Rector\NodeTypeResolver\TypeAnalyzer\StringTypeAnalyzer;
+use Rector\PhpParser\Node\Value\ValueResolver;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://www.reddit.com/r/PHP/comments/aqk01p/is_there_a_situation_in_which_if_countarray_0/
- * @changelog https://3v4l.org/UCd1b
- *
  * @see \Rector\Tests\CodeQuality\Rector\If_\ExplicitBoolCompareRector\ExplicitBoolCompareRectorTest
  */
 final class ExplicitBoolCompareRector extends AbstractRector
@@ -49,7 +47,7 @@ final class ExplicitBoolCompareRector extends AbstractRector
     private $arrayTypeAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\Value\ValueResolver
+     * @var \Rector\PhpParser\Node\Value\ValueResolver
      */
     private $valueResolver;
     public function __construct(StringTypeAnalyzer $stringTypeAnalyzer, ArrayTypeAnalyzer $arrayTypeAnalyzer, ValueResolver $valueResolver)
@@ -110,8 +108,8 @@ CODE_SAMPLE
         if ($conditionNode instanceof Bool_) {
             return null;
         }
-        $conditionStaticType = $this->getType($conditionNode);
-        if ($conditionStaticType->isBoolean()->yes()) {
+        $conditionStaticType = $this->nodeTypeResolver->getNativeType($conditionNode);
+        if ($conditionStaticType instanceof MixedType || $conditionStaticType->isBoolean()->yes()) {
             return null;
         }
         $binaryOp = $this->resolveNewConditionNode($conditionNode, $isNegated);

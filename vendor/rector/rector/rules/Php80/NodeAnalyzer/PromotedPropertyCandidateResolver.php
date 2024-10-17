@@ -12,11 +12,11 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\Property;
-use Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer;
-use Rector\Core\PhpParser\Comparing\NodeComparator;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
+use Rector\NodeAnalyzer\PropertyFetchAnalyzer;
 use Rector\NodeNameResolver\NodeNameResolver;
 use Rector\Php80\ValueObject\PropertyPromotionCandidate;
+use Rector\PhpParser\Comparing\NodeComparator;
+use Rector\PhpParser\Node\BetterNodeFinder;
 final class PromotedPropertyCandidateResolver
 {
     /**
@@ -26,17 +26,17 @@ final class PromotedPropertyCandidateResolver
     private $nodeNameResolver;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Comparing\NodeComparator
+     * @var \Rector\PhpParser\Comparing\NodeComparator
      */
     private $nodeComparator;
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer
+     * @var \Rector\NodeAnalyzer\PropertyFetchAnalyzer
      */
     private $propertyFetchAnalyzer;
     public function __construct(NodeNameResolver $nodeNameResolver, BetterNodeFinder $betterNodeFinder, NodeComparator $nodeComparator, PropertyFetchAnalyzer $propertyFetchAnalyzer)
@@ -67,6 +67,9 @@ final class PromotedPropertyCandidateResolver
     }
     private function matchPropertyPromotionCandidate(Property $property, ClassMethod $constructClassMethod) : ?PropertyPromotionCandidate
     {
+        if ($property->flags === 0) {
+            return null;
+        }
         $onlyProperty = $property->props[0];
         $propertyName = $this->nodeNameResolver->getName($onlyProperty);
         $firstParamAsVariable = $this->resolveFirstParamUses($constructClassMethod);

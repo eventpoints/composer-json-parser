@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\CodingStandard\Fixer\Commenting;
 
-use ECSPrefix202402\Nette\Utils\Strings;
+use ECSPrefix202410\Nette\Utils\Strings;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
@@ -21,9 +21,9 @@ use Symplify\CodingStandard\TokenRunner\DocBlock\MalformWorker\SuperfluousReturn
 use Symplify\CodingStandard\TokenRunner\DocBlock\MalformWorker\SuperfluousVarNameMalformWorker;
 use Symplify\CodingStandard\TokenRunner\DocBlock\MalformWorker\SwitchedTypeAndNameMalformWorker;
 use Symplify\CodingStandard\TokenRunner\Traverser\TokenReverser;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\Commenting\ParamReturnAndVarTagMalformsFixer\ParamReturnAndVarTagMalformsFixerTest
  */

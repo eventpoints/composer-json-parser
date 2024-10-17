@@ -1,17 +1,26 @@
 <?php
 
-namespace ECSPrefix202402\React\Dns\Query;
+namespace ECSPrefix202410\React\Dns\Query;
 
-use ECSPrefix202402\React\EventLoop\Loop;
-use ECSPrefix202402\React\EventLoop\LoopInterface;
-use ECSPrefix202402\React\Promise\Promise;
+use ECSPrefix202410\React\EventLoop\Loop;
+use ECSPrefix202410\React\EventLoop\LoopInterface;
+use ECSPrefix202410\React\Promise\Promise;
 final class TimeoutExecutor implements ExecutorInterface
 {
     private $executor;
     private $loop;
     private $timeout;
-    public function __construct(ExecutorInterface $executor, $timeout, LoopInterface $loop = null)
+    /**
+     * @param ExecutorInterface $executor
+     * @param float $timeout
+     * @param ?LoopInterface $loop
+     */
+    public function __construct(ExecutorInterface $executor, $timeout, $loop = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #3 ($loop) expected null|React\\EventLoop\\LoopInterface');
+        }
         $this->executor = $executor;
         $this->loop = $loop ?: Loop::get();
         $this->timeout = $timeout;

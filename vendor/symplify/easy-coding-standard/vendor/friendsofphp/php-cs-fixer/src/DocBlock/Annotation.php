@@ -32,7 +32,7 @@ final class Annotation
     /**
      * The lines that make up the annotation.
      *
-     * @var Line[]
+     * @var array<int, Line>
      */
     private $lines;
     /**
@@ -70,24 +70,26 @@ final class Annotation
      */
     private $namespace;
     /**
-     * @var NamespaceUseAnalysis[]
+     * @var list<NamespaceUseAnalysis>
      */
     private $namespaceUses;
     /**
      * Create a new line instance.
      *
-     * @param Line[]                 $lines
-     * @param null|NamespaceAnalysis $namespace
-     * @param NamespaceUseAnalysis[] $namespaceUses
+     * @param array<int, Line>           $lines
+     * @param null|NamespaceAnalysis     $namespace
+     * @param list<NamespaceUseAnalysis> $namespaceUses
      */
     public function __construct(array $lines, $namespace = null, array $namespaceUses = [])
     {
         $this->lines = \array_values($lines);
         $this->namespace = $namespace;
         $this->namespaceUses = $namespaceUses;
-        $keys = \array_keys($lines);
-        $this->start = $keys[0];
-        $this->end = \end($keys);
+        \reset($lines);
+        $this->start = \key($lines);
+        \end($lines);
+        $this->end = \key($lines);
+        \reset($lines);
     }
     /**
      * Get the string representation of object.
@@ -138,14 +140,12 @@ final class Annotation
         return null === $typesContent ? null : new \PhpCsFixer\DocBlock\TypeExpression($typesContent, $this->namespace, $this->namespaceUses);
     }
     /**
-     * @return null|string
-     *
      * @internal
      */
-    public function getVariableName()
+    public function getVariableName() : ?string
     {
         $type = \preg_quote($this->getTypesContent() ?? '', '/');
-        $regex = "/@{$this->tag->getName()}\\s+({$type}\\s*)?(&\\s*)?(\\.{3}\\s*)?(?<variable>\\\$.+?)(?:[\\s*]|\$)/";
+        $regex = \sprintf('/@%s\\s+(%s\\s*)?(&\\s*)?(\\.{3}\\s*)?(?<variable>\\$%s)(?:.*|$)/', $this->tag->getName(), $type, \PhpCsFixer\DocBlock\TypeExpression::REGEX_IDENTIFIER);
         if (Preg::match($regex, $this->lines[0]->getContent(), $matches)) {
             return $matches['variable'];
         }

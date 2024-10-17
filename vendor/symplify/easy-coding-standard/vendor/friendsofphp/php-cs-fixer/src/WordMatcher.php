@@ -20,11 +20,11 @@ namespace PhpCsFixer;
 final class WordMatcher
 {
     /**
-     * @var string[]
+     * @var list<string>
      */
     private $candidates;
     /**
-     * @param string[] $candidates
+     * @param list<string> $candidates
      */
     public function __construct(array $candidates)
     {

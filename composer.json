@@ -21,12 +21,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ComposerJsonParser\\": "./src"
+            "KerrialNewham\\ComposerJsonParser\\": "./src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ComposerJsonParser\\Tests\\": "tests/"
+            "KerrialNewham\\ComposerJsonParser\\Tests\\": "tests/"
         }
     },
     "replace": {
@@ -50,7 +50,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "rector/rector": "^0.18.1",
-        "symplify/easy-coding-standard": "^12.0"
+        "rector/rector": "^1.2",
+        "symplify/easy-coding-standard": "^12"
     }
 }

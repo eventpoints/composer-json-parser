@@ -1,13 +1,12 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject;
+namespace ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject;
 
-use ECSPrefix202402\Nette\Utils\Strings;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\CodeSampleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Exception\PoorDocumentationException;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Exception\ShouldNotHappenException;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\CodeSampleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Exception\PoorDocumentationException;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Exception\ShouldNotHappenException;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
 final class RuleDefinition
 {
     /**
@@ -70,7 +69,8 @@ final class RuleDefinition
         if ($this->ruleClass === null) {
             throw new ShouldNotHappenException();
         }
-        return (string) Strings::after($this->ruleClass, '\\', -1);
+        // get short class name
+        return \basename(\str_replace('\\', '/', $this->ruleClass));
     }
     /**
      * @return CodeSampleInterface[]

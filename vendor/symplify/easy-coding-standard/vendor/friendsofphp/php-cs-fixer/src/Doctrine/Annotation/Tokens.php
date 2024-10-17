@@ -24,7 +24,7 @@ use PhpCsFixer\Tokenizer\Token as PhpToken;
 final class Tokens extends \SplFixedArray
 {
     /**
-     * @param string[] $ignoredTags
+     * @param list<string> $ignoredTags
      *
      * @throws \InvalidArgumentException
      */
@@ -82,10 +82,8 @@ final class Tokens extends \SplFixedArray
                     $tokens[] = new \PhpCsFixer\Doctrine\Annotation\Token(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_NONE, \substr($content, $ignoredTextPosition, $ignoredTextLength));
                 }
                 $lastTokenEndIndex = 0;
-                foreach (\array_slice($scannedTokens, 0, $nbScannedTokensToUse) as $token) {
-                    if ($token->isType(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_STRING)) {
-                        $token = new \PhpCsFixer\Doctrine\Annotation\Token($token->getType(), '"' . \str_replace('"', '""', $token->getContent()) . '"', $token->getPosition());
-                    }
+                foreach (\array_slice($scannedTokens, 0, $nbScannedTokensToUse) as $scannedToken) {
+                    $token = $scannedToken->isType(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_STRING) ? new \PhpCsFixer\Doctrine\Annotation\Token($scannedToken->getType(), '"' . \str_replace('"', '""', $scannedToken->getContent()) . '"', $scannedToken->getPosition()) : $scannedToken;
                     $missingTextLength = $token->getPosition() - $lastTokenEndIndex;
                     if ($missingTextLength > 0) {
                         $tokens[] = new \PhpCsFixer\Doctrine\Annotation\Token(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_NONE, \substr($content, $nextAtPosition + $lastTokenEndIndex, $missingTextLength));

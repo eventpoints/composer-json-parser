@@ -9,6 +9,7 @@
  */
 namespace PHP_CodeSniffer\Util;
 
+use Phar;
 class Common
 {
     /**
@@ -88,7 +89,7 @@ class Common
         if (\file_exists($path) === \true) {
             return $path;
         }
-        $phar = \Phar::running(\false);
+        $phar = Phar::running(\false);
         $extra = \str_replace('phar://' . $phar, '', $path);
         $path = \realpath($phar);
         if ($path === \false) {
@@ -251,6 +252,18 @@ class Common
     }
     //end prepareForOutput()
     /**
+     * Strip colors from a text for output to screen.
+     *
+     * @param string $text The text to process.
+     *
+     * @return string
+     */
+    public static function stripColors($text)
+    {
+        return \preg_replace('`\\033\\[[0-9;]+m`', '', $text);
+    }
+    //end stripColors()
+    /**
      * Returns true if the specified string is in the camel caps format.
      *
      * @param string  $string      The string the verify.
@@ -331,7 +344,7 @@ class Common
      */
     public static function isUnderscoreName($string)
     {
-        // If there are space in the name, it can't be valid.
+        // If there is whitespace in the name, it can't be valid.
         if (\strpos($string, ' ') !== \false) {
             return \false;
         }

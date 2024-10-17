@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\SniffRunner\Application;
 
-use ECSPrefix202402\Nette\Utils\FileSystem;
+use ECSPrefix202410\Nette\Utils\FileSystem;
 use PHP_CodeSniffer\Fixer;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis\AssignmentInConditionSniff;
@@ -58,11 +58,6 @@ final class SniffFileProcessor implements FileProcessorInterface
     private $sniffMetadataCollector;
     /**
      * @readonly
-     * @var \Symfony\Component\Filesystem\Filesystem
-     */
-    private $filesystem;
-    /**
-     * @readonly
      * @var \Symplify\EasyCodingStandard\Error\FileDiffFactory
      */
     private $fileDiffFactory;
@@ -77,13 +72,12 @@ final class SniffFileProcessor implements FileProcessorInterface
     /**
      * @param Sniff[] $sniffs
      */
-    public function __construct(Fixer $fixer, FileFactory $fileFactory, DifferInterface $differ, SniffMetadataCollector $sniffMetadataCollector, \ECSPrefix202402\Symfony\Component\Filesystem\Filesystem $filesystem, FileDiffFactory $fileDiffFactory, array $sniffs)
+    public function __construct(Fixer $fixer, FileFactory $fileFactory, DifferInterface $differ, SniffMetadataCollector $sniffMetadataCollector, FileDiffFactory $fileDiffFactory, array $sniffs)
     {
         $this->fixer = $fixer;
         $this->fileFactory = $fileFactory;
         $this->differ = $differ;
         $this->sniffMetadataCollector = $sniffMetadataCollector;
-        $this->filesystem = $filesystem;
         $this->fileDiffFactory = $fileDiffFactory;
         foreach ($sniffs as $sniff) {
             $this->addSniff($sniff);
@@ -119,7 +113,7 @@ final class SniffFileProcessor implements FileProcessorInterface
             $errorsAndDiffs[Bridge::FILE_DIFFS][] = $fileDiff;
         }
         if ($configuration->isFixer()) {
-            $this->filesystem->dumpFile($file->getFilename(), $this->fixer->getContents());
+            FileSystem::write($file->getFilename(), $this->fixer->getContents(), null);
         }
         return $errorsAndDiffs;
     }

@@ -26,13 +26,15 @@ final class TagComparator
     /**
      * Groups of tags that should be allowed to immediately follow each other.
      *
+     * @var list<list<string>>
+     *
      * @internal
      */
     public const DEFAULT_GROUPS = [['deprecated', 'link', 'see', 'since'], ['author', 'copyright', 'license'], ['category', 'package', 'subpackage'], ['property', 'property-read', 'property-write']];
     /**
      * Should the given tags be kept together, or kept apart?
      *
-     * @param string[][] $groups
+     * @param list<list<string>> $groups
      */
     public static function shouldBeTogether(\PhpCsFixer\DocBlock\Tag $first, \PhpCsFixer\DocBlock\Tag $second, array $groups = self::DEFAULT_GROUPS) : bool
     {

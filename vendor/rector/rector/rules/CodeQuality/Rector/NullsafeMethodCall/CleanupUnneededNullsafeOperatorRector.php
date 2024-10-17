@@ -9,10 +9,10 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
-use Rector\StaticTypeMapper\ValueObject\Type\FullyQualifiedObjectType;
+use PHPStan\Type\ObjectType;
+use Rector\Rector\AbstractRector;
 use Rector\TypeDeclaration\TypeAnalyzer\ReturnStrictTypeAnalyzer;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -84,12 +84,8 @@ CODE_SAMPLE
         if (!$node->var instanceof FuncCall && !$node->var instanceof MethodCall && !$node->var instanceof StaticCall) {
             return null;
         }
-        $returnNode = $this->returnStrictTypeAnalyzer->resolveMethodCallReturnNode($node->var);
-        if (!$returnNode instanceof Node) {
-            return null;
-        }
-        $type = $this->getType($returnNode);
-        if (!$type instanceof FullyQualifiedObjectType) {
+        $returnType = $this->returnStrictTypeAnalyzer->resolveMethodCallReturnType($node->var);
+        if (!$returnType instanceof ObjectType) {
             return null;
         }
         return new MethodCall($node->var, $node->name, $node->args);

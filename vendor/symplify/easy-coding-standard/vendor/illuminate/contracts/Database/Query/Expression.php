@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Database\Query;
+namespace ECSPrefix202410\Illuminate\Contracts\Database\Query;
 
-use ECSPrefix202402\Illuminate\Database\Grammar;
+use ECSPrefix202410\Illuminate\Database\Grammar;
 interface Expression
 {
     /**

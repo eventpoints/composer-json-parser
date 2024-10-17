@@ -3,7 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Caching\ValueObject\Storage;
 
-use ECSPrefix202402\Symfony\Component\Filesystem\Filesystem;
+use ECSPrefix202410\Nette\Utils\FileSystem as UtilsFileSystem;
+use ECSPrefix202410\Symfony\Component\Filesystem\Filesystem;
 use Symplify\EasyCodingStandard\Caching\ValueObject\CacheFilePaths;
 use Symplify\EasyCodingStandard\Caching\ValueObject\CacheItem;
 use Symplify\EasyCodingStandard\Exception\ShouldNotHappenException;
@@ -57,16 +58,16 @@ final class FileCacheStorage
             throw new ShouldNotHappenException($errorMessage);
         }
         $variableFileContent = \sprintf("<?php declare(strict_types = 1);\n\nreturn %s;", $exported);
-        $this->fileSystem->dumpFile($cacheFilePaths->getFilePath(), $variableFileContent);
+        UtilsFileSystem::write($cacheFilePaths->getFilePath(), $variableFileContent, null);
     }
     public function clean(string $cacheKey) : void
     {
         $cacheFilePaths = $this->getCacheFilePaths($cacheKey);
-        $this->fileSystem->remove($cacheFilePaths->getFilePath());
+        UtilsFileSystem::delete($cacheFilePaths->getFilePath());
     }
     public function clear() : void
     {
-        $this->fileSystem->remove($this->directory);
+        UtilsFileSystem::delete($this->directory);
     }
     private function getCacheFilePaths(string $key) : CacheFilePaths
     {

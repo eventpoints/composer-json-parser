@@ -1,16 +1,18 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\NodeManipulator;
+namespace Rector\NodeManipulator;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Expression;
-use Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface;
-use Rector\Core\PhpParser\Comparing\NodeComparator;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
+use Rector\Contract\PhpParser\Node\StmtsAwareInterface;
+use Rector\DeadCode\NodeAnalyzer\ExprUsedInNodeAnalyzer;
 use Rector\PhpDocParser\NodeTraverser\SimpleCallableNodeTraverser;
+use Rector\PhpParser\Comparing\NodeComparator;
+use Rector\PhpParser\Node\BetterNodeFinder;
 final class StmtsManipulator
 {
     /**
@@ -20,19 +22,25 @@ final class StmtsManipulator
     private $simpleCallableNodeTraverser;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Comparing\NodeComparator
+     * @var \Rector\PhpParser\Comparing\NodeComparator
      */
     private $nodeComparator;
-    public function __construct(SimpleCallableNodeTraverser $simpleCallableNodeTraverser, BetterNodeFinder $betterNodeFinder, NodeComparator $nodeComparator)
+    /**
+     * @readonly
+     * @var \Rector\DeadCode\NodeAnalyzer\ExprUsedInNodeAnalyzer
+     */
+    private $exprUsedInNodeAnalyzer;
+    public function __construct(SimpleCallableNodeTraverser $simpleCallableNodeTraverser, BetterNodeFinder $betterNodeFinder, NodeComparator $nodeComparator, ExprUsedInNodeAnalyzer $exprUsedInNodeAnalyzer)
     {
         $this->simpleCallableNodeTraverser = $simpleCallableNodeTraverser;
         $this->betterNodeFinder = $betterNodeFinder;
         $this->nodeComparator = $nodeComparator;
+        $this->exprUsedInNodeAnalyzer = $exprUsedInNodeAnalyzer;
     }
     /**
      * @param Stmt[] $stmts
@@ -41,6 +49,7 @@ final class StmtsManipulator
     {
         \end($stmts);
         $lastStmtKey = \key($stmts);
+        \reset($stmts);
         $lastStmt = $stmts[$lastStmtKey];
         if ($lastStmt instanceof Expression) {
             return $lastStmt->expr;
@@ -64,12 +73,18 @@ final class StmtsManipulator
         });
         return $stmts;
     }
-    public function isVariableUsedInNextStmt(StmtsAwareInterface $stmtsAware, int $jumpToKey, string $variableName) : bool
+    /**
+     * @param StmtsAwareInterface|Stmt[] $stmtsAware
+     */
+    public function isVariableUsedInNextStmt($stmtsAware, int $jumpToKey, string $variableName) : bool
     {
-        if ($stmtsAware->stmts === null) {
+        if ($stmtsAware instanceof StmtsAwareInterface && $stmtsAware->stmts === null) {
             return \false;
         }
-        $stmts = \array_slice($stmtsAware->stmts, $jumpToKey, null, \true);
-        return (bool) $this->betterNodeFinder->findVariableOfName($stmts, $variableName);
+        $stmts = \array_slice($stmtsAware instanceof StmtsAwareInterface ? $stmtsAware->stmts : $stmtsAware, $jumpToKey, null, \true);
+        $variable = new Variable($variableName);
+        return (bool) $this->betterNodeFinder->findFirst($stmts, function (Node $subNode) use($variable) : bool {
+            return $this->exprUsedInNodeAnalyzer->isUsed($subNode, $variable);
+        });
     }
 }

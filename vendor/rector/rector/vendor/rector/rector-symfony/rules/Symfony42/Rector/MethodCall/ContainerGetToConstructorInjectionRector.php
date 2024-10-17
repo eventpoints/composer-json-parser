@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace Rector\Symfony\Symfony42\Rector\MethodCall;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Name;
@@ -11,12 +12,12 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Expression;
 use PHPStan\Type\ObjectType;
-use Rector\Core\NodeManipulator\ClassDependencyManipulator;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\MethodName;
+use Rector\NodeManipulator\ClassDependencyManipulator;
 use Rector\PHPUnit\NodeAnalyzer\TestsNodeAnalyzer;
 use Rector\PostRector\ValueObject\PropertyMetadata;
+use Rector\Rector\AbstractRector;
 use Rector\Symfony\NodeAnalyzer\DependencyInjectionMethodCallAnalyzer;
+use Rector\ValueObject\MethodName;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -38,7 +39,7 @@ final class ContainerGetToConstructorInjectionRector extends AbstractRector
     private $testsNodeAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\NodeManipulator\ClassDependencyManipulator
+     * @var \Rector\NodeManipulator\ClassDependencyManipulator
      */
     private $classDependencyManipulator;
     public function __construct(DependencyInjectionMethodCallAnalyzer $dependencyInjectionMethodCallAnalyzer, TestsNodeAnalyzer $testsNodeAnalyzer, ClassDependencyManipulator $classDependencyManipulator)
@@ -103,6 +104,13 @@ CODE_SAMPLE
                 return null;
             }
             if (!$this->isObjectType($node->var, new ObjectType('Symfony\\Component\\DependencyInjection\\ContainerInterface'))) {
+                return null;
+            }
+            if ($node->isFirstClassCallable()) {
+                return null;
+            }
+            $args = $node->getArgs();
+            if (\count($args) === 1 && $args[0]->value instanceof ClassConstFetch) {
                 return null;
             }
             $propertyMetadata = $this->dependencyInjectionMethodCallAnalyzer->replaceMethodCallWithPropertyFetchAndDependency($class, $node);

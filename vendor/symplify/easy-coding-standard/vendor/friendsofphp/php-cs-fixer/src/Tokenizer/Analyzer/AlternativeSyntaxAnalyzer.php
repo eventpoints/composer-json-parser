@@ -46,6 +46,9 @@ final class AlternativeSyntaxAnalyzer
             throw new \InvalidArgumentException("Token at index {$index} is not the start of an alternative syntax block.");
         }
         $startTokenKind = $tokens[$index]->getId();
+        if (!isset(self::ALTERNATIVE_SYNTAX_BLOCK_EDGES[$startTokenKind])) {
+            throw new \LogicException(\sprintf('Unknown startTokenKind: %s', $tokens[$index]->toJson()));
+        }
         $endTokenKinds = self::ALTERNATIVE_SYNTAX_BLOCK_EDGES[$startTokenKind];
         $findKinds = [[$startTokenKind]];
         foreach ($endTokenKinds as $endTokenKind) {

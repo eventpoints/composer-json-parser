@@ -1,10 +1,10 @@
 <?php
 
 declare (strict_types=1);
-namespace RectorPrefix202312\OndraM\CiDetector\Ci;
+namespace RectorPrefix202410\OndraM\CiDetector\Ci;
 
-use RectorPrefix202312\OndraM\CiDetector\Env;
-use RectorPrefix202312\OndraM\CiDetector\TrinaryLogic;
+use RectorPrefix202410\OndraM\CiDetector\Env;
+use RectorPrefix202410\OndraM\CiDetector\TrinaryLogic;
 interface CiInterface
 {
     /**

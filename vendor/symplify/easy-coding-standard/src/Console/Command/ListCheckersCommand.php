@@ -3,13 +3,13 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Command;
 
-use ECSPrefix202402\Nette\Utils\Json;
+use ECSPrefix202410\Nette\Utils\Json;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\FixerInterface;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Console\Output\ConsoleOutputFormatter;
 use Symplify\EasyCodingStandard\Console\Reporter\CheckerListReporter;
 use Symplify\EasyCodingStandard\FixerRunner\Application\FixerFileProcessor;
@@ -50,7 +50,7 @@ final class ListCheckersCommand extends Command
     {
         $this->setName('list-checkers');
         $this->setDescription('Shows loaded checkers');
-        $this->addOption(Option::OUTPUT_FORMAT, null, InputOption::VALUE_REQUIRED, 'Select output format', ConsoleOutputFormatter::NAME);
+        $this->addOption(Option::OUTPUT_FORMAT, null, InputOption::VALUE_REQUIRED, 'Select output format', ConsoleOutputFormatter::getName());
         $this->addOption(Option::CONFIG, 'c', InputOption::VALUE_REQUIRED, 'Path to config file');
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int

@@ -19,12 +19,12 @@ use PhpCsFixer\Console\Report\ListSetsReport\ReportSummary;
 use PhpCsFixer\Console\Report\ListSetsReport\TextReporter;
 use PhpCsFixer\RuleSet\RuleSets;
 use PhpCsFixer\Utils;
-use ECSPrefix202402\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
-use ECSPrefix202402\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
@@ -32,6 +32,7 @@ use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
  */
 final class ListSetsCommand extends Command
 {
+    /** @var string */
     protected static $defaultName = 'list-sets';
     protected function configure() : void
     {

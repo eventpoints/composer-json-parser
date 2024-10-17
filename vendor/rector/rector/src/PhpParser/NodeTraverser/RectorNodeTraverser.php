@@ -1,14 +1,13 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\PhpParser\NodeTraverser;
+namespace Rector\PhpParser\NodeTraverser;
 
 use PhpParser\Node;
+use PhpParser\Node\Stmt;
 use PhpParser\NodeTraverser;
-use PHPStan\Node\CollectedDataNode;
-use Rector\Core\Contract\Rector\CollectorRectorInterface;
-use Rector\Core\Contract\Rector\RectorInterface;
-use Rector\Core\ValueObject\Configuration;
+use PhpParser\NodeVisitor;
+use Rector\Contract\Rector\RectorInterface;
 use Rector\VersionBonding\PhpVersionedFilter;
 final class RectorNodeTraverser extends NodeTraverser
 {
@@ -16,10 +15,6 @@ final class RectorNodeTraverser extends NodeTraverser
      * @var RectorInterface[]
      */
     private $rectors;
-    /**
-     * @var CollectorRectorInterface[]
-     */
-    private $collectorRectors;
     /**
      * @readonly
      * @var \Rector\VersionBonding\PhpVersionedFilter
@@ -30,19 +25,21 @@ final class RectorNodeTraverser extends NodeTraverser
      */
     private $areNodeVisitorsPrepared = \false;
     /**
-     * @param RectorInterface[] $rectors
-     * @param CollectorRectorInterface[] $collectorRectors
+     * @var array<class-string<Node>,RectorInterface[]>
      */
-    public function __construct(array $rectors, array $collectorRectors, PhpVersionedFilter $phpVersionedFilter)
+    private $visitorsPerNodeClass = [];
+    /**
+     * @param RectorInterface[] $rectors
+     */
+    public function __construct(array $rectors, PhpVersionedFilter $phpVersionedFilter)
     {
         $this->rectors = $rectors;
-        $this->collectorRectors = $collectorRectors;
         $this->phpVersionedFilter = $phpVersionedFilter;
         parent::__construct();
     }
     /**
-     * @param Node[] $nodes
-     * @return Node[]
+     * @param Stmt[] $nodes
+     * @return Stmt[]
      */
     public function traverse(array $nodes) : array
     {
@@ -57,20 +54,31 @@ final class RectorNodeTraverser extends NodeTraverser
     {
         $this->rectors = $rectors;
         $this->visitors = [];
+        $this->visitorsPerNodeClass = [];
         $this->areNodeVisitorsPrepared = \false;
     }
-    public function prepareCollectorRectorsRun(Configuration $configuration) : void
+    /**
+     * We return the list of visitors (rector rules) that can be applied to each node class
+     * This list is cached so that we don't need to continually check if a rule can be applied to a node
+     *
+     * @return NodeVisitor[]
+     */
+    public function getVisitorsForNode(Node $node) : array
     {
-        if ($this->collectorRectors === []) {
-            return;
+        $nodeClass = \get_class($node);
+        if (!isset($this->visitorsPerNodeClass[$nodeClass])) {
+            $this->visitorsPerNodeClass[$nodeClass] = [];
+            foreach ($this->visitors as $visitor) {
+                \assert($visitor instanceof RectorInterface);
+                foreach ($visitor->getNodeTypes() as $nodeType) {
+                    if (\is_a($nodeClass, $nodeType, \true)) {
+                        $this->visitorsPerNodeClass[$nodeClass][] = $visitor;
+                        continue 2;
+                    }
+                }
+            }
         }
-        $collectedDataNode = new CollectedDataNode($configuration->getCollectedData(), \false);
-        // hydrate abstract collector rector with configuration
-        foreach ($this->collectorRectors as $collectorRector) {
-            $collectorRector->setCollectedDataNode($collectedDataNode);
-        }
-        $this->visitors = $this->collectorRectors;
-        $this->areNodeVisitorsPrepared = \true;
+        return $this->visitorsPerNodeClass[$nodeClass];
     }
     /**
      * This must happen after $this->configuration is set after ProcessCommand::execute() is run,
@@ -84,11 +92,7 @@ final class RectorNodeTraverser extends NodeTraverser
             return;
         }
         // filer out by version
-        $activeRectors = $this->phpVersionedFilter->filter($this->rectors);
-        $nonCollectorActiveRectors = \array_filter($activeRectors, static function (RectorInterface $rector) : bool {
-            return !$rector instanceof CollectorRectorInterface;
-        });
-        $this->visitors = \array_merge($this->visitors, $nonCollectorActiveRectors);
+        $this->visitors = $this->phpVersionedFilter->filter($this->rectors);
         $this->areNodeVisitorsPrepared = \true;
     }
 }

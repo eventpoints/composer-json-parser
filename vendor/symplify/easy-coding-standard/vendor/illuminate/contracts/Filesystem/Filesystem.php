@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Filesystem;
+namespace ECSPrefix202410\Illuminate\Contracts\Filesystem;
 
 interface Filesystem
 {

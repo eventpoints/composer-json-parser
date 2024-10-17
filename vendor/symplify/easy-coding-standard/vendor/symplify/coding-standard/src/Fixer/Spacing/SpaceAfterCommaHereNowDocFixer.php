@@ -9,9 +9,9 @@ use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 use Symplify\CodingStandard\Fixer\AbstractSymplifyFixer;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\Spacing\SpaceAfterCommaHereNowDocFixer\SpaceAfterCommaHereNowDocFixerTest
  * @see https://3v4l.org/KPZXU

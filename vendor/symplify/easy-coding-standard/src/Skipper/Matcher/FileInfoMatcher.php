@@ -6,6 +6,7 @@ namespace Symplify\EasyCodingStandard\Skipper\Matcher;
 use SplFileInfo;
 use Symplify\EasyCodingStandard\Skipper\FileSystem\FnMatchPathNormalizer;
 use Symplify\EasyCodingStandard\Skipper\Fnmatcher;
+use Symplify\EasyCodingStandard\Skipper\RealpathMatcher;
 final class FileInfoMatcher
 {
     /**
@@ -18,10 +19,16 @@ final class FileInfoMatcher
      * @var \Symplify\EasyCodingStandard\Skipper\Fnmatcher
      */
     private $fnmatcher;
-    public function __construct(FnMatchPathNormalizer $fnMatchPathNormalizer, Fnmatcher $fnmatcher)
+    /**
+     * @readonly
+     * @var \Symplify\EasyCodingStandard\Skipper\RealpathMatcher
+     */
+    private $realpathMatcher;
+    public function __construct(FnMatchPathNormalizer $fnMatchPathNormalizer, Fnmatcher $fnmatcher, RealpathMatcher $realpathMatcher)
     {
         $this->fnMatchPathNormalizer = $fnMatchPathNormalizer;
         $this->fnmatcher = $fnmatcher;
+        $this->realpathMatcher = $realpathMatcher;
     }
     /**
      * @param string[] $filePatterns
@@ -57,6 +64,9 @@ final class FileInfoMatcher
         if (\substr_compare($filePath, $ignoredPath, -\strlen($ignoredPath)) === 0) {
             return \true;
         }
-        return $this->fnmatcher->match($ignoredPath, $filePath);
+        if ($this->fnmatcher->match($ignoredPath, $filePath)) {
+            return \true;
+        }
+        return $this->realpathMatcher->match($ignoredPath, $filePath);
     }
 }

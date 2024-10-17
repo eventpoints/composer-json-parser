@@ -93,12 +93,11 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
         }
     }
     /**
-     * @return array<list<int>|string>
+     * @return list<array{int}|string>
      */
     private function getBraceAfterVariableKinds() : array
     {
-        static $tokens = [')', ']', [CT::T_DYNAMIC_VAR_BRACE_CLOSE], [CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE]];
-        return $tokens;
+        return [')', ']', [CT::T_DYNAMIC_VAR_BRACE_CLOSE], [CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE]];
     }
     /**
      * Gets the token kinds which can work as function calls.
@@ -113,7 +112,7 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
     /**
      * Gets the token kinds of actually language construction.
      *
-     * @return int[]
+     * @return list<int>
      */
     private function getLanguageConstructionTokenKinds() : array
     {

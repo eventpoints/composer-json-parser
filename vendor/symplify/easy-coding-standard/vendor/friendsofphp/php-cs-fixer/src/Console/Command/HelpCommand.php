@@ -15,11 +15,11 @@ namespace PhpCsFixer\Console\Command;
 use PhpCsFixer\FixerConfiguration\AllowedValueSubset;
 use PhpCsFixer\FixerConfiguration\FixerOptionInterface;
 use PhpCsFixer\Utils;
-use ECSPrefix202402\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202402\Symfony\Component\Console\Command\HelpCommand as BaseHelpCommand;
-use ECSPrefix202402\Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202410\Symfony\Component\Console\Command\HelpCommand as BaseHelpCommand;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
@@ -28,6 +28,7 @@ use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
  */
 final class HelpCommand extends BaseHelpCommand
 {
+    /** @var string */
     protected static $defaultName = 'help';
     /**
      * Returns the allowed values of the given option that can be converted to a string.

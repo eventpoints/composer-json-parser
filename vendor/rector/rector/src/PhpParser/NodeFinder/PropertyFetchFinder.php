@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\PhpParser\NodeFinder;
+namespace Rector\PhpParser\NodeFinder;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
@@ -9,6 +9,7 @@ use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\StaticPropertyFetch;
@@ -22,20 +23,20 @@ use PHPStan\Reflection\ClassReflection;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StaticType;
 use PHPStan\Type\TypeWithClassName;
-use Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer;
-use Rector\Core\PhpParser\AstResolver;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
-use Rector\Core\Reflection\ReflectionResolver;
+use Rector\NodeAnalyzer\PropertyFetchAnalyzer;
 use Rector\NodeNameResolver\NodeNameResolver;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Rector\NodeTypeResolver\NodeTypeResolver;
 use Rector\NodeTypeResolver\PHPStan\ParametersAcceptorSelectorVariantsWrapper;
 use Rector\PhpDocParser\NodeTraverser\SimpleCallableNodeTraverser;
+use Rector\PhpParser\AstResolver;
+use Rector\PhpParser\Node\BetterNodeFinder;
+use Rector\Reflection\ReflectionResolver;
 final class PropertyFetchFinder
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
@@ -45,12 +46,12 @@ final class PropertyFetchFinder
     private $nodeNameResolver;
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\AstResolver
+     * @var \Rector\PhpParser\AstResolver
      */
     private $astResolver;
     /**
@@ -60,7 +61,7 @@ final class PropertyFetchFinder
     private $nodeTypeResolver;
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer
+     * @var \Rector\NodeAnalyzer\PropertyFetchAnalyzer
      */
     private $propertyFetchAnalyzer;
     /**
@@ -96,13 +97,16 @@ final class PropertyFetchFinder
         return $this->findPropertyFetchesInClassLike($class, $nodes, $propertyName, $hasTrait, $scope);
     }
     /**
-     * @return PropertyFetch[]|StaticPropertyFetch[]
+     * @return PropertyFetch[]|StaticPropertyFetch[]|NullsafePropertyFetch[]
      */
     public function findLocalPropertyFetchesByName(Class_ $class, string $paramName) : array
     {
-        /** @var PropertyFetch[]|StaticPropertyFetch[] $foundPropertyFetches */
+        /** @var PropertyFetch[]|StaticPropertyFetch[]|NullsafePropertyFetch[] $foundPropertyFetches */
         $foundPropertyFetches = $this->betterNodeFinder->find($class->getMethods(), function (Node $subNode) use($paramName) : bool {
             if ($subNode instanceof PropertyFetch) {
+                return $this->propertyFetchAnalyzer->isLocalPropertyFetchName($subNode, $paramName);
+            }
+            if ($subNode instanceof NullsafePropertyFetch) {
                 return $this->propertyFetchAnalyzer->isLocalPropertyFetchName($subNode, $paramName);
             }
             if ($subNode instanceof StaticPropertyFetch) {

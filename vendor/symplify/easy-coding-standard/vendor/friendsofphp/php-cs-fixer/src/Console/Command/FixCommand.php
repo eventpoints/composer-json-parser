@@ -26,17 +26,18 @@ use PhpCsFixer\Error\ErrorsManager;
 use PhpCsFixer\FixerFileProcessedEvent;
 use PhpCsFixer\Runner\Runner;
 use PhpCsFixer\ToolInfoInterface;
-use ECSPrefix202402\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Terminal;
-use ECSPrefix202402\Symfony\Component\EventDispatcher\EventDispatcher;
-use ECSPrefix202402\Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use ECSPrefix202402\Symfony\Component\Stopwatch\Stopwatch;
+use ECSPrefix202410\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Terminal;
+use ECSPrefix202410\Symfony\Component\EventDispatcher\EventDispatcher;
+use ECSPrefix202410\Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use ECSPrefix202410\Symfony\Component\Stopwatch\Stopwatch;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
@@ -47,7 +48,9 @@ use ECSPrefix202402\Symfony\Component\Stopwatch\Stopwatch;
  */
 class FixCommand extends Command
 {
+    /** @var string */
     protected static $defaultName = 'fix';
+    /** @var string */
     protected static $defaultDescription = 'Fixes a directory or a file.';
     /**
      * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
@@ -153,6 +156,8 @@ Complete configuration for rules can be supplied using a `json` formatted string
 
 The <comment>--dry-run</comment> flag will run the fixer without making changes to your files.
 
+The <comment>--sequential</comment> flag will enforce sequential analysis even if parallel config is provided.
+
 The <comment>--diff</comment> flag can be used to let the fixer output all the changes it makes.
 
 The <comment>--allow-risky</comment> option (pass `yes` or `no`) allows you to set whether risky rules may run. Default value is taken from config file.
@@ -200,7 +205,7 @@ EOF;
     }
     protected function configure() : void
     {
-        $this->setDefinition([new InputArgument('path', InputArgument::IS_ARRAY, 'The path(s) that rules will be run against (each path can be a file or directory).'), new InputOption('path-mode', '', InputOption::VALUE_REQUIRED, 'Specify path mode (can be `override` or `intersection`).', ConfigurationResolver::PATH_MODE_OVERRIDE), new InputOption('allow-risky', '', InputOption::VALUE_REQUIRED, 'Are risky fixers allowed (can be `yes` or `no`).'), new InputOption('config', '', InputOption::VALUE_REQUIRED, 'The path to a config file.'), new InputOption('dry-run', '', InputOption::VALUE_NONE, 'Only shows which files would have been modified.'), new InputOption('rules', '', InputOption::VALUE_REQUIRED, 'List of rules that should be run against configured paths.'), new InputOption('using-cache', '', InputOption::VALUE_REQUIRED, 'Does cache should be used (can be `yes` or `no`).'), new InputOption('cache-file', '', InputOption::VALUE_REQUIRED, 'The path to the cache file.'), new InputOption('diff', '', InputOption::VALUE_NONE, 'Prints diff for each file.'), new InputOption('format', '', InputOption::VALUE_REQUIRED, 'To output results in other formats.'), new InputOption('stop-on-violation', '', InputOption::VALUE_NONE, 'Stop execution on first violation.'), new InputOption('show-progress', '', InputOption::VALUE_REQUIRED, 'Type of progress indicator (none, dots).')]);
+        $this->setDefinition([new InputArgument('path', InputArgument::IS_ARRAY, 'The path(s) that rules will be run against (each path can be a file or directory).'), new InputOption('path-mode', '', InputOption::VALUE_REQUIRED, 'Specify path mode (can be `override` or `intersection`).', ConfigurationResolver::PATH_MODE_OVERRIDE), new InputOption('allow-risky', '', InputOption::VALUE_REQUIRED, 'Are risky fixers allowed (can be `yes` or `no`).'), new InputOption('config', '', InputOption::VALUE_REQUIRED, 'The path to a config file.'), new InputOption('dry-run', '', InputOption::VALUE_NONE, 'Only shows which files would have been modified.'), new InputOption('rules', '', InputOption::VALUE_REQUIRED, 'List of rules that should be run against configured paths.'), new InputOption('using-cache', '', InputOption::VALUE_REQUIRED, 'Should cache be used (can be `yes` or `no`).'), new InputOption('cache-file', '', InputOption::VALUE_REQUIRED, 'The path to the cache file.'), new InputOption('diff', '', InputOption::VALUE_NONE, 'Prints diff for each file.'), new InputOption('format', '', InputOption::VALUE_REQUIRED, 'To output results in other formats.'), new InputOption('stop-on-violation', '', InputOption::VALUE_NONE, 'Stop execution on first violation.'), new InputOption('show-progress', '', InputOption::VALUE_REQUIRED, 'Type of progress indicator (none, dots).'), new InputOption('sequential', '', InputOption::VALUE_NONE, 'Enforce sequential analysis.')]);
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
     {
@@ -210,11 +215,16 @@ EOF;
         if (null !== $passedConfig && null !== $passedRules) {
             throw new InvalidConfigurationException('Passing both `--config` and `--rules` options is not allowed.');
         }
-        $resolver = new ConfigurationResolver($this->defaultConfig, ['allow-risky' => $input->getOption('allow-risky'), 'config' => $passedConfig, 'dry-run' => $this->isDryRun($input), 'rules' => $passedRules, 'path' => $input->getArgument('path'), 'path-mode' => $input->getOption('path-mode'), 'using-cache' => $input->getOption('using-cache'), 'cache-file' => $input->getOption('cache-file'), 'format' => $input->getOption('format'), 'diff' => $input->getOption('diff'), 'stop-on-violation' => $input->getOption('stop-on-violation'), 'verbosity' => $verbosity, 'show-progress' => $input->getOption('show-progress')], \getcwd(), $this->toolInfo);
+        $resolver = new ConfigurationResolver($this->defaultConfig, ['allow-risky' => $input->getOption('allow-risky'), 'config' => $passedConfig, 'dry-run' => $this->isDryRun($input), 'rules' => $passedRules, 'path' => $input->getArgument('path'), 'path-mode' => $input->getOption('path-mode'), 'using-cache' => $input->getOption('using-cache'), 'cache-file' => $input->getOption('cache-file'), 'format' => $input->getOption('format'), 'diff' => $input->getOption('diff'), 'stop-on-violation' => $input->getOption('stop-on-violation'), 'verbosity' => $verbosity, 'show-progress' => $input->getOption('show-progress'), 'sequential' => $input->getOption('sequential')], \getcwd(), $this->toolInfo);
         $reporter = $resolver->getReporter();
         $stdErr = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : ('txt' === $reporter->getFormat() ? $output : null);
         if (null !== $stdErr) {
             $stdErr->writeln(Application::getAboutWithRuntime(\true));
+            $isParallel = $resolver->getParallelConfig()->getMaxProcesses() > 1;
+            $stdErr->writeln(\sprintf('Running analysis on %d core%s.', $resolver->getParallelConfig()->getMaxProcesses(), $isParallel ? \sprintf('s with %d file%s per process', $resolver->getParallelConfig()->getFilesPerProcess(), $resolver->getParallelConfig()->getFilesPerProcess() > 1 ? 's' : '') : ' sequentially'));
+            /** @TODO v4 remove warnings related to parallel runner */
+            $usageDocs = 'https://cs.symfony.com/doc/usage.html';
+            $stdErr->writeln(\sprintf($stdErr->isDecorated() ? '<bg=yellow;fg=black;>%s</>' : '%s', $isParallel ? 'Parallel runner is an experimental feature and may be unstable, use it at your own risk. Feedback highly appreciated!' : \sprintf('You can enable parallel runner and speed up the analysis! Please see %s for more information.', $stdErr->isDecorated() ? \sprintf('<href=%s;bg=yellow;fg=red;bold>usage docs</>', OutputFormatter::escape($usageDocs)) : $usageDocs)));
             $configFile = $resolver->getConfigFile();
             $stdErr->writeln(\sprintf('Loaded config <comment>%s</comment>%s.', $resolver->getConfig()->getName(), null === $configFile ? '' : ' from "' . $configFile . '"'));
             if ($resolver->getUsingCache()) {
@@ -230,7 +240,7 @@ EOF;
         }
         $progressType = $resolver->getProgressType();
         $progressOutput = $this->progressOutputFactory->create($progressType, new OutputContext($stdErr, (new Terminal())->getWidth(), \count($finder)));
-        $runner = new Runner($finder, $resolver->getFixers(), $resolver->getDiffer(), ProgressOutputType::NONE !== $progressType ? $this->eventDispatcher : null, $this->errorsManager, $resolver->getLinter(), $resolver->isDryRun(), $resolver->getCacheManager(), $resolver->getDirectory(), $resolver->shouldStopOnViolation());
+        $runner = new Runner($finder, $resolver->getFixers(), $resolver->getDiffer(), ProgressOutputType::NONE !== $progressType ? $this->eventDispatcher : null, $this->errorsManager, $resolver->getLinter(), $resolver->isDryRun(), $resolver->getCacheManager(), $resolver->getDirectory(), $resolver->shouldStopOnViolation(), $resolver->getParallelConfig(), $input, $resolver->getConfigFile());
         $this->eventDispatcher->addListener(FixerFileProcessedEvent::NAME, [$progressOutput, 'onFixerFileProcessed']);
         $this->stopwatch->start('fixFiles');
         $changed = $runner->fix();

@@ -26,7 +26,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class PhpdocAnnotationWithoutDotFixer extends AbstractFixer
 {
     /**
-     * @var string[]
+     * @var list<string>
      */
     private $tags = ['throws', 'return', 'param', 'internal', 'deprecated', 'var', 'type'];
     public function getDefinition() : FixerDefinitionInterface

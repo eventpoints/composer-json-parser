@@ -3,10 +3,10 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Finder;
 
-use ECSPrefix202402\Symfony\Component\Finder\Finder;
+use ECSPrefix202410\Symfony\Component\Finder\Finder;
 use Symplify\EasyCodingStandard\DependencyInjection\SimpleParameterProvider;
 use Symplify\EasyCodingStandard\ValueObject\Option;
-use ECSPrefix202402\Webmozart\Assert\Assert;
+use ECSPrefix202410\Webmozart\Assert\Assert;
 /**
  * @see \Symplify\EasyCodingStandard\Tests\Finder\SourceFinderTest
  */

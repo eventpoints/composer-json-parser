@@ -30,7 +30,7 @@ final class UnnecessaryStringConcatUnitTest extends AbstractSniffUnitTest
     public function getErrorList($testFile = '')
     {
         switch ($testFile) {
-            case 'UnnecessaryStringConcatUnitTest.inc':
+            case 'UnnecessaryStringConcatUnitTest.1.inc':
                 return [2 => 1, 6 => 1, 9 => 1, 12 => 1, 19 => 1, 20 => 1];
             case 'UnnecessaryStringConcatUnitTest.js':
                 return [1 => 1, 8 => 1, 11 => 1, 14 => 1, 15 => 1];
@@ -46,11 +46,18 @@ final class UnnecessaryStringConcatUnitTest extends AbstractSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
+     * @param string $testFile The name of the file being tested.
+     *
      * @return array<int, int>
      */
-    public function getWarningList()
+    public function getWarningList($testFile = '')
     {
-        return [];
+        switch ($testFile) {
+            case 'UnnecessaryStringConcatUnitTest.1.inc':
+                return [33 => 1];
+            default:
+                return [];
+        }
     }
     //end getWarningList()
 }

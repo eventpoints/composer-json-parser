@@ -55,7 +55,6 @@ class ArrayIndentSniff extends AbstractArraySniff
         // Determine how far indented the entire array declaration should be.
         $ignore = Tokens::$emptyTokens;
         $ignore[] = \T_DOUBLE_ARROW;
-        $ignore[] = \T_COMMA;
         $prev = $phpcsFile->findPrevious($ignore, $stackPtr - 1, null, \true);
         $start = $phpcsFile->findStartOfStatement($prev);
         $first = $phpcsFile->findFirstOnLine(\T_WHITESPACE, $start, \true);
@@ -126,28 +125,27 @@ class ArrayIndentSniff extends AbstractArraySniff
             $error = 'Closing brace of array declaration must be on a new line';
             $fix = $phpcsFile->addFixableError($error, $arrayEnd, 'CloseBraceNotNewLine');
             if ($fix === \true) {
-                $padding = $phpcsFile->eolChar . \str_repeat(' ', $expectedIndent);
+                $padding = $phpcsFile->eolChar . \str_repeat(' ', $startIndent);
                 $phpcsFile->fixer->addContentBefore($arrayEnd, $padding);
             }
             return;
         }
         // The close brace must be indented one stop less.
-        $expectedIndent -= $this->indent;
         $foundIndent = $tokens[$arrayEnd]['column'] - 1;
-        if ($foundIndent === $expectedIndent) {
+        if ($foundIndent === $startIndent) {
             return;
         }
         $pluralizeSpace = 's';
-        if ($expectedIndent === 1) {
+        if ($startIndent === 1) {
             $pluralizeSpace = '';
         }
         $error = 'Array close brace not indented correctly; expected %s space%s but found %s';
-        $data = [$expectedIndent, $pluralizeSpace, $foundIndent];
+        $data = [$startIndent, $pluralizeSpace, $foundIndent];
         $fix = $phpcsFile->addFixableError($error, $arrayEnd, 'CloseBraceIncorrect', $data);
         if ($fix === \false) {
             return;
         }
-        $padding = \str_repeat(' ', $expectedIndent);
+        $padding = \str_repeat(' ', $startIndent);
         if ($foundIndent === 0) {
             $phpcsFile->fixer->addContentBefore($arrayEnd, $padding);
         } else {

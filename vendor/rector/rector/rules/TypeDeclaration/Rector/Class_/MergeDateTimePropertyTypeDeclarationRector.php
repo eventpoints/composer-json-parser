@@ -11,8 +11,8 @@ use PHPStan\Type\TypeWithClassName;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -88,8 +88,11 @@ CODE_SAMPLE
             $varType = $phpDocInfo->getVarType();
             $className = $varType instanceof TypeWithClassName ? $this->nodeTypeResolver->getFullyQualifiedClassName($varType) : null;
             if ($className === 'DateTimeInterface') {
-                $phpDocInfo->removeByType(VarTagValueNode::class);
-                $this->docBlockUpdater->updateRefactoredNodeWithPhpDocInfo($property);
+                $varTagvalueNode = $phpDocInfo->getVarTagValueNode();
+                if ($varTagvalueNode instanceof VarTagValueNode && $varTagvalueNode->description === '') {
+                    $phpDocInfo->removeByType(VarTagValueNode::class);
+                    $this->docBlockUpdater->updateRefactoredNodeWithPhpDocInfo($property);
+                }
                 $property->type = new FullyQualified('DateTimeInterface');
                 $hasChanged = \true;
             }

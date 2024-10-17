@@ -1,11 +1,11 @@
 <?php
 
-namespace ECSPrefix202402\React\Dns\Resolver;
+namespace ECSPrefix202410\React\Dns\Resolver;
 
-use ECSPrefix202402\React\Dns\Model\Message;
-use ECSPrefix202402\React\Dns\Query\ExecutorInterface;
-use ECSPrefix202402\React\Dns\Query\Query;
-use ECSPrefix202402\React\Dns\RecordNotFoundException;
+use ECSPrefix202410\React\Dns\Model\Message;
+use ECSPrefix202410\React\Dns\Query\ExecutorInterface;
+use ECSPrefix202410\React\Dns\Query\Query;
+use ECSPrefix202410\React\Dns\RecordNotFoundException;
 /**
  * @see ResolverInterface for the base interface
  */

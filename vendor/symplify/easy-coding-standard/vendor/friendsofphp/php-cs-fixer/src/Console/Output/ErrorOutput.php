@@ -15,9 +15,9 @@ namespace PhpCsFixer\Console\Output;
 use PhpCsFixer\Differ\DiffConsoleFormatter;
 use PhpCsFixer\Error\Error;
 use PhpCsFixer\Linter\LintingException;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
-use ECSPrefix202402\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
@@ -37,7 +37,7 @@ final class ErrorOutput
         $this->isDecorated = $output->isDecorated();
     }
     /**
-     * @param Error[] $errors
+     * @param list<Error> $errors
      */
     public function listErrors(string $process, array $errors) : void
     {

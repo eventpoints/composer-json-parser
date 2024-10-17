@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Notifications;
+namespace ECSPrefix202410\Illuminate\Contracts\Notifications;
 
 interface Dispatcher
 {

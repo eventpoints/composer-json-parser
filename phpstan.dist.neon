@@ -1,7 +1,5 @@
 parameters:
     level: 6
     paths:
-        - bin/
         - src/
         - tests/
-    ignoreErrors:

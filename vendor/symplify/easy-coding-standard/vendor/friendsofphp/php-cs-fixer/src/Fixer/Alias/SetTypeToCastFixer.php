@@ -85,7 +85,7 @@ settype($bar, "null");
                 // second argument is of the wrong type or is a (complex) statement of some sort (function is overridden)
             }
             // --- Test type ------------------------------
-            $type = \strtolower(\trim($tokens[$secondArgumentStart]->getContent(), '"\'"'));
+            $type = \strtolower(\trim($tokens[$secondArgumentStart]->getContent(), '"\''));
             if ('null' !== $type && !isset($map[$type])) {
                 continue;
                 // we don't know how to map
@@ -96,6 +96,7 @@ settype($bar, "null");
             if ('null' === $type) {
                 $this->fixSettypeNullCall($tokens, $functionNameIndex, $argumentToken);
             } else {
+                \assert(isset($map[$type]));
                 $this->fixSettypeCall($tokens, $functionNameIndex, $argumentToken, new Token($map[$type]));
             }
         }

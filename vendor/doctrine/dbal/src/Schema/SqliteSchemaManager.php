@@ -60,7 +60,7 @@ class SQLiteSchemaManager extends AbstractSchemaManager
     {
         $table = $this->introspectTable($table);
 
-        $this->alterTable(new TableDiff($table, [], [], [], [], [], [], [], [], [$foreignKey], [], []));
+        $this->alterTable(new TableDiff($table, modifiedForeignKeys: [$foreignKey]));
     }
 
     public function dropForeignKey(string $name, string $table): void
@@ -69,7 +69,7 @@ class SQLiteSchemaManager extends AbstractSchemaManager
 
         $foreignKey = $table->getForeignKey($name);
 
-        $this->alterTable(new TableDiff($table, [], [], [], [], [], [], [], [], [], [], [$foreignKey]));
+        $this->alterTable(new TableDiff($table, droppedForeignKeys: [$foreignKey]));
     }
 
     /**
@@ -79,7 +79,7 @@ class SQLiteSchemaManager extends AbstractSchemaManager
     {
         $table = $this->normalizeName($table);
 
-        $columns = $this->selectForeignKeyColumns('', $table)
+        $columns = $this->selectForeignKeyColumns('main', $table)
             ->fetchAllAssociative();
 
         if (count($columns) > 0) {
@@ -99,8 +99,6 @@ class SQLiteSchemaManager extends AbstractSchemaManager
 
     /**
      * {@inheritDoc}
-     *
-     * @link http://ezcomponents.org/docs/api/trunk/DatabaseSchema/ezcDbSchemaPgsqlReader.html
      */
     protected function _getPortableTableIndexesList(array $tableIndexes, string $tableName): array
     {
@@ -221,19 +219,22 @@ class SQLiteSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableColumnDefinition(array $tableColumn): Column
     {
-        preg_match('/^([^()]*)\\s*(\\(((\\d+)(,\\s*(\\d+))?)\\))?/', $tableColumn['type'], $matches);
+        $matchResult = preg_match('/^([^()]*)\\s*(\\(((\\d+)(,\\s*(\\d+))?)\\))?/', $tableColumn['type'], $matches);
+        assert($matchResult === 1);
 
         $dbType = trim(strtolower($matches[1]));
 
-        $length = $precision = $unsigned = null;
+        $length = $precision = null;
         $fixed  = $unsigned = false;
         $scale  = 0;
 
-        if (count($matches) >= 6) {
-            $precision = (int) $matches[4];
-            $scale     = (int) $matches[6];
-        } elseif (count($matches) >= 4) {
-            $length = (int) $matches[4];
+        if (isset($matches[4])) {
+            if (isset($matches[6])) {
+                $precision = (int) $matches[4];
+                $scale     = (int) $matches[6];
+            } else {
+                $length = (int) $matches[4];
+            }
         }
 
         if (str_contains($dbType, ' unsigned')) {
@@ -574,7 +575,7 @@ SQL;
                    p.*
               FROM sqlite_master t
               JOIN pragma_foreign_key_list(t.name) p
-                ON p."seq" != "-1"
+                ON p."seq" != '-1'
 SQL;
 
         $conditions = [

@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Auth;
+namespace ECSPrefix202410\Illuminate\Contracts\Auth;
 
 interface MustVerifyEmail
 {

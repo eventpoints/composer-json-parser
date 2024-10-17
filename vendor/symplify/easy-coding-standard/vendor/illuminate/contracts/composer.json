@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ECSPrefix202402\\Illuminate\\Contracts\\": ""
+            "ECSPrefix202410\\Illuminate\\Contracts\\": ""
         }
     },
     "extra": {

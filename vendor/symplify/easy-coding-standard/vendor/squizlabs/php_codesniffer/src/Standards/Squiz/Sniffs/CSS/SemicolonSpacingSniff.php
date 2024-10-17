@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Ensure each style definition has a semi-colon and it is spaced correctly.
+ * Ensure each style definition has a semicolon and it is spaced correctly.
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
@@ -62,7 +62,7 @@ class SemicolonSpacingSniff implements Sniff
         if ($tokens[$endOfThisStatement - 1]['code'] !== \T_WHITESPACE) {
             return;
         }
-        // There is a semi-colon, so now find the last token in the statement.
+        // There is a semicolon, so now find the last token in the statement.
         $prevNonEmpty = $phpcsFile->findPrevious(Tokens::$emptyTokens, $endOfThisStatement - 1, null, \true);
         $found = $tokens[$endOfThisStatement - 1]['length'];
         if ($tokens[$prevNonEmpty]['line'] !== $tokens[$endOfThisStatement]['line']) {

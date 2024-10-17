@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Http;
+namespace ECSPrefix202410\Illuminate\Contracts\Http;
 
 interface Kernel
 {

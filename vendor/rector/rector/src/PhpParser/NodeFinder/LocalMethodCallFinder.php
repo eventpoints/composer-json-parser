@@ -1,21 +1,22 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\PhpParser\NodeFinder;
+namespace Rector\PhpParser\NodeFinder;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PHPStan\Type\TypeWithClassName;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
 use Rector\NodeNameResolver\NodeNameResolver;
 use Rector\NodeTypeResolver\NodeTypeResolver;
+use Rector\PhpParser\Node\BetterNodeFinder;
 final class LocalMethodCallFinder
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     /**
@@ -35,7 +36,7 @@ final class LocalMethodCallFinder
         $this->nodeNameResolver = $nodeNameResolver;
     }
     /**
-     * @return MethodCall[]
+     * @return MethodCall[]|StaticCall[]
      */
     public function match(Class_ $class, ClassMethod $classMethod) : array
     {
@@ -44,15 +45,15 @@ final class LocalMethodCallFinder
             return [];
         }
         $classMethodName = $this->nodeNameResolver->getName($classMethod);
-        /** @var MethodCall[] $matchingMethodCalls */
+        /** @var MethodCall[]|StaticCall[] $matchingMethodCalls */
         $matchingMethodCalls = $this->betterNodeFinder->find($class->getMethods(), function (Node $subNode) use($className, $classMethodName) : bool {
-            if (!$subNode instanceof MethodCall) {
+            if (!$subNode instanceof MethodCall && !$subNode instanceof StaticCall) {
                 return \false;
             }
             if (!$this->nodeNameResolver->isName($subNode->name, $classMethodName)) {
                 return \false;
             }
-            $callerType = $this->nodeTypeResolver->getType($subNode->var);
+            $callerType = $subNode instanceof MethodCall ? $this->nodeTypeResolver->getType($subNode->var) : $this->nodeTypeResolver->getType($subNode->class);
             if (!$callerType instanceof TypeWithClassName) {
                 return \false;
             }

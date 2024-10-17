@@ -19,12 +19,12 @@ use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\TypeWithClassName;
 use PHPStan\Type\UnionType;
-use Rector\Core\PhpParser\Node\NodeFactory;
+use Rector\PhpParser\Node\NodeFactory;
 final class ExactCompareFactory
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\NodeFactory
+     * @var \Rector\PhpParser\Node\NodeFactory
      */
     private $nodeFactory;
     public function __construct(NodeFactory $nodeFactory)
@@ -116,22 +116,19 @@ final class ExactCompareFactory
      */
     private function resolveFromCleanedNullUnionType(UnionType $unionType, Expr $expr, bool $treatAsNotEmpty)
     {
-        $compareExprs = [];
-        foreach ($unionType->getTypes() as $unionedType) {
-            $compareExprs[] = $this->createNotIdenticalFalsyCompare($unionedType, $expr, $treatAsNotEmpty);
-        }
+        $compareExprs = $this->collectCompareExprs($unionType, $expr, $treatAsNotEmpty, \false);
         return $this->createBooleanAnd($compareExprs);
     }
     /**
      * @return array<Identical|BooleanOr|NotIdentical|BooleanNot|Instanceof_|BooleanAnd|null>
      */
-    private function collectCompareExprs(UnionType $unionType, Expr $expr, bool $treatAsNonEmpty) : array
+    private function collectCompareExprs(UnionType $unionType, Expr $expr, bool $treatAsNonEmpty, bool $identical = \true) : array
     {
         $compareExprs = [];
         foreach ($unionType->getTypes() as $unionedType) {
-            $compareExprs[] = $this->createIdenticalFalsyCompare($unionedType, $expr, $treatAsNonEmpty);
+            $compareExprs[] = $identical ? $this->createIdenticalFalsyCompare($unionedType, $expr, $treatAsNonEmpty) : $this->createNotIdenticalFalsyCompare($unionedType, $expr, $treatAsNonEmpty);
         }
-        return $compareExprs;
+        return \array_unique($compareExprs, \SORT_REGULAR);
     }
     private function cleanUpPossibleNullableUnionType(UnionType $unionType) : Type
     {

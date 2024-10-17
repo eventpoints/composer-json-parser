@@ -9,11 +9,14 @@
  */
 namespace PHP_CodeSniffer\Filters;
 
-use PHP_CodeSniffer\Util;
-use PHP_CodeSniffer\Ruleset;
+use FilesystemIterator;
 use PHP_CodeSniffer\Config;
+use PHP_CodeSniffer\Ruleset;
+use PHP_CodeSniffer\Util\Common;
+use RecursiveDirectoryIterator;
+use RecursiveFilterIterator;
 use ReturnTypeWillChange;
-class Filter extends \RecursiveFilterIterator
+class Filter extends RecursiveFilterIterator
 {
     /**
      * The top-level path we are filtering.
@@ -83,7 +86,7 @@ class Filter extends \RecursiveFilterIterator
     public function accept()
     {
         $filePath = $this->current();
-        $realPath = Util\Common::realpath($filePath);
+        $realPath = Common::realpath($filePath);
         if ($realPath !== \false) {
             // It's a real path somewhere, so record it
             // to check for circular symlinks.
@@ -121,7 +124,7 @@ class Filter extends \RecursiveFilterIterator
     public function getChildren()
     {
         $filterClass = \get_called_class();
-        $children = new $filterClass(new \RecursiveDirectoryIterator($this->current(), \RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS), $this->basedir, $this->config, $this->ruleset);
+        $children = new $filterClass(new RecursiveDirectoryIterator($this->current(), RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS), $this->basedir, $this->config, $this->ruleset);
         // Set the ignore patterns so we don't have to generate them again.
         $children->ignoreDirPatterns = $this->ignoreDirPatterns;
         $children->ignoreFilePatterns = $this->ignoreFilePatterns;
@@ -152,7 +155,7 @@ class Filter extends \RecursiveFilterIterator
         // complete extension list and make sure one is allowed.
         $extensions = [];
         \array_shift($fileParts);
-        foreach ($fileParts as $part) {
+        while (empty($fileParts) === \false) {
             $extensions[\implode('.', $fileParts)] = 1;
             \array_shift($fileParts);
         }

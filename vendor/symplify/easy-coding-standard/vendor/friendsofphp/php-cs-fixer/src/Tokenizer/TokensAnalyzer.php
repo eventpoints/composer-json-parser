@@ -293,10 +293,10 @@ final class TokensAnalyzer
         if ($this->tokens[$prevIndex]->isGivenKind([\T_AS, \T_CLASS, \T_CONST, \T_DOUBLE_COLON, \T_FUNCTION, \T_GOTO, \PhpCsFixer\Tokenizer\CT::T_GROUP_IMPORT_BRACE_OPEN, \T_INTERFACE, \T_TRAIT, \PhpCsFixer\Tokenizer\CT::T_TYPE_COLON, \PhpCsFixer\Tokenizer\CT::T_TYPE_ALTERNATION, \PhpCsFixer\Tokenizer\CT::T_TYPE_INTERSECTION]) || $this->tokens[$prevIndex]->isObjectOperator()) {
             return \false;
         }
-        while ($this->tokens[$prevIndex]->isGivenKind([\PhpCsFixer\Tokenizer\CT::T_NAMESPACE_OPERATOR, \T_NS_SEPARATOR, \T_STRING])) {
+        while ($this->tokens[$prevIndex]->isGivenKind([\PhpCsFixer\Tokenizer\CT::T_NAMESPACE_OPERATOR, \T_NS_SEPARATOR, \T_STRING, \PhpCsFixer\Tokenizer\CT::T_ARRAY_TYPEHINT])) {
             $prevIndex = $this->tokens->getPrevMeaningfulToken($prevIndex);
         }
-        if ($this->tokens[$prevIndex]->isGivenKind([\PhpCsFixer\Tokenizer\CT::T_CONST_IMPORT, \T_EXTENDS, \PhpCsFixer\Tokenizer\CT::T_FUNCTION_IMPORT, \T_IMPLEMENTS, \T_INSTANCEOF, \T_INSTEADOF, \T_NAMESPACE, \T_NEW, \PhpCsFixer\Tokenizer\CT::T_NULLABLE_TYPE, \PhpCsFixer\Tokenizer\CT::T_TYPE_COLON, \T_USE, \PhpCsFixer\Tokenizer\CT::T_USE_TRAIT])) {
+        if ($this->tokens[$prevIndex]->isGivenKind([\PhpCsFixer\Tokenizer\CT::T_CONST_IMPORT, \T_EXTENDS, \PhpCsFixer\Tokenizer\CT::T_FUNCTION_IMPORT, \T_IMPLEMENTS, \T_INSTANCEOF, \T_INSTEADOF, \T_NAMESPACE, \T_NEW, \PhpCsFixer\Tokenizer\CT::T_NULLABLE_TYPE, \PhpCsFixer\Tokenizer\CT::T_TYPE_COLON, \T_USE, \PhpCsFixer\Tokenizer\CT::T_USE_TRAIT, \PhpCsFixer\Tokenizer\CT::T_TYPE_INTERSECTION, \PhpCsFixer\Tokenizer\CT::T_TYPE_ALTERNATION, \T_CONST, \PhpCsFixer\Tokenizer\CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_CLOSE])) {
             return \false;
         }
         // `FOO & $bar` could be:
@@ -397,7 +397,7 @@ final class TokensAnalyzer
         if (!$token->equals('&') || !$prevToken->isGivenKind(\T_STRING)) {
             return \false;
         }
-        static $searchTokens = [';', '{', '}', [\T_FN], [\T_FUNCTION], [\T_OPEN_TAG], [\T_OPEN_TAG_WITH_ECHO]];
+        static $searchTokens = [';', '{', '}', [\T_DOUBLE_ARROW], [\T_FN], [\T_FUNCTION], [\T_OPEN_TAG], [\T_OPEN_TAG_WITH_ECHO]];
         $prevToken = $tokens[$tokens->getPrevTokenOfKind($index, $searchTokens)];
         return $prevToken->isGivenKind([\T_FN, \T_FUNCTION]);
     }

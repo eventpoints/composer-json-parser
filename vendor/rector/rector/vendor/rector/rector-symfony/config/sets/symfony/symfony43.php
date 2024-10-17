@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace RectorPrefix202312;
+namespace RectorPrefix202410;
 
 use Rector\Arguments\Rector\ClassMethod\ArgumentAdderRector;
 use Rector\Arguments\ValueObject\ArgumentAdder;
@@ -15,12 +15,11 @@ use Rector\Symfony\Symfony43\Rector\MethodCall\GetCurrencyBundleMethodCallsToInt
 use Rector\Symfony\Symfony43\Rector\MethodCall\MakeDispatchFirstArgumentEventRector;
 use Rector\Symfony\Symfony43\Rector\MethodCall\WebTestCaseAssertIsSuccessfulRector;
 use Rector\Symfony\Symfony43\Rector\MethodCall\WebTestCaseAssertResponseCodeRector;
-use Rector\Symfony\Symfony43\Rector\MethodCall\WebTestCaseAssertSelectorTextContainsRector;
 use Rector\Symfony\Symfony43\Rector\StmtsAwareInterface\TwigBundleFilesystemLoaderToTwigRector;
 # https://github.com/symfony/symfony/blob/4.4/UPGRADE-4.3.md
 return static function (RectorConfig $rectorConfig) : void {
     # https://symfony.com/blog/new-in-symfony-4-3-better-test-assertions
-    $rectorConfig->rules([WebTestCaseAssertIsSuccessfulRector::class, WebTestCaseAssertResponseCodeRector::class, WebTestCaseAssertSelectorTextContainsRector::class, TwigBundleFilesystemLoaderToTwigRector::class, MakeDispatchFirstArgumentEventRector::class, GetCurrencyBundleMethodCallsToIntlRector::class, ConvertRenderTemplateShortNotationToBundleSyntaxRector::class, EventDispatcherParentConstructRector::class]);
+    $rectorConfig->rules([WebTestCaseAssertIsSuccessfulRector::class, WebTestCaseAssertResponseCodeRector::class, TwigBundleFilesystemLoaderToTwigRector::class, MakeDispatchFirstArgumentEventRector::class, GetCurrencyBundleMethodCallsToIntlRector::class, ConvertRenderTemplateShortNotationToBundleSyntaxRector::class, EventDispatcherParentConstructRector::class]);
     $rectorConfig->ruleWithConfiguration(RenameMethodRector::class, [new MethodCallRename('Symfony\\Component\\BrowserKit\\Response', 'getStatus', 'getStatusCode'), new MethodCallRename('Symfony\\Component\\Security\\Http\\Firewall', 'handleRequest', 'callListeners')]);
     $rectorConfig->ruleWithConfiguration(RenameClassRector::class, [
         // assets deprecation
@@ -46,7 +45,6 @@ return static function (RectorConfig $rectorConfig) : void {
         'Symfony\\Component\\Cache\\Simple\\RedisCache' => 'Symfony\\Component\\Cache\\Adapter\\RedisAdapter',
         'Symfony\\Component\\Cache\\Simple\\TraceableCache' => 'Symfony\\Component\\Cache\\Adapter\\TraceableAdapterCache',
         'Symfony\\Component\\Cache\\Simple\\Psr6Cache' => 'Symfony\\Component\\Cache\\Psr16Cache',
-        'Psr\\SimpleCache\\CacheInterface' => 'Symfony\\Contracts\\Cache\\CacheInterface',
         # EventDispatcher
         'Symfony\\Component\\HttpKernel\\Event\\FilterControllerArgumentsEvent' => 'Symfony\\Component\\HttpKernel\\Event\\ControllerArgumentsEvent',
         'Symfony\\Component\\HttpKernel\\Event\\FilterControllerEvent' => 'Symfony\\Component\\HttpKernel\\Event\\ControllerEvent',

@@ -10,7 +10,7 @@
 namespace PHP_CodeSniffer\Tests\Core\Autoloader;
 
 use PHP_CodeSniffer\Autoload;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 /**
  * Tests for the \PHP_CodeSniffer\Autoload::determineLoadedClass method.
  *

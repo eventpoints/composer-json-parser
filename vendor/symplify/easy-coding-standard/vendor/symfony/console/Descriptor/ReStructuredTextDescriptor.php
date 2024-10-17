@@ -8,16 +8,16 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Descriptor;
+namespace ECSPrefix202410\Symfony\Component\Console\Descriptor;
 
-use ECSPrefix202402\Symfony\Component\Console\Application;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
-use ECSPrefix202402\Symfony\Component\Console\Helper\Helper;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202402\Symfony\Component\String\UnicodeString;
+use ECSPrefix202410\Symfony\Component\Console\Application;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Helper\Helper;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\String\UnicodeString;
 class ReStructuredTextDescriptor extends Descriptor
 {
     // <h1>

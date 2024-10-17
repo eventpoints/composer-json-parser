@@ -12,5 +12,6 @@ interface OutputFormatterInterface
      * @return ExitCode::*
      */
     public function report(ErrorAndDiffResult $errorAndDiffResult, Configuration $configuration) : int;
-    public function getName() : string;
+    public static function getName() : string;
+    public static function hasSupportForProgressBars() : bool;
 }

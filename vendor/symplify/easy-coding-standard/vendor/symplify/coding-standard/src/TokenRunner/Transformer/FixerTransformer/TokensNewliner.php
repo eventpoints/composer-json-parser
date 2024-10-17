@@ -57,7 +57,7 @@ final class TokensNewliner
         // 1. break before arguments closing
         $this->lineLengthCloserTransformer->insertNewlineBeforeClosingIfNeeded($tokens, $blockInfo, $kind, $currentNewlineIndentWhitespace, $this->indentResolver->resolveClosingBracketNewlineWhitespace($tokens, $blockInfo->getStart()));
         // again, from the bottom to the top
-        for ($i = $blockInfo->getEnd() - 1; $i > $blockInfo->getStart(); --$i) {
+        for ($i = $blockInfo->getEnd() - 1; $i >= $blockInfo->getStart(); --$i) {
             /** @var Token $currentToken */
             $currentToken = $tokens[$i];
             $i = $this->tokenSkipper->skipBlocksReversed($tokens, $i);

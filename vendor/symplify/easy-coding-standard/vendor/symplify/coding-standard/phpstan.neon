@@ -19,8 +19,10 @@ parameters:
             message: '#Instantiated class PHP_CodeSniffer\\Util\\Tokens not found#'
 
         - '#Constant T_OPEN_CURLY_BRACKET|T_START_NOWDOC not found#'
-        - '#Parameter \#1 \$index of method PhpCsFixer\\Tokenizer\\Tokens\:\:getNextTokenOfKind\(\) expects int, int\|null given#'
         - '#Method Symplify\\CodingStandard\\TokenRunner\\Traverser\\ArrayBlockInfoFinder\:\:reverseTokens\(\) should return array<PhpCsFixer\\Tokenizer\\Token> but returns array<int, PhpCsFixer\\Tokenizer\\Token\|null>#'
+
+        # unused generics
+        - '#Class (.*?) implements generic interface PhpCsFixer\\Fixer\\ConfigurableFixerInterface but does not specify its types\: TFixerInputConfig, TFixerComputedConfig#'
 
         # false positive
         -

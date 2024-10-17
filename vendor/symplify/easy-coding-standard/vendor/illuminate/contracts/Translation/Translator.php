@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Translation;
+namespace ECSPrefix202410\Illuminate\Contracts\Translation;
 
 interface Translator
 {

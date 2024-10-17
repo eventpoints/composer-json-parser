@@ -3,10 +3,10 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Style;
 
-use ECSPrefix202402\Symfony\Component\Console\Input\ArgvInput;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleOutput;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202410\Symfony\Component\Console\Input\ArgvInput;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleOutput;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * @api
  */

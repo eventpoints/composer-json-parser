@@ -13,19 +13,21 @@ declare (strict_types=1);
 namespace PhpCsFixer;
 
 use PhpCsFixer\Fixer\FixerInterface;
+use PhpCsFixer\Runner\Parallel\ParallelConfig;
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Katsuhiro Ogawa <ko.fivestar@gmail.com>
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  */
-class Config implements \PhpCsFixer\ConfigInterface
+class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareConfigInterface
 {
     /**
      * @var string
      */
     private $cacheFile = '.php-cs-fixer.cache';
     /**
-     * @var FixerInterface[]
+     * @var list<FixerInterface>
      */
     private $customFixers = [];
     /**
@@ -57,6 +59,10 @@ class Config implements \PhpCsFixer\ConfigInterface
      */
     private $name;
     /**
+     * @var \PhpCsFixer\Runner\Parallel\ParallelConfig
+     */
+    private $parallelConfig;
+    /**
      * @var null|string
      */
     private $phpExecutable;
@@ -80,6 +86,12 @@ class Config implements \PhpCsFixer\ConfigInterface
             $this->name = $name;
             $this->rules = ['@PSR12' => \true];
         }
+        // @TODO 4.0 cleanup
+        if (\PhpCsFixer\Utils::isFutureModeEnabled() || \filter_var(\getenv('PHP_CS_FIXER_PARALLEL'), \FILTER_VALIDATE_BOOL)) {
+            $this->parallelConfig = ParallelConfigFactory::detect();
+        } else {
+            $this->parallelConfig = ParallelConfigFactory::sequential();
+        }
     }
     public function getCacheFile() : string
     {
@@ -94,9 +106,7 @@ class Config implements \PhpCsFixer\ConfigInterface
      */
     public function getFinder() : iterable
     {
-        if (null === $this->finder) {
-            $this->finder = new \PhpCsFixer\Finder();
-        }
+        $this->finder = $this->finder ?? new \PhpCsFixer\Finder();
         return $this->finder;
     }
     public function getFormat() : string
@@ -118,6 +128,10 @@ class Config implements \PhpCsFixer\ConfigInterface
     public function getName() : string
     {
         return $this->name;
+    }
+    public function getParallelConfig() : ParallelConfig
+    {
+        return $this->parallelConfig;
     }
     public function getPhpExecutable() : ?string
     {
@@ -170,6 +184,11 @@ class Config implements \PhpCsFixer\ConfigInterface
     public function setLineEnding(string $lineEnding) : \PhpCsFixer\ConfigInterface
     {
         $this->lineEnding = $lineEnding;
+        return $this;
+    }
+    public function setParallelConfig(ParallelConfig $config) : \PhpCsFixer\ConfigInterface
+    {
+        $this->parallelConfig = $config;
         return $this;
     }
     public function setPhpExecutable(?string $phpExecutable) : \PhpCsFixer\ConfigInterface

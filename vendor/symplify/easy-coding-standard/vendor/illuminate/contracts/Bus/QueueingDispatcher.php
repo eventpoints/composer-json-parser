@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Bus;
+namespace ECSPrefix202410\Illuminate\Contracts\Bus;
 
 interface QueueingDispatcher extends Dispatcher
 {

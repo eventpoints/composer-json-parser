@@ -1,23 +1,23 @@
 <?php
 
-namespace ECSPrefix202402\React\Dns\Resolver;
+namespace ECSPrefix202410\React\Dns\Resolver;
 
-use ECSPrefix202402\React\Cache\ArrayCache;
-use ECSPrefix202402\React\Cache\CacheInterface;
-use ECSPrefix202402\React\Dns\Config\Config;
-use ECSPrefix202402\React\Dns\Config\HostsFile;
-use ECSPrefix202402\React\Dns\Query\CachingExecutor;
-use ECSPrefix202402\React\Dns\Query\CoopExecutor;
-use ECSPrefix202402\React\Dns\Query\ExecutorInterface;
-use ECSPrefix202402\React\Dns\Query\FallbackExecutor;
-use ECSPrefix202402\React\Dns\Query\HostsFileExecutor;
-use ECSPrefix202402\React\Dns\Query\RetryExecutor;
-use ECSPrefix202402\React\Dns\Query\SelectiveTransportExecutor;
-use ECSPrefix202402\React\Dns\Query\TcpTransportExecutor;
-use ECSPrefix202402\React\Dns\Query\TimeoutExecutor;
-use ECSPrefix202402\React\Dns\Query\UdpTransportExecutor;
-use ECSPrefix202402\React\EventLoop\Loop;
-use ECSPrefix202402\React\EventLoop\LoopInterface;
+use ECSPrefix202410\React\Cache\ArrayCache;
+use ECSPrefix202410\React\Cache\CacheInterface;
+use ECSPrefix202410\React\Dns\Config\Config;
+use ECSPrefix202410\React\Dns\Config\HostsFile;
+use ECSPrefix202410\React\Dns\Query\CachingExecutor;
+use ECSPrefix202410\React\Dns\Query\CoopExecutor;
+use ECSPrefix202410\React\Dns\Query\ExecutorInterface;
+use ECSPrefix202410\React\Dns\Query\FallbackExecutor;
+use ECSPrefix202410\React\Dns\Query\HostsFileExecutor;
+use ECSPrefix202410\React\Dns\Query\RetryExecutor;
+use ECSPrefix202410\React\Dns\Query\SelectiveTransportExecutor;
+use ECSPrefix202410\React\Dns\Query\TcpTransportExecutor;
+use ECSPrefix202410\React\Dns\Query\TimeoutExecutor;
+use ECSPrefix202410\React\Dns\Query\UdpTransportExecutor;
+use ECSPrefix202410\React\EventLoop\Loop;
+use ECSPrefix202410\React\EventLoop\LoopInterface;
 final class Factory
 {
     /**
@@ -35,8 +35,12 @@ final class Factory
      * @throws \InvalidArgumentException for invalid DNS server address
      * @throws \UnderflowException when given DNS Config object has an empty list of nameservers
      */
-    public function create($config, LoopInterface $loop = null)
+    public function create($config, $loop = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|React\\EventLoop\\LoopInterface');
+        }
         $executor = $this->decorateHostsFileExecutor($this->createExecutor($config, $loop ?: Loop::get()));
         return new Resolver($executor);
     }
@@ -56,8 +60,16 @@ final class Factory
      * @throws \InvalidArgumentException for invalid DNS server address
      * @throws \UnderflowException when given DNS Config object has an empty list of nameservers
      */
-    public function createCached($config, LoopInterface $loop = null, CacheInterface $cache = null)
+    public function createCached($config, $loop = null, $cache = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|React\\EventLoop\\LoopInterface');
+        }
+        if ($cache !== null && !$cache instanceof CacheInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #3 ($cache) expected null|React\\Cache\\CacheInterface');
+        }
         // default to keeping maximum of 256 responses in cache unless explicitly given
         if (!$cache instanceof CacheInterface) {
             $cache = new ArrayCache(256);

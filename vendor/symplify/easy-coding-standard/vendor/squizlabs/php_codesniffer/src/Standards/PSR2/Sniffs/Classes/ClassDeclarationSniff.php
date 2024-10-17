@@ -261,7 +261,7 @@ class ClassDeclarationSniff extends PEARClassDeclarationSniff
                 $implementsToken = $className;
                 continue;
             }
-            if ($checkingImplements === \true && $multiLineImplements === \true && ($tokens[$className - 1]['code'] !== \T_NS_SEPARATOR || $tokens[$className - 2]['code'] !== \T_STRING)) {
+            if ($checkingImplements === \true && $multiLineImplements === \true && ($tokens[$className - 1]['code'] !== \T_NS_SEPARATOR || $tokens[$className - 2]['code'] !== \T_STRING && $tokens[$className - 2]['code'] !== \T_NAMESPACE)) {
                 $prev = $phpcsFile->findPrevious([\T_NS_SEPARATOR, \T_WHITESPACE], $className - 1, $implements, \true);
                 if ($prev === $implementsToken && $tokens[$className]['line'] !== $tokens[$prev]['line'] + 1) {
                     if ($keywordTokenType === \T_EXTENDS) {
@@ -283,7 +283,7 @@ class ClassDeclarationSniff extends PEARClassDeclarationSniff
                         $phpcsFile->fixer->endChangeset();
                     }
                 } else {
-                    if ($tokens[$prev]['line'] !== $tokens[$className]['line'] - 1) {
+                    if (isset(Tokens::$commentTokens[$tokens[$prev]['code']]) === \false && $tokens[$prev]['line'] !== $tokens[$className]['line'] - 1 || $tokens[$prev]['line'] === $tokens[$className]['line']) {
                         if ($keywordTokenType === \T_EXTENDS) {
                             $error = 'Only one interface may be specified per line in a multi-line extends declaration';
                             $fix = $phpcsFile->addFixableError($error, $className, 'ExtendsInterfaceSameLine');
@@ -327,8 +327,8 @@ class ClassDeclarationSniff extends PEARClassDeclarationSniff
                 }
                 //end if
             } else {
-                if ($tokens[$className - 1]['code'] !== \T_NS_SEPARATOR || $tokens[$className - 2]['code'] !== \T_STRING) {
-                    // Not part of a longer fully qualified class name.
+                if ($tokens[$className - 1]['code'] !== \T_NS_SEPARATOR || $tokens[$className - 2]['code'] !== \T_STRING && $tokens[$className - 2]['code'] !== \T_NAMESPACE) {
+                    // Not part of a longer fully qualified or namespace relative class name.
                     if ($tokens[$className - 1]['code'] === \T_COMMA || $tokens[$className - 1]['code'] === \T_NS_SEPARATOR && $tokens[$className - 2]['code'] === \T_COMMA) {
                         $error = 'Expected 1 space before "%s"; 0 found';
                         $data = [$tokens[$className]['content']];
@@ -428,9 +428,8 @@ class ClassDeclarationSniff extends PEARClassDeclarationSniff
             $ignoreTokens[] = \T_WHITESPACE;
             $ignoreTokens[] = \T_COMMENT;
             $ignoreTokens[] = \T_SEMICOLON;
-            $ignoreTokens[] = \T_COMMA;
             $nextContent = $phpcsFile->findNext($ignoreTokens, $closeBrace + 1, null, \true);
-            if ($tokens[$nextContent]['content'] !== $phpcsFile->eolChar && $tokens[$nextContent]['line'] === $tokens[$closeBrace]['line']) {
+            if ($tokens[$nextContent]['line'] === $tokens[$closeBrace]['line']) {
                 $type = \strtolower($tokens[$stackPtr]['content']);
                 $error = 'Closing %s brace must be on a line by itself';
                 $data = [$type];

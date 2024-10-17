@@ -9,19 +9,18 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\PreDec;
 use PhpParser\Node\Expr\PreInc;
-use Rector\Core\PhpParser\Printer\BetterStandardPrinter;
-use Rector\Core\Rector\AbstractRector;
+use Rector\PhpParser\Printer\BetterStandardPrinter;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://3v4l.org/SG0Wu
  * @see \Rector\Tests\DeadCode\Rector\Array_\RemoveDuplicatedArrayKeyRector\RemoveDuplicatedArrayKeyRectorTest
  */
 final class RemoveDuplicatedArrayKeyRector extends AbstractRector
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Printer\BetterStandardPrinter
+     * @var \Rector\PhpParser\Printer\BetterStandardPrinter
      */
     private $betterStandardPrinter;
     public function __construct(BetterStandardPrinter $betterStandardPrinter)

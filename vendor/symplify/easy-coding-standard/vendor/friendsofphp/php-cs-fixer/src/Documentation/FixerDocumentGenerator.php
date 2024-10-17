@@ -109,7 +109,9 @@ RST;
                 $warningsHeader = 'Warnings';
             }
             $warningsHeaderLine = \str_repeat('-', \strlen($warningsHeader));
-            $doc .= "\n\n" . \implode("\n", \array_filter([$warningsHeader, $warningsHeaderLine, $deprecationDescription, $experimentalDescription, $riskyDescription]));
+            $doc .= "\n\n" . \implode("\n", \array_filter([$warningsHeader, $warningsHeaderLine, $deprecationDescription, $experimentalDescription, $riskyDescription], static function (string $text) : bool {
+                return '' !== $text;
+            }));
         }
         if ($fixer instanceof ConfigurableFixerInterface) {
             $doc .= <<<'RST'
@@ -133,8 +135,8 @@ RST;
                 $allowed = HelpCommand::getDisplayableAllowedValues($option);
                 if (null === $allowed) {
                     $allowedKind = 'Allowed types';
-                    $allowed = \array_map(static function ($value) : string {
-                        return '``' . $value . '``';
+                    $allowed = \array_map(static function (string $value) : string {
+                        return '``' . Utils::convertArrayTypeToList($value) . '``';
                     }, $option->getAllowedTypes());
                 } else {
                     $allowedKind = 'Allowed values';
@@ -237,7 +239,7 @@ RST;
         return $ruleSetConfigs;
     }
     /**
-     * @param FixerInterface[] $fixers
+     * @param list<FixerInterface> $fixers
      */
     public function generateFixersDocumentationIndex(array $fixers) : string
     {

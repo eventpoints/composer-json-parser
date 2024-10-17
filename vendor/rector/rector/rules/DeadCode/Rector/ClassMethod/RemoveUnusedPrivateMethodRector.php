@@ -10,11 +10,12 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
-use Rector\Core\Rector\AbstractScopeAwareRector;
-use Rector\Core\Reflection\ReflectionResolver;
-use Rector\Core\ValueObject\MethodName;
 use Rector\DeadCode\NodeAnalyzer\IsClassMethodUsedAnalyzer;
+use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\PhpParser\Node\BetterNodeFinder;
+use Rector\Rector\AbstractScopeAwareRector;
+use Rector\Reflection\ReflectionResolver;
+use Rector\ValueObject\MethodName;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -29,12 +30,12 @@ final class RemoveUnusedPrivateMethodRector extends AbstractScopeAwareRector
     private $isClassMethodUsedAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \Rector\PhpParser\Node\BetterNodeFinder
      */
     private $betterNodeFinder;
     public function __construct(IsClassMethodUsedAnalyzer $isClassMethodUsedAnalyzer, ReflectionResolver $reflectionResolver, BetterNodeFinder $betterNodeFinder)
@@ -82,25 +83,30 @@ CODE_SAMPLE
      */
     public function refactorWithScope(Node $node, Scope $scope) : ?Node
     {
-        if ($this->hasDynamicMethodCallOnFetchThis($node)) {
+        $classMethods = $node->getMethods();
+        if ($classMethods === []) {
             return null;
         }
-        if ($node->getMethods() === []) {
+        $filter = static function (ClassMethod $classMethod) : bool {
+            return $classMethod->isPrivate();
+        };
+        $privateMethods = \array_filter($classMethods, $filter);
+        if ($privateMethods === []) {
+            return null;
+        }
+        if ($this->hasDynamicMethodCallOnFetchThis($classMethods)) {
             return null;
         }
         $hasChanged = \false;
         $classReflection = $this->reflectionResolver->resolveClassReflection($node);
-        foreach ($node->stmts as $key => $stmt) {
-            if (!$stmt instanceof ClassMethod) {
+        foreach ($privateMethods as $privateMethod) {
+            if ($this->shouldSkip($privateMethod, $classReflection)) {
                 continue;
             }
-            if ($this->shouldSkip($stmt, $classReflection)) {
+            if ($this->isClassMethodUsedAnalyzer->isClassMethodUsed($node, $privateMethod, $scope)) {
                 continue;
             }
-            if ($this->isClassMethodUsedAnalyzer->isClassMethodUsed($node, $stmt, $scope)) {
-                continue;
-            }
-            unset($node->stmts[$key]);
+            unset($node->stmts[$privateMethod->getAttribute(AttributeKey::STMT_KEY)]);
             $hasChanged = \true;
         }
         if ($hasChanged) {
@@ -113,7 +119,7 @@ CODE_SAMPLE
         if (!$classReflection instanceof ClassReflection) {
             return \true;
         }
-        // unreliable to detect trait, interface doesn't make sense
+        // unreliable to detect trait, interface, anonymous class: doesn't make sense
         if ($classReflection->isTrait()) {
             return \true;
         }
@@ -123,19 +129,18 @@ CODE_SAMPLE
         if ($classReflection->isAnonymous()) {
             return \true;
         }
-        // skips interfaces by default too
-        if (!$classMethod->isPrivate()) {
-            return \true;
-        }
         // skip magic methods - @see https://www.php.net/manual/en/language.oop5.magic.php
         if ($classMethod->isMagic()) {
             return \true;
         }
         return $classReflection->hasMethod(MethodName::CALL);
     }
-    private function hasDynamicMethodCallOnFetchThis(Class_ $class) : bool
+    /**
+     * @param ClassMethod[] $classMethods
+     */
+    private function hasDynamicMethodCallOnFetchThis(array $classMethods) : bool
     {
-        foreach ($class->getMethods() as $classMethod) {
+        foreach ($classMethods as $classMethod) {
             $isFound = (bool) $this->betterNodeFinder->findFirst((array) $classMethod->getStmts(), function (Node $subNode) : bool {
                 if (!$subNode instanceof MethodCall) {
                     return \false;

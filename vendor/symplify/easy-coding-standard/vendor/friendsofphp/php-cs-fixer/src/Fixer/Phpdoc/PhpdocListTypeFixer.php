@@ -33,7 +33,7 @@ final class PhpdocListTypeFixer extends AbstractPhpdocTypesFixer
         return new FixerDefinition('PHPDoc `list` type must be used instead of `array` without a key.', [new CodeSample(<<<'PHP'
 <?php
 
-namespace ECSPrefix202402;
+namespace ECSPrefix202410;
 
 /**
  * @param array<int> $x
@@ -47,7 +47,7 @@ PHP
      * {@inheritdoc}
      *
      * Must run before PhpdocAlignFixer, PhpdocTypesOrderFixer.
-     * Must run after AlignMultilineCommentFixer, CommentToPhpdocFixer, PhpdocIndentFixer, PhpdocScalarFixer, PhpdocToCommentFixer, PhpdocTypesFixer.
+     * Must run after AlignMultilineCommentFixer, CommentToPhpdocFixer, PhpdocArrayTypeFixer, PhpdocIndentFixer, PhpdocScalarFixer, PhpdocToCommentFixer, PhpdocTypesFixer.
      */
     public function getPriority() : int
     {
@@ -55,6 +55,6 @@ PHP
     }
     protected function normalize(string $type) : string
     {
-        return Preg::replace('/array(?=<[^,]+(>|<|{|\\())/i', 'list', $type);
+        return Preg::replace('/array(?=<(?:[^,<]|<[^>]+>)+(>|{|\\())/i', 'list', $type);
     }
 }

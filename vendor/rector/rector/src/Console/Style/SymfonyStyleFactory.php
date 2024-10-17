@@ -1,19 +1,18 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\Console\Style;
+namespace Rector\Console\Style;
 
-use Rector\Core\Util\Reflection\PrivatesAccessor;
-use RectorPrefix202312\Symfony\Component\Console\Application;
-use RectorPrefix202312\Symfony\Component\Console\Input\ArgvInput;
-use RectorPrefix202312\Symfony\Component\Console\Output\ConsoleOutput;
-use RectorPrefix202312\Symfony\Component\Console\Output\OutputInterface;
-use RectorPrefix202312\Symfony\Component\Console\Style\SymfonyStyle;
+use Rector\Util\Reflection\PrivatesAccessor;
+use RectorPrefix202410\Symfony\Component\Console\Application;
+use RectorPrefix202410\Symfony\Component\Console\Input\ArgvInput;
+use RectorPrefix202410\Symfony\Component\Console\Output\ConsoleOutput;
+use RectorPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 final class SymfonyStyleFactory
 {
     /**
      * @readonly
-     * @var \Rector\Core\Util\Reflection\PrivatesAccessor
+     * @var \Rector\Util\Reflection\PrivatesAccessor
      */
     private $privatesAccessor;
     public function __construct(PrivatesAccessor $privatesAccessor)
@@ -23,7 +22,7 @@ final class SymfonyStyleFactory
     /**
      * @api
      */
-    public function create() : SymfonyStyle
+    public function create() : \Rector\Console\Style\RectorStyle
     {
         // to prevent missing argv indexes
         if (!isset($_SERVER['argv'])) {
@@ -41,7 +40,7 @@ final class SymfonyStyleFactory
         if ($this->isPHPUnitRun()) {
             $consoleOutput->setVerbosity(OutputInterface::VERBOSITY_QUIET);
         }
-        return new \Rector\Core\Console\Style\RectorStyle($argvInput, $consoleOutput);
+        return new \Rector\Console\Style\RectorStyle($argvInput, $consoleOutput);
     }
     /**
      * Never ever used static methods if not neccesary, this is just handy for tests + src to prevent duplication.

@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202402\React\EventLoop\Timer;
+namespace ECSPrefix202410\React\EventLoop\Timer;
 
-use ECSPrefix202402\React\EventLoop\TimerInterface;
+use ECSPrefix202410\React\EventLoop\TimerInterface;
 /**
  * The actual connection implementation for TimerInterface
  *

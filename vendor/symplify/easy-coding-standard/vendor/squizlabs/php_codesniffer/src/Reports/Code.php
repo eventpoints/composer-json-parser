@@ -9,8 +9,10 @@
  */
 namespace PHP_CodeSniffer\Reports;
 
+use Exception;
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Util;
+use PHP_CodeSniffer\Util\Common;
+use PHP_CodeSniffer\Util\Timing;
 class Code implements \PHP_CodeSniffer\Reports\Report
 {
     /**
@@ -20,10 +22,11 @@ class Code implements \PHP_CodeSniffer\Reports\Report
      * and FALSE if it ignored the file. Returning TRUE indicates that the file and
      * its data should be counted in the grand totals.
      *
-     * @param array                       $report      Prepared report data.
-     * @param \PHP_CodeSniffer\Files\File $phpcsFile   The file being reported on.
-     * @param bool                        $showSources Show sources?
-     * @param int                         $width       Maximum allowed line width.
+     * @param array<string, string|int|array> $report      Prepared report data.
+     *                                                     See the {@see Report} interface for a detailed specification.
+     * @param \PHP_CodeSniffer\Files\File     $phpcsFile   The file being reported on.
+     * @param bool                            $showSources Show sources?
+     * @param int                             $width       Maximum allowed line width.
      *
      * @return bool
      */
@@ -48,7 +51,7 @@ class Code implements \PHP_CodeSniffer\Reports\Report
             }
             try {
                 $phpcsFile->parse();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // This is a second parse, so ignore exceptions.
                 // They would have been added to the file's error list already.
             }
@@ -101,8 +104,8 @@ class Code implements \PHP_CodeSniffer\Reports\Report
         $maxSnippetLength += $maxLineNumLength + 8;
         // Determine the longest error message we will be showing.
         $maxErrorLength = 0;
-        foreach ($report['messages'] as $line => $lineErrors) {
-            foreach ($lineErrors as $column => $colErrors) {
+        foreach ($report['messages'] as $lineErrors) {
+            foreach ($lineErrors as $colErrors) {
                 foreach ($colErrors as $error) {
                     $length = \strlen($error['message']);
                     if ($showSources === \true) {
@@ -198,7 +201,7 @@ class Code implements \PHP_CodeSniffer\Reports\Report
                         $phpcsFile->tokenizer->replaceTabsInToken($token, $tab, "\x00");
                         $tokenContent = $token['content'];
                     }
-                    $tokenContent = Util\Common::prepareForOutput($tokenContent, ["\r", "\n", "\t"]);
+                    $tokenContent = Common::prepareForOutput($tokenContent, ["\r", "\n", "\t"]);
                     $tokenContent = \str_replace("\x00", ' ', $tokenContent);
                     $underline = \false;
                     if ($snippetLine === $line && isset($lineErrors[$tokens[$i]['column']]) === \true) {
@@ -221,7 +224,7 @@ class Code implements \PHP_CodeSniffer\Reports\Report
             }
             //end if
             echo \str_repeat('-', $width) . \PHP_EOL;
-            foreach ($lineErrors as $column => $colErrors) {
+            foreach ($lineErrors as $colErrors) {
                 foreach ($colErrors as $error) {
                     $padding = $maxLineNumLength - \strlen($line);
                     echo 'LINE ' . \str_repeat(' ', $padding) . $line . ': ';
@@ -289,7 +292,7 @@ class Code implements \PHP_CodeSniffer\Reports\Report
         }
         echo $cachedData;
         if ($toScreen === \true && $interactive === \false) {
-            Util\Timing::printRunTime();
+            Timing::printRunTime();
         }
     }
     //end generate()

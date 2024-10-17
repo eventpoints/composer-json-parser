@@ -27,7 +27,7 @@ final class LowerCaseKeywordUnitTest extends AbstractSniffUnitTest
      */
     public function getErrorList()
     {
-        return [10 => 3, 11 => 4, 12 => 1, 13 => 3, 14 => 7, 15 => 1, 19 => 1, 20 => 1, 21 => 1, 25 => 1, 28 => 1, 31 => 1, 32 => 1, 35 => 1, 39 => 2, 42 => 1, 44 => 1];
+        return [10 => 3, 11 => 4, 12 => 1, 13 => 3, 14 => 7, 15 => 1, 19 => 1, 20 => 1, 21 => 1, 25 => 1, 28 => 1, 31 => 1, 32 => 1, 35 => 1, 39 => 2, 42 => 1, 44 => 1, 47 => 1, 48 => 1, 52 => 3, 54 => 1];
     }
     //end getErrorList()
     /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Database\Eloquent;
+namespace ECSPrefix202410\Illuminate\Contracts\Database\Eloquent;
 
-use ECSPrefix202402\Illuminate\Database\Eloquent\Model;
+use ECSPrefix202410\Illuminate\Database\Eloquent\Model;
 interface SerializesCastableAttributes
 {
     /**

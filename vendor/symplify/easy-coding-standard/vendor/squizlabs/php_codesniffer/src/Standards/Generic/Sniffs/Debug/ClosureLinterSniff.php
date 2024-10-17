@@ -55,20 +55,20 @@ class ClosureLinterSniff implements Sniff
      *                                               the token was found.
      *
      * @return int
-     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jslint.js could not be run
+     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jslint.js could not be run.
      */
     public function process(File $phpcsFile, $stackPtr)
     {
         $lintPath = Config::getExecutablePath('gjslint');
         if ($lintPath === null) {
-            return $phpcsFile->numTokens + 1;
+            return $phpcsFile->numTokens;
         }
         $fileName = $phpcsFile->getFilename();
         $lintPath = Common::escapeshellcmd($lintPath);
         $cmd = $lintPath . ' --nosummary --notime --unix_mode ' . \escapeshellarg($fileName);
         \exec($cmd, $output, $retval);
         if (\is_array($output) === \false) {
-            return $phpcsFile->numTokens + 1;
+            return $phpcsFile->numTokens;
         }
         foreach ($output as $finding) {
             $matches = [];
@@ -93,7 +93,7 @@ class ClosureLinterSniff implements Sniff
         }
         //end foreach
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

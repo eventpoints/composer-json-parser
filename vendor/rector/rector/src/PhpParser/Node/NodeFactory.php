@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\PhpParser\Node;
+namespace Rector\PhpParser\Node;
 
 use PhpParser\Builder\Method;
 use PhpParser\Builder\Param as ParamBuilder;
@@ -39,17 +39,17 @@ use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Property;
 use PHPStan\Type\Type;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
-use Rector\Core\Enum\ObjectReference;
-use Rector\Core\Exception\NotImplementedYetException;
-use Rector\Core\Exception\ShouldNotHappenException;
-use Rector\Core\NodeDecorator\PropertyTypeDecorator;
+use Rector\Enum\ObjectReference;
+use Rector\Exception\NotImplementedYetException;
+use Rector\Exception\ShouldNotHappenException;
+use Rector\NodeDecorator\PropertyTypeDecorator;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Rector\PhpDocParser\NodeTraverser\SimpleCallableNodeTraverser;
 use Rector\PHPStanStaticTypeMapper\Enum\TypeKind;
 use Rector\PostRector\ValueObject\PropertyMetadata;
 use Rector\StaticTypeMapper\StaticTypeMapper;
 /**
- * @see \Rector\Core\Tests\PhpParser\Node\NodeFactoryTest
+ * @see \Rector\Tests\PhpParser\Node\NodeFactoryTest
  */
 final class NodeFactory
 {
@@ -70,7 +70,7 @@ final class NodeFactory
     private $staticTypeMapper;
     /**
      * @readonly
-     * @var \Rector\Core\NodeDecorator\PropertyTypeDecorator
+     * @var \Rector\NodeDecorator\PropertyTypeDecorator
      */
     private $propertyTypeDecorator;
     /**
@@ -258,18 +258,6 @@ final class NodeFactory
         $name = new Name(ObjectReference::SELF);
         return new ClassConstFetch($name, $constantName);
     }
-    /**
-     * @param Param[] $params
-     * @return Arg[]
-     */
-    public function createArgsFromParams(array $params) : array
-    {
-        $args = [];
-        foreach ($params as $param) {
-            $args[] = new Arg($param->var);
-        }
-        return $args;
-    }
     public function createNull() : ConstFetch
     {
         return new ConstFetch(new Name('null'));
@@ -318,15 +306,24 @@ final class NodeFactory
         }
         return $this->createBooleanAndFromNodes($newNodes);
     }
-    public function createReprintedExpr(Expr $expr) : Expr
+    /**
+     * Setting all child nodes to null is needed to avoid reprint of invalid tokens
+     * @see https://github.com/rectorphp/rector/issues/8712
+     *
+     * @template TNode as Node
+     *
+     * @param TNode $node
+     * @return TNode
+     */
+    public function createReprintedNode(Node $node) : Node
     {
-        // reset original node, to allow the printer to re-use the expr
-        $expr->setAttribute(AttributeKey::ORIGINAL_NODE, null);
-        $this->simpleCallableNodeTraverser->traverseNodesWithCallable($expr, static function (Node $node) : Node {
-            $node->setAttribute(AttributeKey::ORIGINAL_NODE, null);
-            return $node;
+        // reset original node, to allow the printer to re-use the node
+        $node->setAttribute(AttributeKey::ORIGINAL_NODE, null);
+        $this->simpleCallableNodeTraverser->traverseNodesWithCallable($node, static function (Node $subNode) : Node {
+            $subNode->setAttribute(AttributeKey::ORIGINAL_NODE, null);
+            return $subNode;
         });
-        return $expr;
+        return $node;
     }
     /**
      * @param string|int|null $key

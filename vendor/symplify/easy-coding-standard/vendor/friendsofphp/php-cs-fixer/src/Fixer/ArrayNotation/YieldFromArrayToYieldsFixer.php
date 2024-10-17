@@ -90,7 +90,7 @@ final class YieldFromArrayToYieldsFixer extends AbstractFixer
         $tokens->insertSlices($inserts);
     }
     /**
-     * @return iterable<int, array<int>>
+     * @return iterable<int, array{int, int}>
      */
     private function getYieldsFromToUnpack(Tokens $tokens) : iterable
     {

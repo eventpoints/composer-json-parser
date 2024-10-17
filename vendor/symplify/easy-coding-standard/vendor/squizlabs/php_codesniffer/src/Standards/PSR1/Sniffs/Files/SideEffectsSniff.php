@@ -46,7 +46,7 @@ class SideEffectsSniff implements Sniff
             $phpcsFile->recordMetric($stackPtr, 'Declarations and side effects mixed', 'no');
         }
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
     /**

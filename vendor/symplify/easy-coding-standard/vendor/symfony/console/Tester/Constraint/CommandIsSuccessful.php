@@ -8,10 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Tester\Constraint;
+namespace ECSPrefix202410\Symfony\Component\Console\Tester\Constraint;
 
-use ECSPrefix202402\PHPUnit\Framework\Constraint\Constraint;
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\PHPUnit\Framework\Constraint\Constraint;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
 final class CommandIsSuccessful extends Constraint
 {
     public function toString() : string

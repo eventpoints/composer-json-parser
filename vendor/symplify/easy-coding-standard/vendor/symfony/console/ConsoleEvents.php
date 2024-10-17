@@ -8,12 +8,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console;
+namespace ECSPrefix202410\Symfony\Component\Console;
 
-use ECSPrefix202402\Symfony\Component\Console\Event\ConsoleCommandEvent;
-use ECSPrefix202402\Symfony\Component\Console\Event\ConsoleErrorEvent;
-use ECSPrefix202402\Symfony\Component\Console\Event\ConsoleSignalEvent;
-use ECSPrefix202402\Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use ECSPrefix202410\Symfony\Component\Console\Event\ConsoleCommandEvent;
+use ECSPrefix202410\Symfony\Component\Console\Event\ConsoleErrorEvent;
+use ECSPrefix202410\Symfony\Component\Console\Event\ConsoleSignalEvent;
+use ECSPrefix202410\Symfony\Component\Console\Event\ConsoleTerminateEvent;
 /**
  * Contains all events dispatched by an Application.
  *

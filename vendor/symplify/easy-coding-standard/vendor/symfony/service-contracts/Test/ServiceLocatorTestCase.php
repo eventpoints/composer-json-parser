@@ -8,13 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Contracts\Service\Test;
+namespace ECSPrefix202410\Symfony\Contracts\Service\Test;
 
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
-use ECSPrefix202402\Psr\Container\ContainerExceptionInterface;
-use ECSPrefix202402\Psr\Container\ContainerInterface;
-use ECSPrefix202402\Psr\Container\NotFoundExceptionInterface;
-use ECSPrefix202402\Symfony\Contracts\Service\ServiceLocatorTrait;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\Psr\Container\ContainerExceptionInterface;
+use ECSPrefix202410\Psr\Container\ContainerInterface;
+use ECSPrefix202410\Psr\Container\NotFoundExceptionInterface;
+use ECSPrefix202410\Symfony\Contracts\Service\ServiceLocatorTrait;
 abstract class ServiceLocatorTestCase extends TestCase
 {
     protected function getServiceLocator(array $factories) : ContainerInterface

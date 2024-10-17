@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ComposerJsonParser\Model;
+namespace KerrialNewham\ComposerJsonParser\Model;
 
 final readonly class Autoload
 {
     public function __construct(
         private string $namespace,
         private string $path,
-    )
-    {
+    ) {
     }
 
     public function getNamespace(): string
@@ -22,5 +21,4 @@ final readonly class Autoload
     {
         return $this->path;
     }
-
 }

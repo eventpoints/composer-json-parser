@@ -265,7 +265,7 @@ class ObjectHydrator extends AbstractHydrator
     }
 
     /**
-     * @psalm-param class-string $className
+     * @param class-string $className
      * @psalm-param array<string, mixed> $data
      */
     private function getEntityFromIdentityMap(string $className, array $data): object|bool
@@ -356,11 +356,15 @@ class ObjectHydrator extends AbstractHydrator
                     $parentObject = $this->resultPointers[$parentAlias];
                 } else {
                     // Parent object of relation not found, mark as not-fetched again
-                    $element = $this->getEntity($data, $dqlAlias);
+                    if (isset($nonemptyComponents[$dqlAlias])) {
+                        $element = $this->getEntity($data, $dqlAlias);
 
-                    // Update result pointer and provide initial fetch data for parent
-                    $this->resultPointers[$dqlAlias]               = $element;
-                    $rowData['data'][$parentAlias][$relationField] = $element;
+                        // Update result pointer and provide initial fetch data for parent
+                        $this->resultPointers[$dqlAlias]               = $element;
+                        $rowData['data'][$parentAlias][$relationField] = $element;
+                    } else {
+                        $element = null;
+                    }
 
                     // Mark as not-fetched again
                     unset($this->hints['fetched'][$parentAlias][$relationField]);
@@ -552,9 +556,7 @@ class ObjectHydrator extends AbstractHydrator
             $scalarCount = (isset($rowData['scalars']) ? count($rowData['scalars']) : 0);
 
             foreach ($rowData['newObjects'] as $objIndex => $newObject) {
-                $class = $newObject['class'];
-                $args  = $newObject['args'];
-                $obj   = $class->newInstanceArgs($args);
+                $obj = $newObject['obj'];
 
                 if ($scalarCount === 0 && count($rowData['newObjects']) === 1) {
                     $result[$resultKey] = $obj;

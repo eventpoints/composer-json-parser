@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202402\Symplify\RuleDocGenerator\Exception;
+namespace ECSPrefix202410\Symplify\RuleDocGenerator\Exception;
 
 use Exception;
 final class ShouldNotHappenException extends Exception

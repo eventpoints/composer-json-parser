@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Filesystem;
+namespace ECSPrefix202410\Symfony\Component\Filesystem;
 
-use ECSPrefix202402\Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use ECSPrefix202402\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
-use ECSPrefix202402\Symfony\Component\Filesystem\Exception\IOException;
+use ECSPrefix202410\Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use ECSPrefix202410\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
+use ECSPrefix202410\Symfony\Component\Filesystem\Exception\IOException;
 /**
  * Provides basic utility to manipulate the file system.
  *
@@ -64,6 +64,8 @@ class Filesystem
             if ($originIsLocal) {
                 // Like `cp`, preserve executable permission bits
                 self::box('chmod', $targetFile, \fileperms($targetFile) | \fileperms($originFile) & 0111);
+                // Like `cp`, preserve the file modification time
+                self::box('touch', $targetFile, \filemtime($originFile));
                 if ($bytesCopied !== ($bytesOrigin = \filesize($originFile))) {
                     throw new IOException(\sprintf('Failed to copy the whole content of "%s" to "%s" (%g of %g bytes copied).', $originFile, $targetFile, $bytesCopied, $bytesOrigin), 0, null, $originFile);
                 }
@@ -147,7 +149,7 @@ class Filesystem
                 }
             } elseif (\is_dir($file)) {
                 if (!$isRecursive) {
-                    $tmpName = \dirname(\realpath($file)) . '/.' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-_'));
+                    $tmpName = \dirname(\realpath($file)) . '/.!' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-!'));
                     if (\file_exists($tmpName)) {
                         try {
                             self::doRemove([$tmpName], \true);
@@ -170,7 +172,7 @@ class Filesystem
                     }
                     throw new IOException(\sprintf('Failed to remove directory "%s": ', $file) . $lastError);
                 }
-            } elseif (!self::box('unlink', $file) && (\strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
+            } elseif (!self::box('unlink', $file) && (self::$lastError && \strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
                 throw new IOException(\sprintf('Failed to remove file "%s": ', $file) . self::$lastError);
             }
         }
@@ -199,6 +201,9 @@ class Filesystem
     /**
      * Change the owner of an array of files or directories.
      *
+     * This method always throws on Windows, as the underlying PHP function is not supported.
+     * @see https://www.php.net/chown
+     *
      * @param string|int $user      A user name or number
      * @param bool       $recursive Whether change the owner recursively or not
      *
@@ -224,6 +229,9 @@ class Filesystem
     }
     /**
      * Change the group of an array of files or directories.
+     *
+     * This method always throws on Windows, as the underlying PHP function is not supported.
+     * @see https://www.php.net/chgrp
      *
      * @param string|int $group     A group name or number
      * @param bool       $recursive Whether change the group recursively or not
@@ -568,10 +576,13 @@ class Filesystem
             if (\false === self::box('file_put_contents', $tmpFile, $content)) {
                 throw new IOException(\sprintf('Failed to write file "%s": ', $filename) . self::$lastError, 0, null, $filename);
             }
-            self::box('chmod', $tmpFile, \file_exists($filename) ? \fileperms($filename) : 0666 & ~\umask());
+            self::box('chmod', $tmpFile, self::box('fileperms', $filename) ?: 0666 & ~\umask());
             $this->rename($tmpFile, $filename, \true);
         } finally {
             if (\file_exists($tmpFile)) {
+                if ('\\' === \DIRECTORY_SEPARATOR && !\is_writable($tmpFile)) {
+                    self::box('chmod', $tmpFile, self::box('fileperms', $tmpFile) | 0200);
+                }
                 self::box('unlink', $tmpFile);
             }
         }
@@ -596,6 +607,22 @@ class Filesystem
         if (\false === self::box('file_put_contents', $filename, $content, \FILE_APPEND | ($lock ? \LOCK_EX : 0))) {
             throw new IOException(\sprintf('Failed to write file "%s": ', $filename) . self::$lastError, 0, null, $filename);
         }
+    }
+    /**
+     * Returns the content of a file as a string.
+     *
+     * @throws IOException If the file cannot be read
+     */
+    public function readFile(string $filename) : string
+    {
+        if (\is_dir($filename)) {
+            throw new IOException(\sprintf('Failed to read file "%s": File is a directory.', $filename));
+        }
+        $content = self::box('file_get_contents', $filename);
+        if (\false === $content) {
+            throw new IOException(\sprintf('Failed to read file "%s": ', $filename) . self::$lastError, 0, null, $filename);
+        }
+        return $content;
     }
     /**
      * @param string|iterable $files

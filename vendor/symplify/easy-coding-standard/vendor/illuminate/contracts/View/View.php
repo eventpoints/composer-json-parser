@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\View;
+namespace ECSPrefix202410\Illuminate\Contracts\View;
 
-use ECSPrefix202402\Illuminate\Contracts\Support\Renderable;
+use ECSPrefix202410\Illuminate\Contracts\Support\Renderable;
 interface View extends Renderable
 {
     /**

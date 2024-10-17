@@ -11,7 +11,7 @@ namespace PHP_CodeSniffer\Tests\Core\Ruleset;
 
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Tests\ConfigDouble;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 use ReflectionObject;
 /**
  * These tests specifically focus on the changes made to work around the PHP 8.2 dynamic properties deprecation.
@@ -118,7 +118,7 @@ final class SetSniffPropertyTest extends TestCase
         // Set up the ruleset.
         $standard = __DIR__ . '/SetPropertyThrowsErrorOnInvalidPropertyTest.xml';
         $config = new ConfigDouble(["--standard={$standard}"]);
-        $ruleset = new Ruleset($config);
+        new Ruleset($config);
     }
     //end testSetPropertyThrowsErrorOnInvalidProperty()
     /**
@@ -142,7 +142,7 @@ final class SetSniffPropertyTest extends TestCase
         // Set up the ruleset.
         $standard = __DIR__ . '/SetPropertyNotAllowedViaAttributeTest.xml';
         $config = new ConfigDouble(["--standard={$standard}"]);
-        $ruleset = new Ruleset($config);
+        new Ruleset($config);
     }
     //end testSetPropertyThrowsErrorWhenPropertyOnlyAllowedViaAttribute()
     /**
@@ -158,7 +158,7 @@ final class SetSniffPropertyTest extends TestCase
         // Set up the ruleset.
         $standard = __DIR__ . '/SetPropertyDoesNotThrowErrorOnInvalidPropertyWhenSetForStandardTest.xml';
         $config = new ConfigDouble(["--standard={$standard}"]);
-        $ruleset = new Ruleset($config);
+        new Ruleset($config);
     }
     //end testSetPropertyDoesNotThrowErrorOnInvalidPropertyWhenSetForStandard()
     /**
@@ -174,7 +174,7 @@ final class SetSniffPropertyTest extends TestCase
         // Set up the ruleset.
         $standard = __DIR__ . '/SetPropertyDoesNotThrowErrorOnInvalidPropertyWhenSetForCategoryTest.xml';
         $config = new ConfigDouble(["--standard={$standard}"]);
-        $ruleset = new Ruleset($config);
+        new Ruleset($config);
     }
     //end testSetPropertyDoesNotThrowErrorOnInvalidPropertyWhenSetForCategory()
     /**
@@ -263,7 +263,7 @@ final class SetSniffPropertyTest extends TestCase
      */
     public function testDirectCallWithOldArrayFormatThrowsDeprecationNotice()
     {
-        $exceptionClass = 'ECSPrefix202402\\PHPUnit\\Framework\\Error\\Deprecated';
+        $exceptionClass = 'ECSPrefix202410\\PHPUnit\\Framework\\Error\\Deprecated';
         if (\class_exists($exceptionClass) === \false) {
             $exceptionClass = 'PHPUnit_Framework_Error_Deprecated';
         }
@@ -276,13 +276,11 @@ final class SetSniffPropertyTest extends TestCase
             $this->setExpectedException($exceptionClass, $exceptionMsg);
         }
         $name = 'AllowedAsDeclared';
-        $sniffCode = "Fixtures.SetProperty.{$name}";
         $sniffClass = 'Fixtures\\Sniffs\\SetProperty\\' . $name . 'Sniff';
         // Set up the ruleset.
         $standard = __DIR__ . "/SetProperty{$name}Test.xml";
         $config = new ConfigDouble(["--standard={$standard}"]);
         $ruleset = new Ruleset($config);
-        $propertyName = 'arbitrarystring';
         $ruleset->setSniffProperty($sniffClass, 'arbitrarystring', ['key' => 'value']);
     }
     //end testDirectCallWithOldArrayFormatThrowsDeprecationNotice()

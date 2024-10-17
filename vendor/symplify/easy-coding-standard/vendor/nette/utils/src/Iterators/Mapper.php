@@ -5,10 +5,10 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace ECSPrefix202402\Nette\Iterators;
+namespace ECSPrefix202410\Nette\Iterators;
 
 /**
- * Applies the callback to the elements of the inner iterator.
+ * @deprecated use Nette\Utils\Iterables::map()
  */
 class Mapper extends \IteratorIterator
 {
@@ -19,7 +19,9 @@ class Mapper extends \IteratorIterator
         parent::__construct($iterator);
         $this->callback = $callback;
     }
-    #[\ReturnTypeWillChange]
+    /**
+     * @return mixed
+     */
     public function current()
     {
         return ($this->callback)(parent::current(), parent::key());

@@ -1,16 +1,16 @@
 <?php
 
-namespace ComposerJsonParser\Model;
+declare(strict_types=1);
+
+namespace KerrialNewham\ComposerJsonParser\Model;
 
 readonly class PackageVersion
 {
-    public float $version;
-    public string $versionConstraints;
-
-    public function __construct(float $version, string $versionConstraints)
+    public function __construct(
+        public float $version,
+        public string $versionConstraints
+    )
     {
-        $this->version = $version;
-        $this->versionConstraints = $versionConstraints;
     }
 
     public function getVersion(): float
@@ -22,5 +22,4 @@ readonly class PackageVersion
     {
         return $this->versionConstraints;
     }
-
 }

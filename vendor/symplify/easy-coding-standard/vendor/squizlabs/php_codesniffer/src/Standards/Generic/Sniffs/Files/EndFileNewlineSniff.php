@@ -59,7 +59,7 @@ class EndFileNewlineSniff implements Sniff
             $phpcsFile->recordMetric($stackPtr, 'Newline at EOF', 'yes');
         }
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

@@ -38,7 +38,7 @@ final class Utils
      */
     public static function camelCaseToUnderscore(string $string) : string
     {
-        return \mb_strtolower(\PhpCsFixer\Preg::replace('/(?<!^)((?=[\\p{Lu}][^\\p{Lu}])|(?<![\\p{Lu}])(?=[\\p{Lu}]))/', '_', $string));
+        return \mb_strtolower(\PhpCsFixer\Preg::replace('/(?<!^)(?<!_)((?=[\\p{Lu}][^\\p{Lu}])|(?<![\\p{Lu}])(?=[\\p{Lu}]))/', '_', $string));
     }
     /**
      * Calculate the trailing whitespace.
@@ -106,7 +106,7 @@ final class Utils
     /**
      * Join names in natural language using specified wrapper (double quote by default).
      *
-     * @param string[] $names
+     * @param list<string> $names
      *
      * @throws \InvalidArgumentException
      */
@@ -130,7 +130,7 @@ final class Utils
     /**
      * Join names in natural language wrapped in backticks, e.g. `a`, `b` and `c`.
      *
-     * @param string[] $names
+     * @param list<string> $names
      *
      * @throws \InvalidArgumentException
      */
@@ -160,6 +160,12 @@ final class Utils
         \sort($triggeredDeprecations);
         return $triggeredDeprecations;
     }
+    public static function convertArrayTypeToList(string $type) : string
+    {
+        $parts = \explode('[]', $type);
+        $count = \count($parts) - 1;
+        return \str_repeat('list<', $count) . $parts[0] . \str_repeat('>', $count);
+    }
     /**
      * @param mixed $value
      */
@@ -176,7 +182,7 @@ final class Utils
         return \PhpCsFixer\Preg::replace('/\\bNULL\\b/', 'null', $str);
     }
     /**
-     * @param array<mixed> $value
+     * @param array<array-key, mixed> $value
      */
     private static function arrayToString(array $value) : string
     {

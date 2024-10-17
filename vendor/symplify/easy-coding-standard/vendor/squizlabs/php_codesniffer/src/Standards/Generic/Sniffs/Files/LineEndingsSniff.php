@@ -52,7 +52,7 @@ class LineEndingsSniff implements Sniff
         $phpcsFile->recordMetric($stackPtr, 'EOL char', $found);
         if ($found === $this->eolChar) {
             // Ignore the rest of the file.
-            return $phpcsFile->numTokens + 1;
+            return $phpcsFile->numTokens;
         }
         // Check for single line files without an EOL. This is a very special
         // case and the EOL char is set to \n when this happens.
@@ -60,7 +60,7 @@ class LineEndingsSniff implements Sniff
             $tokens = $phpcsFile->getTokens();
             $lastToken = $phpcsFile->numTokens - 1;
             if ($tokens[$lastToken]['line'] === 1 && $tokens[$lastToken]['content'] !== "\n") {
-                return $phpcsFile->numTokens + 1;
+                return $phpcsFile->numTokens;
             }
         }
         $error = 'End of line character is invalid; expected "%s" but found "%s"';
@@ -110,7 +110,7 @@ class LineEndingsSniff implements Sniff
         }
         //end if
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

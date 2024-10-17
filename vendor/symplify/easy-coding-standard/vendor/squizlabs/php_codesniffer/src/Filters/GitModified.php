@@ -9,7 +9,7 @@
  */
 namespace PHP_CodeSniffer\Filters;
 
-use PHP_CodeSniffer\Util;
+use PHP_CodeSniffer\Util\Common;
 class GitModified extends \PHP_CodeSniffer\Filters\ExactMatch
 {
     /**
@@ -55,7 +55,7 @@ class GitModified extends \PHP_CodeSniffer\Filters\ExactMatch
             $basedir = \dirname($basedir);
         }
         foreach ($output as $path) {
-            $path = Util\Common::realpath($path);
+            $path = Common::realpath($path);
             if ($path === \false) {
                 continue;
             }

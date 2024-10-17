@@ -28,7 +28,7 @@ interface ConfigInterface
     /**
      * Returns the custom fixers to use.
      *
-     * @return FixerInterface[]
+     * @return list<FixerInterface>
      */
     public function getCustomFixers() : array;
     /**
@@ -77,7 +77,7 @@ interface ConfigInterface
      *
      * Name of custom fixer should follow `VendorName/rule_name` convention.
      *
-     * @param FixerInterface[]|iterable|\Traversable $fixers
+     * @param iterable<FixerInterface> $fixers
      */
     public function registerCustomFixers(iterable $fixers) : self;
     /**

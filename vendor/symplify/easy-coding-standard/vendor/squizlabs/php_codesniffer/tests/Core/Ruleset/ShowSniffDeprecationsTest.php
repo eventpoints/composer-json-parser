@@ -11,7 +11,7 @@ namespace PHP_CodeSniffer\Tests\Core\Ruleset;
 
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Tests\ConfigDouble;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 /**
  * Tests PHPCS native handling of sniff deprecations.
  *

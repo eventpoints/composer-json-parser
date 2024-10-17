@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Configuration;
 
-use ECSPrefix202402\Nette\Utils\FileSystem;
-use ECSPrefix202402\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202410\Nette\Utils\FileSystem;
+use ECSPrefix202410\Symfony\Component\Console\Style\SymfonyStyle;
 use Symplify\EasyCodingStandard\Application\FileProcessorCollector;
 final class ConfigInitializer
 {
@@ -28,7 +28,7 @@ final class ConfigInitializer
      * @var \Symfony\Component\Filesystem\Filesystem
      */
     private $filesystem;
-    public function __construct(FileProcessorCollector $fileProcessorCollector, SymfonyStyle $symfonyStyle, \Symplify\EasyCodingStandard\Configuration\InitPathsResolver $initPathsResolver, \ECSPrefix202402\Symfony\Component\Filesystem\Filesystem $filesystem)
+    public function __construct(FileProcessorCollector $fileProcessorCollector, SymfonyStyle $symfonyStyle, \Symplify\EasyCodingStandard\Configuration\InitPathsResolver $initPathsResolver, \ECSPrefix202410\Symfony\Component\Filesystem\Filesystem $filesystem)
     {
         $this->fileProcessorCollector = $fileProcessorCollector;
         $this->symfonyStyle = $symfonyStyle;
@@ -64,7 +64,7 @@ final class ConfigInitializer
         $projectPhpDirectoriesContents = $this->createPathsString($projectPhpDirectories);
         $templateFileContents = \str_replace('__PATHS__', $projectPhpDirectoriesContents, $templateFileContents);
         // create the ecs.php file
-        FileSystem::write(\getcwd() . '/ecs.php', $templateFileContents);
+        FileSystem::write(\getcwd() . '/ecs.php', $templateFileContents, null);
         $this->symfonyStyle->success('The ecs.php config was generated! Re-run the command to tidy your code');
     }
     /**

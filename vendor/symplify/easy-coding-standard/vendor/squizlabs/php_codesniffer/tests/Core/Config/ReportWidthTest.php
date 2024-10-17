@@ -10,7 +10,7 @@
 namespace PHP_CodeSniffer\Tests\Core\Config;
 
 use PHP_CodeSniffer\Config;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 /**
  * Tests for the \PHP_CodeSniffer\Config reportWidth value.
@@ -185,7 +185,7 @@ final class ReportWidthTest extends TestCase
     /**
      * Test that the report width will be set correctly for various types of input.
      *
-     * @param mixed $input    Input value received.
+     * @param mixed $value    Input value received.
      * @param int   $expected Expected report width.
      *
      * @dataProvider dataReportWidthInputHandling
@@ -193,10 +193,10 @@ final class ReportWidthTest extends TestCase
      *
      * @return void
      */
-    public function testReportWidthInputHandling($input, $expected)
+    public function testReportWidthInputHandling($value, $expected)
     {
         $config = new Config();
-        $config->reportWidth = $input;
+        $config->reportWidth = $value;
         $this->assertSame($expected, $config->reportWidth);
     }
     //end testReportWidthInputHandling()

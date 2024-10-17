@@ -6,7 +6,7 @@ namespace Symplify\EasyCodingStandard\ValueObject\Error;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\FixerInterface;
 use Symplify\EasyCodingStandard\Parallel\ValueObject\Name;
-use ECSPrefix202402\Symplify\EasyParallel\Contract\SerializableInterface;
+use ECSPrefix202410\Symplify\EasyParallel\Contract\SerializableInterface;
 final class FileDiff implements SerializableInterface
 {
     /**
@@ -59,18 +59,22 @@ final class FileDiff implements SerializableInterface
     {
         return $this->relativeFilePath;
     }
+    public function getAbsoluteFilePath() : ?string
+    {
+        return \realpath($this->relativeFilePath) ?: null;
+    }
     /**
      * @return array{relative_file_path: string, diff: string, diff_console_formatted: string, applied_checkers: string[]}
      */
     public function jsonSerialize() : array
     {
-        return [Name::RELATIVE_FILE_PATH => $this->relativeFilePath, Name::DIFF => $this->diff, Name::DIFF_CONSOLE_FORMATTED => $this->consoleFormattedDiff, Name::APPLIED_CHECKERS => $this->getAppliedCheckers()];
+        return [Name::ABSOLUTE_FILE_PATH => $this->getAbsoluteFilePath(), Name::RELATIVE_FILE_PATH => $this->relativeFilePath, Name::DIFF => $this->diff, Name::DIFF_CONSOLE_FORMATTED => $this->consoleFormattedDiff, Name::APPLIED_CHECKERS => $this->getAppliedCheckers()];
     }
     /**
      * @param array{relative_file_path: string, diff: string, diff_console_formatted: string, applied_checkers: string[]} $json
      * @return $this
      */
-    public static function decode(array $json) : \ECSPrefix202402\Symplify\EasyParallel\Contract\SerializableInterface
+    public static function decode(array $json) : \ECSPrefix202410\Symplify\EasyParallel\Contract\SerializableInterface
     {
         return new self($json[Name::RELATIVE_FILE_PATH], $json[Name::DIFF], $json[Name::DIFF_CONSOLE_FORMATTED], $json[Name::APPLIED_CHECKERS]);
     }

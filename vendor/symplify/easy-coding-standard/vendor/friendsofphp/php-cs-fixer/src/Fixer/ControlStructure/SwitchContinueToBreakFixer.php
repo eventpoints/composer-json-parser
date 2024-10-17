@@ -22,7 +22,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class SwitchContinueToBreakFixer extends AbstractFixer
 {
     /**
-     * @var int[]
+     * @var list<int>
      */
     private $switchLevels = [];
     public function getDefinition() : FixerDefinitionInterface

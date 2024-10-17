@@ -12,11 +12,11 @@
  */
 namespace PHP_CodeSniffer\Tests\Core\Tokenizer;
 
-use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Files\DummyFile;
+use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Tests\ConfigDouble;
 use PHP_CodeSniffer\Tests\Core\AbstractMethodUnitTest;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 abstract class AbstractTokenizerTestCase extends TestCase
 {
@@ -56,6 +56,7 @@ abstract class AbstractTokenizerTestCase extends TestCase
     protected function initializeFile()
     {
         if (isset($this->phpcsFile) === \false) {
+            $_SERVER['argv'] = [];
             $config = new ConfigDouble();
             // Also set a tab-width to enable testing tab-replaced vs `orig_content`.
             $config->tabWidth = $this->tabWidth;
@@ -68,8 +69,9 @@ abstract class AbstractTokenizerTestCase extends TestCase
             $contents = 'phpcs_input_file: ' . $pathToTestFile . \PHP_EOL;
             $contents .= \file_get_contents($pathToTestFile);
             $this->phpcsFile = new DummyFile($contents, $ruleset, $config);
-            $this->phpcsFile->process();
+            $this->phpcsFile->parse();
         }
+        //end if
     }
     //end initializeFile()
     /**

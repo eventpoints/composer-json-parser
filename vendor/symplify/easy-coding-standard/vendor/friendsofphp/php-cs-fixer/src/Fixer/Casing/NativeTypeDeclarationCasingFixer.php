@@ -83,7 +83,7 @@ final class NativeTypeDeclarationCasingFixer extends AbstractFixer
      */
     private $functionsAnalyzer;
     /**
-     * @var list<list<int>|string>
+     * @var list<array{int}|string>
      */
     private $beforePropertyTypeTokens;
     public function __construct()

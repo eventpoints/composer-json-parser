@@ -1,26 +1,40 @@
 <?php
 
-namespace ComposerJsonParser\Model;
+declare(strict_types=1);
+
+namespace KerrialNewham\ComposerJsonParser\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
 final class Composer
 {
-
     private null|string $name = null;
+
     private null|string $description = null;
+
     private null|string $type = null;
+
     private null|PackageVersion $version = null;
+
     private null|string $minimumStability = null;
-    private ArrayCollection $require;
-    private ArrayCollection $config;
-    private ArrayCollection $autoload;
-    private ArrayCollection $devAutoload;
-    private ArrayCollection $replace;
-    private ArrayCollection $scripts;
-    private ArrayCollection $conflict;
-    private ArrayCollection $extra;
-    private ArrayCollection $requireDev;
+
+    private readonly ArrayCollection $require;
+
+    private readonly ArrayCollection $config;
+
+    private readonly ArrayCollection $autoload;
+
+    private readonly ArrayCollection $devAutoload;
+
+    private readonly ArrayCollection $replace;
+
+    private readonly ArrayCollection $scripts;
+
+    private readonly ArrayCollection $conflict;
+
+    private readonly ArrayCollection $extra;
+
+    private readonly ArrayCollection $requireDev;
 
     public function __construct()
     {
@@ -160,25 +174,23 @@ final class Composer
         $this->scripts->add($script);
     }
 
-
     public function getRequirePackageByName(string $name): null|Package
     {
-        return $this->getRequire()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
+        return $this->getRequire()->findFirst(fn (int $key, Package $package): bool => $name === $package->getName());
     }
 
     public function getDevPackageByName(string $name): null|Package
     {
-        return $this->getRequireDev()->findFirst(fn(int $key, Package $package) => $name === $package->getName());
+        return $this->getRequireDev()->findFirst(fn (int $key, Package $package): bool => $name === $package->getName());
     }
 
     public function getPackageByName(string $name): null|Package
     {
         $packages = new ArrayCollection([
             ...$this->getRequire(),
-            ...$this->getRequireDev()
+            ...$this->getRequireDev(),
         ]);
 
-        return $packages->findFirst(fn(int $key, Package $package) => $name === $package->getName());
+        return $packages->findFirst(fn (int $key, Package $package): bool => $name === $package->getName());
     }
-
 }

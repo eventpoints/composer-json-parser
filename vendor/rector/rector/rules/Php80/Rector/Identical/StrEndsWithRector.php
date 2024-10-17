@@ -16,29 +16,29 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\UnaryMinus;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
-use Rector\Core\NodeAnalyzer\BinaryOpAnalyzer;
-use Rector\Core\PhpParser\Node\Value\ValueResolver;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\FuncCallAndExpr;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\NodeAnalyzer\BinaryOpAnalyzer;
+use Rector\PhpParser\Node\Value\ValueResolver;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\FuncCallAndExpr;
+use Rector\ValueObject\PhpVersionFeature;
+use Rector\ValueObject\PolyfillPackage;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
+use Rector\VersionBonding\Contract\RelatedPolyfillInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://wiki.php.net/rfc/add_str_starts_with_and_ends_with_functions
- *
  * @see \Rector\Tests\Php80\Rector\Identical\StrEndsWithRector\StrEndsWithRectorTest
  */
-final class StrEndsWithRector extends AbstractRector implements MinPhpVersionInterface
+final class StrEndsWithRector extends AbstractRector implements MinPhpVersionInterface, RelatedPolyfillInterface
 {
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\BinaryOpAnalyzer
+     * @var \Rector\NodeAnalyzer\BinaryOpAnalyzer
      */
     private $binaryOpAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\Value\ValueResolver
+     * @var \Rector\PhpParser\Node\Value\ValueResolver
      */
     private $valueResolver;
     public function __construct(BinaryOpAnalyzer $binaryOpAnalyzer, ValueResolver $valueResolver)
@@ -112,6 +112,10 @@ CODE_SAMPLE
     {
         return $this->refactorSubstr($node) ?? $this->refactorSubstrCompare($node);
     }
+    public function providePolyfillPackage() : string
+    {
+        return PolyfillPackage::PHP_80;
+    }
     /**
      * Covers:
      * $isMatch = substr($haystack, -strlen($needle)) === $needle;
@@ -157,12 +161,18 @@ CODE_SAMPLE
             return null;
         }
         $substrCompareFuncCall = $funcCallAndExpr->getFuncCall();
-        if (\count($substrCompareFuncCall->getArgs()) < 2) {
+        $args = $substrCompareFuncCall->getArgs();
+        if (\count($args) < 2) {
             return null;
         }
-        $haystack = $substrCompareFuncCall->getArgs()[0]->value;
-        $needle = $substrCompareFuncCall->getArgs()[1]->value;
-        $thirdArgValue = $substrCompareFuncCall->getArgs()[2]->value;
+        $haystack = $args[0]->value;
+        $needle = $args[1]->value;
+        $thirdArgValue = $args[2]->value;
+        $isCaseInsensitiveValue = isset($args[4]) ? $this->valueResolver->getValue($args[4]->value) : null;
+        // is case insensitive → not valid replacement
+        if ($isCaseInsensitiveValue === \true) {
+            return null;
+        }
         if (!$this->isUnaryMinusStrlenFuncCallArgValue($thirdArgValue, $needle) && !$this->isHardCodedLNumberAndString($thirdArgValue, $needle)) {
             return null;
         }

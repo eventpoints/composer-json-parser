@@ -5,7 +5,7 @@
  *
  * @see \PHP_CodeSniffer\Tests\Core\Ruleset\SniffDeprecationTest
  */
-namespace ECSPrefix202402\Fixtures\Sniffs\Deprecated;
+namespace ECSPrefix202410\Fixtures\Sniffs\Deprecated;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\DeprecatedSniff;

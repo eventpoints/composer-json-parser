@@ -14,7 +14,7 @@ namespace PhpCsFixer\Console\Report\FixReport;
 
 use PhpCsFixer\Console\Application;
 use PhpCsFixer\Preg;
-use ECSPrefix202402\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *

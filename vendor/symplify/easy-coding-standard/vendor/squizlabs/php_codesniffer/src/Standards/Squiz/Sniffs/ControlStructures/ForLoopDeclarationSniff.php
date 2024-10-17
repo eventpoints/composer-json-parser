@@ -63,8 +63,8 @@ class ForLoopDeclarationSniff implements Sniff
         $this->requiredSpacesBeforeClose = (int) $this->requiredSpacesBeforeClose;
         $tokens = $phpcsFile->getTokens();
         $openingBracket = $phpcsFile->findNext(\T_OPEN_PARENTHESIS, $stackPtr);
-        if ($openingBracket === \false) {
-            $error = 'Possible parse error: no opening parenthesis for FOR keyword';
+        if ($openingBracket === \false || isset($tokens[$openingBracket]['parenthesis_closer']) === \false) {
+            $error = 'Possible parse error: no opening/closing parenthesis for FOR keyword';
             $phpcsFile->addWarning($error, $stackPtr, 'NoOpenBracket');
             return;
         }

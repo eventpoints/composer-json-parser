@@ -104,29 +104,31 @@ abstract class AbstractHydrator
 
         $this->prepare();
 
-        while (true) {
-            $row = $this->statement()->fetchAssociative();
+        try {
+            while (true) {
+                $row = $this->statement()->fetchAssociative();
 
-            if ($row === false) {
-                $this->cleanup();
-
-                break;
-            }
-
-            $result = [];
-
-            $this->hydrateRowData($row, $result);
-
-            $this->cleanupAfterRowIteration();
-            if (count($result) === 1) {
-                if (count($resultSetMapping->indexByMap) === 0) {
-                    yield end($result);
-                } else {
-                    yield from $result;
+                if ($row === false) {
+                    break;
                 }
-            } else {
-                yield $result;
+
+                $result = [];
+
+                $this->hydrateRowData($row, $result);
+
+                $this->cleanupAfterRowIteration();
+                if (count($result) === 1) {
+                    if (count($resultSetMapping->indexByMap) === 0) {
+                        yield end($result);
+                    } else {
+                        yield from $result;
+                    }
+                } else {
+                    yield $result;
+                }
             }
+        } finally {
+            $this->cleanup();
         }
     }
 
@@ -250,15 +252,16 @@ abstract class AbstractHydrator
      * @psalm-return array{
      *                   data: array<array-key, array>,
      *                   newObjects?: array<array-key, array{
-     *                       class: mixed,
-     *                       args?: array
+     *                       class: ReflectionClass,
+     *                       args: array,
+     *                       obj: object
      *                   }>,
      *                   scalars?: array
      *               }
      */
     protected function gatherRowData(array $data, array &$id, array &$nonemptyComponents): array
     {
-        $rowData = ['data' => []];
+        $rowData = ['data' => [], 'newObjects' => []];
 
         foreach ($data as $key => $value) {
             $cacheKeyInfo = $this->hydrateColumnInfo($key);
@@ -331,6 +334,25 @@ abstract class AbstractHydrator
 
                     break;
             }
+        }
+
+        foreach ($this->resultSetMapping()->nestedNewObjectArguments as $objIndex => ['ownerIndex' => $ownerIndex, 'argIndex' => $argIndex]) {
+            if (! isset($rowData['newObjects'][$ownerIndex . ':' . $argIndex])) {
+                continue;
+            }
+
+            $newObject = $rowData['newObjects'][$ownerIndex . ':' . $argIndex];
+            unset($rowData['newObjects'][$ownerIndex . ':' . $argIndex]);
+
+            $obj = $newObject['class']->newInstanceArgs($newObject['args']);
+
+            $rowData['newObjects'][$ownerIndex]['args'][$argIndex] = $obj;
+        }
+
+        foreach ($rowData['newObjects'] as $objIndex => $newObject) {
+            $obj = $newObject['class']->newInstanceArgs($newObject['args']);
+
+            $rowData['newObjects'][$objIndex]['obj'] = $obj;
         }
 
         return $rowData;

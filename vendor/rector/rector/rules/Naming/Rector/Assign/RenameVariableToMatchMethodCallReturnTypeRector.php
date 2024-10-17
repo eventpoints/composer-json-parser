@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Rector\Naming\Rector\Assign;
 
-use RectorPrefix202312\Nette\Utils\Strings;
+use RectorPrefix202410\Nette\Utils\Strings;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\Closure;
@@ -13,7 +13,6 @@ use PhpParser\Node\Stmt\Function_;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
-use Rector\Core\Rector\AbstractRector;
 use Rector\Naming\Guard\BreakingVariableRenameGuard;
 use Rector\Naming\Matcher\VariableAndCallAssignMatcher;
 use Rector\Naming\Naming\ExpectedNameResolver;
@@ -21,6 +20,7 @@ use Rector\Naming\NamingConvention\NamingConventionAnalyzer;
 use Rector\Naming\PhpDoc\VarTagValueNodeRenamer;
 use Rector\Naming\ValueObject\VariableAndCallAssign;
 use Rector\Naming\VariableRenamer;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -136,6 +136,7 @@ CODE_SAMPLE
         if ($node->stmts === null) {
             return null;
         }
+        $hasChanged = \false;
         foreach ($node->stmts as $stmt) {
             if (!$stmt instanceof Expression) {
                 continue;
@@ -146,7 +147,7 @@ CODE_SAMPLE
             $assign = $stmt->expr;
             $variableAndCallAssign = $this->variableAndCallAssignMatcher->match($assign, $node);
             if (!$variableAndCallAssign instanceof VariableAndCallAssign) {
-                return null;
+                continue;
             }
             $call = $variableAndCallAssign->getCall();
             $expectedName = $this->expectedNameResolver->resolveForCall($call);
@@ -160,6 +161,9 @@ CODE_SAMPLE
                 continue;
             }
             $this->renameVariable($variableAndCallAssign, $expectedName, $stmt);
+            $hasChanged = \true;
+        }
+        if ($hasChanged) {
             return $node;
         }
         return null;

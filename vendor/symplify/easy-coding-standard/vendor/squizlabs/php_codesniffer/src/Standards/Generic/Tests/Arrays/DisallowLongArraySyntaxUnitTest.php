@@ -34,6 +34,8 @@ final class DisallowLongArraySyntaxUnitTest extends AbstractSniffUnitTest
                 return [2 => 1, 4 => 1, 6 => 1, 7 => 1, 12 => 1];
             case 'DisallowLongArraySyntaxUnitTest.2.inc':
                 return [2 => 1, 9 => 1];
+            case 'DisallowLongArraySyntaxUnitTest.3.inc':
+                return [7 => 1];
             default:
                 return [];
         }

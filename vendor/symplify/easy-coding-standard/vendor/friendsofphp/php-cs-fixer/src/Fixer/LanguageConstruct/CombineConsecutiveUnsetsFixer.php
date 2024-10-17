@@ -68,7 +68,7 @@ final class CombineConsecutiveUnsetsFixer extends AbstractFixer
         }
     }
     /**
-     * @param int[] $indices
+     * @param list<int> $indices
      */
     private function clearOffsetTokens(Tokens $tokens, int $offset, array $indices) : void
     {
@@ -87,7 +87,7 @@ final class CombineConsecutiveUnsetsFixer extends AbstractFixer
      *
      * Or the index to where the method looked for a call.
      *
-     * @return int|int[]
+     * @return array{int, int, int, int}|int
      */
     private function getPreviousUnsetCall(Tokens $tokens, int $index)
     {

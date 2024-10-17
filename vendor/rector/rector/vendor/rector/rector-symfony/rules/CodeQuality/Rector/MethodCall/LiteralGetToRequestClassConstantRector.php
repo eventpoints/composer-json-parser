@@ -8,7 +8,7 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Type\ObjectType;
-use Rector\Core\Rector\AbstractRector;
+use Rector\Rector\AbstractRector;
 use Rector\Symfony\NodeAnalyzer\LiteralCallLikeConstFetchReplacer;
 use Rector\Symfony\ValueObject\ConstantMap\SymfonyRequestConstantMap;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
@@ -76,7 +76,7 @@ CODE_SAMPLE
         }
         // for client, the transitional dependency to browser-kit might be missing and cause fatal error on PHPStan reflection
         // in most cases that should be skipped, @changelog https://github.com/rectorphp/rector/issues/7135
-        if ($this->reflectionProvider->hasClass('Symfony\\Component\\BrowserKit\\AbstractBrowser') && $this->isObjectType($node->var, new ObjectType('Symfony\\Component\\HttpKernel\\Client'))) {
+        if ($this->reflectionProvider->hasClass('Symfony\\Component\\BrowserKit\\AbstractBrowser') && ($this->isObjectType($node->var, new ObjectType('Symfony\\Component\\HttpKernel\\Client')) || $this->isObjectType($node->var, new ObjectType('Symfony\\Bundle\\FrameworkBundle\\KernelBrowser')))) {
             return $this->refactorClientMethodCall($node);
         }
         if (!$this->isName($node->name, 'setMethod')) {

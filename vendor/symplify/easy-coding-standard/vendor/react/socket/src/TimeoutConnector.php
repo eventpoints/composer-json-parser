@@ -1,17 +1,26 @@
 <?php
 
-namespace ECSPrefix202402\React\Socket;
+namespace ECSPrefix202410\React\Socket;
 
-use ECSPrefix202402\React\EventLoop\Loop;
-use ECSPrefix202402\React\EventLoop\LoopInterface;
-use ECSPrefix202402\React\Promise\Promise;
+use ECSPrefix202410\React\EventLoop\Loop;
+use ECSPrefix202410\React\EventLoop\LoopInterface;
+use ECSPrefix202410\React\Promise\Promise;
 final class TimeoutConnector implements ConnectorInterface
 {
     private $connector;
     private $timeout;
     private $loop;
-    public function __construct(ConnectorInterface $connector, $timeout, LoopInterface $loop = null)
+    /**
+     * @param ConnectorInterface $connector
+     * @param float $timeout
+     * @param ?LoopInterface $loop
+     */
+    public function __construct(ConnectorInterface $connector, $timeout, $loop = null)
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #3 ($loop) expected null|React\\EventLoop\\LoopInterface');
+        }
         $this->connector = $connector;
         $this->timeout = $timeout;
         $this->loop = $loop ?: Loop::get();

@@ -5,7 +5,7 @@ namespace Symplify\EasyCodingStandard\Configuration;
 
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\FixerInterface;
-use ECSPrefix202402\Symfony\Component\Finder\Finder;
+use ECSPrefix202410\Symfony\Component\Finder\Finder;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 use Symplify\EasyCodingStandard\Exception\Configuration\SuperfluousConfigurationException;
 use Symplify\EasyCodingStandard\ValueObject\Option;
@@ -60,10 +60,9 @@ final class ECSConfigBuilder
      */
     private $lineEnding;
     /**
-     * Enabled by default
-     * @var bool
+     * @var bool|null
      */
-    private $parallel = \true;
+    private $parallel;
     /**
      * @var int
      */
@@ -76,15 +75,30 @@ final class ECSConfigBuilder
      * @var int
      */
     private $parallelJobSize = 20;
+    /**
+     * @var bool|null
+     */
+    private $reportingRealPath;
     public function __invoke(ECSConfig $ecsConfig) : void
     {
-        $ecsConfig->sets($this->sets);
+        if ($this->sets !== []) {
+            $ecsConfig->sets($this->sets);
+        }
+        if ($this->dynamicSets !== []) {
+            $ecsConfig->dynamicSets($this->dynamicSets);
+        }
         if ($this->paths !== []) {
             $ecsConfig->paths($this->paths);
         }
-        $ecsConfig->skip($this->skip);
-        $ecsConfig->rules($this->rules);
-        $ecsConfig->rulesWithConfiguration($this->rulesWithConfiguration);
+        if ($this->skip !== []) {
+            $ecsConfig->skip($this->skip);
+        }
+        if ($this->rules !== []) {
+            $ecsConfig->rules($this->rules);
+        }
+        if ($this->rulesWithConfiguration !== []) {
+            $ecsConfig->rulesWithConfiguration($this->rulesWithConfiguration);
+        }
         if ($this->fileExtensions !== []) {
             $ecsConfig->fileExtensions($this->fileExtensions);
         }
@@ -100,11 +114,15 @@ final class ECSConfigBuilder
         if ($this->lineEnding !== null) {
             $ecsConfig->lineEnding($this->lineEnding);
         }
-        $ecsConfig->dynamicSets($this->dynamicSets);
-        if ($this->parallel) {
-            $ecsConfig->parallel($this->parallelTimeoutSeconds, $this->parallelMaxNumberOfProcess, $this->parallelJobSize);
-        } else {
-            $ecsConfig->disableParallel();
+        if ($this->parallel !== null) {
+            if ($this->parallel) {
+                $ecsConfig->parallel($this->parallelTimeoutSeconds, $this->parallelMaxNumberOfProcess, $this->parallelJobSize);
+            } else {
+                $ecsConfig->disableParallel();
+            }
+        }
+        if ($this->reportingRealPath !== null) {
+            $ecsConfig->reportingRealPath($this->reportingRealPath);
         }
     }
     /**
@@ -413,6 +431,11 @@ final class ECSConfigBuilder
     public function withoutParallel() : self
     {
         $this->parallel = \false;
+        return $this;
+    }
+    public function withRealPathReporting(bool $absolutePath = \true) : self
+    {
+        $this->reportingRealPath = $absolutePath;
         return $this;
     }
 }

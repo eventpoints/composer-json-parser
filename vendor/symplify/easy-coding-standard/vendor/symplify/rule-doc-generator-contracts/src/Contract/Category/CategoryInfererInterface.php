@@ -1,9 +1,9 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202402\Symplify\RuleDocGenerator\Contract\Category;
+namespace ECSPrefix202410\Symplify\RuleDocGenerator\Contract\Category;
 
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 interface CategoryInfererInterface
 {
     public function infer(RuleDefinition $ruleDefinition) : ?string;

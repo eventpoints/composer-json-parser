@@ -43,7 +43,7 @@ class CodeAnalyzerSniff implements Sniff
     {
         $analyzerPath = Config::getExecutablePath('zend_ca');
         if ($analyzerPath === null) {
-            return $phpcsFile->numTokens + 1;
+            return $phpcsFile->numTokens;
         }
         $fileName = $phpcsFile->getFilename();
         // In the command, 2>&1 is important because the code analyzer sends its
@@ -60,7 +60,7 @@ class CodeAnalyzerSniff implements Sniff
         // provide useful error reporting.
         if (\is_numeric($exitCode) === \true && $exitCode > 0) {
             if (\is_array($output) === \true) {
-                $msg = \join('\\n', $output);
+                $msg = \implode('\\n', $output);
             }
             throw new RuntimeException("Failed invoking ZendCodeAnalyzer, exitcode was [{$exitCode}], retval was [{$retval}], output was [{$msg}]");
         }
@@ -79,7 +79,7 @@ class CodeAnalyzerSniff implements Sniff
             }
         }
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

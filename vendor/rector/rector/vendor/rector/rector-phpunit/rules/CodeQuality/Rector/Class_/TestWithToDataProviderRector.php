@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Rector\PHPUnit\CodeQuality\Rector\Class_;
 
-use RectorPrefix202312\Nette\Utils\Json;
-use RectorPrefix202312\Nette\Utils\Strings;
+use RectorPrefix202410\Nette\Utils\Json;
+use RectorPrefix202410\Nette\Utils\Strings;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
@@ -21,9 +21,9 @@ use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\BetterPhpDocParser\PhpDocManipulator\PhpDocTagRemover;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
-use Rector\Core\NodeManipulator\ClassInsertManipulator;
-use Rector\Core\Rector\AbstractRector;
+use Rector\NodeManipulator\ClassInsertManipulator;
 use Rector\PHPUnit\NodeAnalyzer\TestsNodeAnalyzer;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -53,9 +53,13 @@ final class TestWithToDataProviderRector extends AbstractRector
     private $docBlockUpdater;
     /**
      * @readonly
-     * @var \Rector\Core\NodeManipulator\ClassInsertManipulator
+     * @var \Rector\NodeManipulator\ClassInsertManipulator
      */
     private $classInsertManipulator;
+    /**
+     * @var bool
+     */
+    private $hasChanged = \false;
     public function __construct(TestsNodeAnalyzer $testsNodeAnalyzer, PhpDocInfoFactory $phpDocInfoFactory, PhpDocTagRemover $phpDocTagRemover, DocBlockUpdater $docBlockUpdater, ClassInsertManipulator $classInsertManipulator)
     {
         $this->testsNodeAnalyzer = $testsNodeAnalyzer;
@@ -111,11 +115,15 @@ CODE_SAMPLE
         if (!$this->testsNodeAnalyzer->isInTestClass($node)) {
             return null;
         }
+        $this->hasChanged = \false;
         foreach ($node->stmts as $classMethod) {
             if (!$classMethod instanceof ClassMethod) {
                 continue;
             }
             $this->refactorClassMethod($node, $classMethod);
+        }
+        if (!$this->hasChanged) {
+            return null;
         }
         return $node;
     }
@@ -123,7 +131,6 @@ CODE_SAMPLE
     {
         $arrayItemsSingleLine = [];
         $arrayMultiLine = null;
-        $hasChanged = \false;
         $phpDocInfo = $this->phpDocInfoFactory->createFromNode($classMethod);
         if (!$phpDocInfo instanceof PhpDocInfo) {
             return;
@@ -144,9 +151,11 @@ CODE_SAMPLE
                 $arrayItemsSingleLine[] = new ArrayItem($this->createArrayItem($values[0]));
             }
             //cleanup
-            $hasChanged = $this->phpDocTagRemover->removeTagValueFromNode($phpDocInfo, $testWithPhpDocTagNode);
+            if ($this->phpDocTagRemover->removeTagValueFromNode($phpDocInfo, $testWithPhpDocTagNode)) {
+                $this->hasChanged = \true;
+            }
         }
-        if (!$hasChanged) {
+        if (!$this->hasChanged) {
             return;
         }
         $dataProviderName = $this->generateDataProviderName($classMethod);

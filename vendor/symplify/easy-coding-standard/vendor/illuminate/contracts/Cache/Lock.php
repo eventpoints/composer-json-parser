@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Cache;
+namespace ECSPrefix202410\Illuminate\Contracts\Cache;
 
 interface Lock
 {

@@ -4,12 +4,14 @@ declare (strict_types=1);
 namespace Rector\CodingStyle\Rector\Use_;
 
 use PhpParser\Node;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\TraitUse;
+use PhpParser\Node\Stmt\TraitUseAdaptation\Alias;
 use PhpParser\Node\Stmt\Use_;
-use Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace;
-use Rector\Core\Rector\AbstractRector;
+use Rector\PhpParser\Node\CustomNode\FileWithoutNamespace;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -48,7 +50,7 @@ CODE_SAMPLE
     }
     /**
      * @param FileWithoutNamespace|Namespace_|Class_ $node
-     * @return \Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\Namespace_|\PhpParser\Node\Stmt\Class_|null
+     * @return \Rector\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\Namespace_|\PhpParser\Node\Stmt\Class_|null
      */
     public function refactor(Node $node)
     {
@@ -101,7 +103,13 @@ CODE_SAMPLE
         }
         $traitUses = [];
         foreach ($traitUse->traits as $singleTraitUse) {
-            $traitUses[] = new TraitUse([$singleTraitUse]);
+            $adaptation = [];
+            foreach ($traitUse->adaptations as $traitAdaptation) {
+                if ($traitAdaptation instanceof Alias && $traitAdaptation->trait && $traitAdaptation->trait instanceof Name && $traitAdaptation->trait->toString() === $singleTraitUse->toString()) {
+                    $adaptation[] = $traitAdaptation;
+                }
+            }
+            $traitUses[] = new TraitUse([$singleTraitUse], $adaptation);
         }
         return $traitUses;
     }

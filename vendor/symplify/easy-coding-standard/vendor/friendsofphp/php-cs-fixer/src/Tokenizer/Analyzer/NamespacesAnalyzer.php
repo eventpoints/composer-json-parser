@@ -47,8 +47,8 @@ final class NamespacesAnalyzer
             // Continue the analysis after the end of this namespace to find the next one
             $index = $scopeEndIndex;
         }
-        if (0 === \count($namespaces)) {
-            $namespaces[] = new NamespaceAnalysis('', '', 0, 0, 0, \count($tokens) - 1);
+        if (0 === \count($namespaces) && $tokens->isTokenKindFound(\T_OPEN_TAG)) {
+            $namespaces[] = new NamespaceAnalysis('', '', $openTagIndex = $tokens[0]->isGivenKind(\T_INLINE_HTML) ? 1 : 0, $openTagIndex, $openTagIndex, \count($tokens) - 1);
         }
         return $namespaces;
     }

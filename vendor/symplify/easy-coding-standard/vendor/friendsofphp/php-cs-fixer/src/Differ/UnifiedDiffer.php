@@ -13,8 +13,8 @@ declare (strict_types=1);
 namespace PhpCsFixer\Differ;
 
 use PhpCsFixer\Preg;
-use ECSPrefix202402\SebastianBergmann\Diff\Differ;
-use ECSPrefix202402\SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
+use ECSPrefix202410\SebastianBergmann\Diff\Differ;
+use ECSPrefix202410\SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
 final class UnifiedDiffer implements \PhpCsFixer\Differ\DifferInterface
 {
     public function diff(string $old, string $new, ?\SplFileInfo $file = null) : string

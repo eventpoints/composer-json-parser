@@ -17,23 +17,22 @@ use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\NodeTraverser;
-use Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace;
-use Rector\Core\PhpParser\NodeFinder\PropertyFetchFinder;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use PHPStan\Type\UnionType;
+use Rector\PhpParser\Node\CustomNode\FileWithoutNamespace;
+use Rector\PhpParser\NodeFinder\PropertyFetchFinder;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://stackoverflow.com/a/41000866/1348344 https://3v4l.org/ABDNv
- *
  * @see \Rector\Tests\Php71\Rector\Assign\AssignArrayToStringRector\AssignArrayToStringRectorTest
  */
 final class AssignArrayToStringRector extends AbstractRector implements MinPhpVersionInterface
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\NodeFinder\PropertyFetchFinder
+     * @var \Rector\PhpParser\NodeFinder\PropertyFetchFinder
      */
     private $propertyFetchFinder;
     public function __construct(PropertyFetchFinder $propertyFetchFinder)
@@ -131,7 +130,7 @@ CODE_SAMPLE
     }
     /**
      * @return ArrayDimFetch[]
-     * @param \PhpParser\Node\Stmt\Namespace_|\Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Stmt\Function_|\PhpParser\Node\Expr\Closure $node
+     * @param \PhpParser\Node\Stmt\Namespace_|\Rector\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Stmt\Function_|\PhpParser\Node\Expr\Closure $node
      */
     private function findSameNamedVariableAssigns(Variable $variable, $node) : array
     {
@@ -176,14 +175,21 @@ CODE_SAMPLE
         return \false;
     }
     /**
-     * @param \PhpParser\Node\Stmt\Namespace_|\Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Stmt\Function_|\PhpParser\Node\Expr\Closure $node
+     * @param \PhpParser\Node\Stmt\Namespace_|\Rector\PhpParser\Node\CustomNode\FileWithoutNamespace|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Stmt\Function_|\PhpParser\Node\Expr\Closure $node
      */
     private function refactorAssign(Assign $assign, $node) : ?Assign
     {
+        if (!$assign->var instanceof Variable) {
+            return null;
+        }
         if (!$this->isEmptyString($assign->expr)) {
             return null;
         }
-        if (!$assign->var instanceof Variable) {
+        $type = $this->nodeTypeResolver->getNativeType($assign->var);
+        if ($type->isArray()->yes()) {
+            return null;
+        }
+        if ($type instanceof UnionType) {
             return null;
         }
         $variableAssignArrayDimFetches = $this->findSameNamedVariableAssigns($assign->var, $node);

@@ -1,9 +1,9 @@
 <?php
 
-namespace ECSPrefix202402\React\EventLoop;
+namespace ECSPrefix202410\React\EventLoop;
 
-use ECSPrefix202402\React\EventLoop\Tick\FutureTickQueue;
-use ECSPrefix202402\React\EventLoop\Timer\Timer;
+use ECSPrefix202410\React\EventLoop\Tick\FutureTickQueue;
+use ECSPrefix202410\React\EventLoop\Timer\Timer;
 use SplObjectStorage;
 /**
  * An `ext-uv` based event loop.
@@ -197,7 +197,7 @@ final class ExtUvLoop implements LoopInterface
     private function addStream($stream)
     {
         if (!isset($this->streamEvents[(int) $stream])) {
-            $this->streamEvents[(int) $stream] = \ECSPrefix202402\uv_poll_init_socket($this->uv, $stream);
+            $this->streamEvents[(int) $stream] = \ECSPrefix202410\uv_poll_init_socket($this->uv, $stream);
         }
         if ($this->streamEvents[(int) $stream] !== \false) {
             $this->pollStream($stream);

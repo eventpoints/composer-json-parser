@@ -19,7 +19,7 @@ use PhpCsFixer\Tokenizer\Tokens;
  */
 final class SwitchAnalyzer
 {
-    /** @var array<string, array<int>> */
+    /** @var array<string, list<int>> */
     private static $cache = [];
     public static function belongsToSwitch(Tokens $tokens, int $index) : bool
     {

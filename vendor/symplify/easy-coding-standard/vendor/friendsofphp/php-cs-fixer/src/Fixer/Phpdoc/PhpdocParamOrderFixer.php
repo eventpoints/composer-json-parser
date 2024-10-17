@@ -82,7 +82,7 @@ function m($a, array $b, Foo $c) {}
         }
     }
     /**
-     * @return Token[]
+     * @return list<Token>
      */
     private function getFunctionParamNames(Tokens $tokens, int $paramBlockStart) : array
     {
@@ -96,8 +96,8 @@ function m($a, array $b, Foo $c) {}
     /**
      * Overwrite the param annotations in order.
      *
-     * @param Token[]      $paramNames
-     * @param Annotation[] $paramAnnotations
+     * @param list<Token>      $paramNames
+     * @param list<Annotation> $paramAnnotations
      */
     private function rewriteDocBlock(DocBlock $doc, array $paramNames, array $paramAnnotations) : DocBlock
     {
@@ -123,8 +123,8 @@ function m($a, array $b, Foo $c) {}
     /**
      * Sort the param annotations according to the function parameters.
      *
-     * @param Token[]      $funcParamNames
-     * @param Annotation[] $paramAnnotations
+     * @param list<Token>      $funcParamNames
+     * @param list<Annotation> $paramAnnotations
      *
      * @return list<string>
      */
@@ -141,9 +141,8 @@ function m($a, array $b, Foo $c) {}
             }
         }
         // Detect superfluous annotations
-        /** @var Annotation[] $invalidParams */
-        $invalidParams = \array_diff_key($paramAnnotations, $validParams);
-        $invalidParams = \array_values($invalidParams);
+        /** @var list<Annotation> $invalidParams */
+        $invalidParams = \array_values(\array_diff_key($paramAnnotations, $validParams));
         // Append invalid parameters to the (ordered) valid ones
         $orderedParams = \array_values($validParams);
         foreach ($invalidParams as $params) {
@@ -154,7 +153,7 @@ function m($a, array $b, Foo $c) {}
     /**
      * Fetch all annotations except the param ones.
      *
-     * @param Annotation[] $paramAnnotations
+     * @param list<Annotation> $paramAnnotations
      *
      * @return list<string>
      */
@@ -179,9 +178,9 @@ function m($a, array $b, Foo $c) {}
     /**
      * Return the indices of the lines of a specific parameter annotation.
      *
-     * @param Annotation[] $paramAnnotations
+     * @param list<Annotation> $paramAnnotations
      *
-     * @return null|array<int>
+     * @return ?list<int>
      */
     private function findParamAnnotationByIdentifier(array $paramAnnotations, string $identifier) : ?array
     {

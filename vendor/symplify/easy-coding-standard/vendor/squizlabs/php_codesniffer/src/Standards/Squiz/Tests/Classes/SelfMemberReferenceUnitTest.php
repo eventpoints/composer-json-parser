@@ -27,7 +27,7 @@ final class SelfMemberReferenceUnitTest extends AbstractSniffUnitTest
      */
     public function getErrorList()
     {
-        return [24 => 1, 25 => 1, 26 => 1, 30 => 1, 31 => 1, 32 => 2, 40 => 2, 92 => 1, 121 => 1, 132 => 1, 139 => 3, 140 => 1, 143 => 2, 162 => 1, 171 => 1];
+        return [24 => 1, 25 => 1, 26 => 1, 30 => 1, 31 => 1, 32 => 2, 40 => 2, 92 => 1, 121 => 1, 132 => 1, 139 => 3, 140 => 1, 143 => 2, 162 => 1, 171 => 1, 183 => 1, 197 => 1];
     }
     //end getErrorList()
     /**

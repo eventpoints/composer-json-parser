@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\FileSystem;
 
-use ECSPrefix202402\Nette\Utils\FileSystem;
-use ECSPrefix202402\Nette\Utils\Json;
+use ECSPrefix202410\Nette\Utils\FileSystem;
+use ECSPrefix202410\Nette\Utils\Json;
 final class JsonFileSystem
 {
     /**
@@ -21,6 +21,6 @@ final class JsonFileSystem
     public static function writeFilePath(string $filePath, array $data) : void
     {
         $jsonContents = Json::encode($data, Json::PRETTY);
-        FileSystem::write($filePath, $jsonContents);
+        FileSystem::write($filePath, $jsonContents, null);
     }
 }

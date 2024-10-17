@@ -12,9 +12,11 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Tokenizer;
 
+use PhpCsFixer\Console\Application;
 use PhpCsFixer\Preg;
 use PhpCsFixer\Tokenizer\Analyzer\Analysis\NamespaceAnalysis;
 use PhpCsFixer\Tokenizer\Analyzer\NamespacesAnalyzer;
+use PhpCsFixer\Utils;
 /**
  * Collection of code tokens.
  *
@@ -45,6 +47,7 @@ class Tokens extends \SplFixedArray
     public const BLOCK_TYPE_ATTRIBUTE = 11;
     public const BLOCK_TYPE_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS = 12;
     public const BLOCK_TYPE_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE = 13;
+    public const BLOCK_TYPE_COMPLEX_STRING_VARIABLE = 14;
     /**
      * Static class cache.
      *
@@ -141,7 +144,24 @@ class Tokens extends \SplFixedArray
     public static function fromArray($array, $saveIndices = null) : self
     {
         $tokens = new self(\count($array));
-        if ($saveIndices ?? \true) {
+        $arrayIsListFunction = function (array $array) : bool {
+            if (\function_exists('array_is_list')) {
+                return \array_is_list($array);
+            }
+            if ($array === []) {
+                return \true;
+            }
+            $current_key = 0;
+            foreach ($array as $key => $noop) {
+                if ($key !== $current_key) {
+                    return \false;
+                }
+                ++$current_key;
+            }
+            return \true;
+        };
+        if (\false !== $saveIndices && !$arrayIsListFunction($array)) {
+            Utils::triggerDeprecation(new \InvalidArgumentException(\sprintf('Parameter "array" should be a list. This will be enforced in version %d.0.', Application::getMajorVersion() + 1)));
             foreach ($array as $key => $val) {
                 $tokens[$key] = $val;
             }
@@ -186,7 +206,7 @@ class Tokens extends \SplFixedArray
     {
         static $definitions = null;
         if (null === $definitions) {
-            $definitions = [self::BLOCK_TYPE_CURLY_BRACE => ['start' => '{', 'end' => '}'], self::BLOCK_TYPE_PARENTHESIS_BRACE => ['start' => '(', 'end' => ')'], self::BLOCK_TYPE_INDEX_SQUARE_BRACE => ['start' => '[', 'end' => ']'], self::BLOCK_TYPE_ARRAY_SQUARE_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_SQUARE_BRACE_OPEN, '['], 'end' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_SQUARE_BRACE_CLOSE, ']']], self::BLOCK_TYPE_DYNAMIC_PROP_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_PROP_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_PROP_BRACE_CLOSE, '}']], self::BLOCK_TYPE_DYNAMIC_VAR_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_VAR_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_VAR_BRACE_CLOSE, '}']], self::BLOCK_TYPE_ARRAY_INDEX_CURLY_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_INDEX_CURLY_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE, '}']], self::BLOCK_TYPE_GROUP_IMPORT_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_GROUP_IMPORT_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_GROUP_IMPORT_BRACE_CLOSE, '}']], self::BLOCK_TYPE_DESTRUCTURING_SQUARE_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DESTRUCTURING_SQUARE_BRACE_OPEN, '['], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DESTRUCTURING_SQUARE_BRACE_CLOSE, ']']], self::BLOCK_TYPE_BRACE_CLASS_INSTANTIATION => ['start' => [\PhpCsFixer\Tokenizer\CT::T_BRACE_CLASS_INSTANTIATION_OPEN, '('], 'end' => [\PhpCsFixer\Tokenizer\CT::T_BRACE_CLASS_INSTANTIATION_CLOSE, ')']], self::BLOCK_TYPE_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_OPEN, '('], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_CLOSE, ')']], self::BLOCK_TYPE_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE_CLOSE, '}']]];
+            $definitions = [self::BLOCK_TYPE_CURLY_BRACE => ['start' => '{', 'end' => '}'], self::BLOCK_TYPE_PARENTHESIS_BRACE => ['start' => '(', 'end' => ')'], self::BLOCK_TYPE_INDEX_SQUARE_BRACE => ['start' => '[', 'end' => ']'], self::BLOCK_TYPE_ARRAY_SQUARE_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_SQUARE_BRACE_OPEN, '['], 'end' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_SQUARE_BRACE_CLOSE, ']']], self::BLOCK_TYPE_DYNAMIC_PROP_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_PROP_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_PROP_BRACE_CLOSE, '}']], self::BLOCK_TYPE_DYNAMIC_VAR_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_VAR_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_VAR_BRACE_CLOSE, '}']], self::BLOCK_TYPE_ARRAY_INDEX_CURLY_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_INDEX_CURLY_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE, '}']], self::BLOCK_TYPE_GROUP_IMPORT_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_GROUP_IMPORT_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_GROUP_IMPORT_BRACE_CLOSE, '}']], self::BLOCK_TYPE_DESTRUCTURING_SQUARE_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DESTRUCTURING_SQUARE_BRACE_OPEN, '['], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DESTRUCTURING_SQUARE_BRACE_CLOSE, ']']], self::BLOCK_TYPE_BRACE_CLASS_INSTANTIATION => ['start' => [\PhpCsFixer\Tokenizer\CT::T_BRACE_CLASS_INSTANTIATION_OPEN, '('], 'end' => [\PhpCsFixer\Tokenizer\CT::T_BRACE_CLASS_INSTANTIATION_CLOSE, ')']], self::BLOCK_TYPE_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_OPEN, '('], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_CLOSE, ')']], self::BLOCK_TYPE_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE => ['start' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE_OPEN, '{'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DYNAMIC_CLASS_CONSTANT_FETCH_CURLY_BRACE_CLOSE, '}']], self::BLOCK_TYPE_COMPLEX_STRING_VARIABLE => ['start' => [\T_DOLLAR_OPEN_CURLY_BRACES, '${'], 'end' => [\PhpCsFixer\Tokenizer\CT::T_DOLLAR_CLOSE_CURLY_BRACES, '}']]];
             // @TODO: drop condition when PHP 8.0+ is required
             if (\defined('T_ATTRIBUTE')) {
                 $definitions[self::BLOCK_TYPE_ATTRIBUTE] = ['start' => [\T_ATTRIBUTE, '#['], 'end' => [\PhpCsFixer\Tokenizer\CT::T_ATTRIBUTE_CLOSE, ']']];
@@ -199,9 +219,10 @@ class Tokens extends \SplFixedArray
      *
      * @param int $size
      */
+    #[\ReturnTypeWillChange]
     public function setSize($size) : bool
     {
-        if ($this->getSize() !== $size) {
+        if (\count($this) !== $size) {
             $this->changed = \true;
             $this->namespaceDeclarations = null;
             return parent::setSize($size);
@@ -215,6 +236,9 @@ class Tokens extends \SplFixedArray
      */
     public function offsetUnset($index) : void
     {
+        if (\count($this) - 1 !== $index) {
+            Utils::triggerDeprecation(new \InvalidArgumentException(\sprintf('Tokens should be a list - only the last index can be unset. This will be enforced in version %d.0.', Application::getMajorVersion() + 1)));
+        }
         if (isset($this[$index])) {
             if (isset($this->blockStartCache[$index])) {
                 unset($this->blockEndCache[$this->blockStartCache[$index]], $this->blockStartCache[$index]);
@@ -238,6 +262,9 @@ class Tokens extends \SplFixedArray
      */
     public function offsetSet($index, $newval) : void
     {
+        if (0 > $index || \count($this) <= $index) {
+            Utils::triggerDeprecation(new \InvalidArgumentException(\sprintf('Tokens should be a list - index must be within the existing range. This will be enforced in version %d.0.', Application::getMajorVersion() + 1)));
+        }
         if (!isset($this[$index]) || !$this[$index]->equals($newval)) {
             if (isset($this[$index])) {
                 if (isset($this->blockStartCache[$index])) {
@@ -268,7 +295,7 @@ class Tokens extends \SplFixedArray
      */
     public function clearEmptyTokens() : void
     {
-        $limit = $this->count();
+        $limit = \count($this);
         for ($index = 0; $index < $limit; ++$index) {
             if ($this->isEmptyAt($index)) {
                 break;
@@ -341,7 +368,7 @@ class Tokens extends \SplFixedArray
      * @param self::BLOCK_TYPE_* $type        type of block
      * @param int                $searchIndex index of opening brace
      *
-     * @return int index of closing brace
+     * @return int<0, max> index of closing brace
      */
     public function findBlockEnd(int $type, int $searchIndex) : int
     {
@@ -351,7 +378,7 @@ class Tokens extends \SplFixedArray
      * @param self::BLOCK_TYPE_* $type        type of block
      * @param int                $searchIndex index of closing brace
      *
-     * @return int index of opening brace
+     * @return int<0, max> index of opening brace
      */
     public function findBlockStart(int $type, int $searchIndex) : int
     {
@@ -362,12 +389,12 @@ class Tokens extends \SplFixedArray
      * @param int                     $start        optional offset
      * @param null|int                $end          optional limit
      *
-     * @return ($possibleKind is int ? array<int, Token> : array<int, array<int, Token>>)
+     * @return ($possibleKind is int ? array<int<0, max>, Token> : array<int, array<int<0, max>, Token>>)
      */
     public function findGivenKind($possibleKind, int $start = 0, ?int $end = null) : array
     {
         if (null === $end) {
-            $end = $this->count();
+            $end = \count($this);
         }
         $elements = [];
         $possibleKinds = (array) $possibleKind;
@@ -590,7 +617,7 @@ class Tokens extends \SplFixedArray
      *                                                                              the ones used in $sequence. If any is missing, the default case-sensitive
      *                                                                              comparison is used
      *
-     * @return null|non-empty-array<int, Token> an array containing the tokens matching the sequence elements, indexed by their position
+     * @return null|non-empty-array<int<0, max>, Token> an array containing the tokens matching the sequence elements, indexed by their position
      */
     public function findSequence(array $sequence, int $start = 0, ?int $end = null, $caseSensitive = \true) : ?array
     {
@@ -632,10 +659,10 @@ class Tokens extends \SplFixedArray
         \reset($sequence);
         // remove the first token from the sequence, so we can freely iterate through the sequence after a match to
         // the first one is found
-        $key = \key($sequence);
-        $firstCs = self::isKeyCaseSensitive($caseSensitive, $key);
-        $firstToken = $sequence[$key];
-        unset($sequence[$key]);
+        $firstKey = \key($sequence);
+        $firstCs = self::isKeyCaseSensitive($caseSensitive, $firstKey);
+        $firstToken = $sequence[$firstKey];
+        unset($sequence[$firstKey]);
         // begin searching for the first token in the sequence (start included)
         $index = $start - 1;
         while ($index <= $end) {
@@ -731,7 +758,7 @@ class Tokens extends \SplFixedArray
             $slice = \is_array($slice) || $slice instanceof self ? $slice : [$slice];
             $sliceCount = \count($slice);
             for ($i = $previousSliceIndex - 1; $i >= $index; --$i) {
-                parent::offsetSet($i + $itemsCount, parent::offsetGet($i));
+                parent::offsetSet($i + $itemsCount, $this[$i]);
             }
             $previousSliceIndex = $index;
             $itemsCount -= $sliceCount;
@@ -819,6 +846,8 @@ class Tokens extends \SplFixedArray
         }
         // clear memory
         $this->setSize(0);
+        $this->blockStartCache = [];
+        $this->blockEndCache = [];
         $tokens = \token_get_all($code, \TOKEN_PARSE);
         $this->setSize(\count($tokens));
         foreach ($tokens as $index => $token) {
@@ -1001,7 +1030,7 @@ class Tokens extends \SplFixedArray
      * @param int                $searchIndex index of starting brace
      * @param bool               $findEnd     if method should find block's end or start
      *
-     * @return int index of opposite brace
+     * @return int<0, max> index of opposite brace
      */
     private function findOppositeBlockEdge(int $type, int $searchIndex, bool $findEnd) : int
     {
@@ -1018,7 +1047,7 @@ class Tokens extends \SplFixedArray
         $startEdge = $blockEdgeDefinitions[$type]['start'];
         $endEdge = $blockEdgeDefinitions[$type]['end'];
         $startIndex = $searchIndex;
-        $endIndex = $this->count() - 1;
+        $endIndex = \count($this) - 1;
         $indexOffset = 1;
         if (!$findEnd) {
             [$startEdge, $endEdge] = [$endEdge, $startEdge];

@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Config;
 
-use ECSPrefix202402\Illuminate\Container\Container;
+use ECSPrefix202410\Illuminate\Container\Container;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
@@ -18,9 +18,9 @@ use Symplify\EasyCodingStandard\DependencyInjection\CompilerPass\RemoveExcludedC
 use Symplify\EasyCodingStandard\DependencyInjection\CompilerPass\RemoveMutualCheckersCompilerPass;
 use Symplify\EasyCodingStandard\DependencyInjection\SimpleParameterProvider;
 use Symplify\EasyCodingStandard\ValueObject\Option;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
-use ECSPrefix202402\Webmozart\Assert\Assert;
-use ECSPrefix202402\Webmozart\Assert\InvalidArgumentException;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
+use ECSPrefix202410\Webmozart\Assert\Assert;
+use ECSPrefix202410\Webmozart\Assert\InvalidArgumentException;
 /**
  * @api
  */
@@ -155,6 +155,13 @@ final class ECSConfig extends Container
     public function disableParallel() : void
     {
         SimpleParameterProvider::setParameter(Option::PARALLEL, \false);
+    }
+    /**
+     * @api
+     */
+    public function reportingRealPath(bool $absolute = \true) : void
+    {
+        SimpleParameterProvider::setParameter(Option::REPORTING_REALPATH, $absolute);
     }
     /**
      * @link https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/blob/master/doc/ruleSets/index.rst

@@ -10,10 +10,11 @@ use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 use Symplify\CodingStandard\DocBlock\UselessDocBlockCleaner;
 use Symplify\CodingStandard\Fixer\AbstractSymplifyFixer;
+use Symplify\CodingStandard\Fixer\Naming\ClassNameResolver;
 use Symplify\CodingStandard\TokenRunner\Traverser\TokenReverser;
-use ECSPrefix202402\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202402\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202410\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202410\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\Commenting\RemoveUselessDefaultCommentFixer\RemoveUselessDefaultCommentFixerTest
  */
@@ -30,13 +31,19 @@ final class RemoveUselessDefaultCommentFixer extends AbstractSymplifyFixer imple
      */
     private $tokenReverser;
     /**
+     * @readonly
+     * @var \Symplify\CodingStandard\Fixer\Naming\ClassNameResolver
+     */
+    private $classNameResolver;
+    /**
      * @var string
      */
     private const ERROR_MESSAGE = 'Remove useless PHPStorm-generated @todo comments, redundant "Class XY" or "gets service" comments etc.';
-    public function __construct(UselessDocBlockCleaner $uselessDocBlockCleaner, TokenReverser $tokenReverser)
+    public function __construct(UselessDocBlockCleaner $uselessDocBlockCleaner, TokenReverser $tokenReverser, ClassNameResolver $classNameResolver)
     {
         $this->uselessDocBlockCleaner = $uselessDocBlockCleaner;
         $this->tokenReverser = $tokenReverser;
+        $this->classNameResolver = $classNameResolver;
     }
     public function getDefinition() : FixerDefinitionInterface
     {
@@ -64,8 +71,9 @@ final class RemoveUselessDefaultCommentFixer extends AbstractSymplifyFixer imple
             if (!$token->isGivenKind([\T_DOC_COMMENT, \T_COMMENT])) {
                 continue;
             }
+            $classLikeName = $this->classNameResolver->resolveClassName($fileInfo, $tokens);
             $originalContent = $token->getContent();
-            $cleanedDocContent = $this->uselessDocBlockCleaner->clearDocTokenContent($token);
+            $cleanedDocContent = $this->uselessDocBlockCleaner->clearDocTokenContent($token, $classLikeName);
             if ($cleanedDocContent === '') {
                 // remove token
                 $tokens->clearTokenAndMergeSurroundingWhitespace($index);

@@ -10,26 +10,25 @@ use PhpParser\Node\Expr\BinaryOp\Coalesce;
 use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\MagicConst\Line;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Type\Constant\ConstantStringType;
-use Rector\Core\NodeAnalyzer\ExprAnalyzer;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use Rector\NodeAnalyzer\ExprAnalyzer;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog https://3v4l.org/XPEEl
- * @changelog https://3v4l.org/ObNQZ
  * @see \Rector\Tests\Php71\Rector\BinaryOp\BinaryOpBetweenNumberAndStringRector\BinaryOpBetweenNumberAndStringRectorTest
  */
 final class BinaryOpBetweenNumberAndStringRector extends AbstractRector implements MinPhpVersionInterface
 {
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\ExprAnalyzer
+     * @var \Rector\NodeAnalyzer\ExprAnalyzer
      */
     private $exprAnalyzer;
     public function __construct(ExprAnalyzer $exprAnalyzer)
@@ -58,7 +57,7 @@ class SomeClass
     public function run()
     {
         $value = 5 + 0;
-        $value = 5.0 + 0;
+        $value = 5.0 + 0.0;
     }
 }
 CODE_SAMPLE
@@ -89,11 +88,11 @@ CODE_SAMPLE
             return null;
         }
         if ($this->isStringOrStaticNonNumericString($node->left) && $this->nodeTypeResolver->isNumberType($node->right)) {
-            $node->left = new LNumber(0);
+            $node->left = $this->nodeTypeResolver->getNativeType($node->right)->isInteger()->yes() ? new LNumber(0) : new DNumber(0);
             return $node;
         }
         if ($this->isStringOrStaticNonNumericString($node->right) && $this->nodeTypeResolver->isNumberType($node->left)) {
-            $node->right = new LNumber(0);
+            $node->right = $this->nodeTypeResolver->getNativeType($node->left)->isInteger()->yes() ? new LNumber(0) : new DNumber(0);
             return $node;
         }
         return null;

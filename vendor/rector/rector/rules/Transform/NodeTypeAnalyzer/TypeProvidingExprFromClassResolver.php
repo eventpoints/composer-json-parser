@@ -19,9 +19,9 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\TypeWithClassName;
-use Rector\Core\ValueObject\MethodName;
 use Rector\Naming\Naming\PropertyNaming;
 use Rector\NodeNameResolver\NodeNameResolver;
+use Rector\ValueObject\MethodName;
 final class TypeProvidingExprFromClassResolver
 {
     /**
@@ -69,7 +69,7 @@ final class TypeProvidingExprFromClassResolver
     {
         $methodReflections = $this->getClassMethodReflections($classReflection);
         foreach ($methodReflections as $methodReflection) {
-            $functionVariant = ParametersAcceptorSelector::selectSingle($methodReflection->getVariants());
+            $functionVariant = ParametersAcceptorSelector::combineAcceptors($methodReflection->getVariants());
             $returnType = $functionVariant->getReturnType();
             if (!$this->isMatchingType($returnType, $objectType)) {
                 continue;

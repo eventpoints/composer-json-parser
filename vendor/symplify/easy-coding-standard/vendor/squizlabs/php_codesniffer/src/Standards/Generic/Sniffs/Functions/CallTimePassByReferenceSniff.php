@@ -21,7 +21,7 @@ class CallTimePassByReferenceSniff implements Sniff
      */
     public function register()
     {
-        return [\T_STRING, \T_VARIABLE];
+        return [\T_STRING, \T_VARIABLE, \T_ANON_CLASS, \T_PARENT, \T_SELF, \T_STATIC];
     }
     //end register()
     /**
@@ -39,19 +39,19 @@ class CallTimePassByReferenceSniff implements Sniff
         $findTokens = Tokens::$emptyTokens;
         $findTokens[] = \T_BITWISE_AND;
         $prev = $phpcsFile->findPrevious($findTokens, $stackPtr - 1, null, \true);
-        // Skip tokens that are the names of functions or classes
+        // Skip tokens that are the names of functions
         // within their definitions. For example: function myFunction...
         // "myFunction" is T_STRING but we should skip because it is not a
         // function or method *call*.
         $prevCode = $tokens[$prev]['code'];
-        if ($prevCode === \T_FUNCTION || $prevCode === \T_CLASS) {
+        if ($prevCode === \T_FUNCTION) {
             return;
         }
         // If the next non-whitespace token after the function or method call
         // is not an opening parenthesis then it cant really be a *call*.
         $functionName = $stackPtr;
         $openBracket = $phpcsFile->findNext(Tokens::$emptyTokens, $functionName + 1, null, \true);
-        if ($tokens[$openBracket]['code'] !== \T_OPEN_PARENTHESIS) {
+        if ($openBracket === \false || $tokens[$openBracket]['code'] !== \T_OPEN_PARENTHESIS) {
             return;
         }
         if (isset($tokens[$openBracket]['parenthesis_closer']) === \false) {
@@ -61,9 +61,6 @@ class CallTimePassByReferenceSniff implements Sniff
         $nextSeparator = $openBracket;
         $find = [\T_VARIABLE, \T_OPEN_SHORT_ARRAY];
         while (($nextSeparator = $phpcsFile->findNext($find, $nextSeparator + 1, $closeBracket)) !== \false) {
-            if (isset($tokens[$nextSeparator]['nested_parenthesis']) === \false) {
-                continue;
-            }
             if ($tokens[$nextSeparator]['code'] === \T_OPEN_SHORT_ARRAY) {
                 $nextSeparator = $tokens[$nextSeparator]['bracket_closer'];
                 continue;

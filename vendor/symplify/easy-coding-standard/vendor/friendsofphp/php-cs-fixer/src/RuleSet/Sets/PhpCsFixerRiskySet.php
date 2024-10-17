@@ -30,7 +30,6 @@ final class PhpCsFixerRiskySet extends AbstractRuleSetDescription
             // @TODO: consider switching to `true`, like in @Symfony
             'native_constant_invocation' => ['fix_built_in' => \false, 'include' => ['DIRECTORY_SEPARATOR', 'PHP_INT_SIZE', 'PHP_SAPI', 'PHP_VERSION_ID'], 'scope' => 'namespaced', 'strict' => \true],
             'no_alias_functions' => ['sets' => ['@all']],
-            'no_unreachable_default_argument_value' => \true,
             'no_unset_on_property' => \true,
             'php_unit_data_provider_name' => \true,
             'php_unit_data_provider_return_type' => \true,

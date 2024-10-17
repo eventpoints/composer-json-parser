@@ -22,9 +22,9 @@ use PhpParser\Node\Stmt\Switch_;
 use PhpParser\Node\Stmt\Trait_;
 use PhpParser\Node\Stmt\TryCatch;
 use PhpParser\Node\Stmt\While_;
-use Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface;
-use Rector\Core\Rector\AbstractRector;
+use Rector\Contract\PhpParser\Node\StmtsAwareInterface;
 use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -72,15 +72,15 @@ CODE_SAMPLE
     }
     /**
      * @param StmtsAwareInterface|ClassLike $node
-     * @return null|\Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike
+     * @return null|\Rector\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike
      */
     public function refactor(Node $node)
     {
         return $this->processAddNewLine($node, \false);
     }
     /**
-     * @param \Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike $node
-     * @return null|\Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike
+     * @param \Rector\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike $node
+     * @return null|\Rector\Contract\PhpParser\Node\StmtsAwareInterface|\PhpParser\Node\Stmt\ClassLike
      */
     private function processAddNewLine($node, bool $hasChanged, int $jumpToKey = 0)
     {
@@ -89,6 +89,7 @@ CODE_SAMPLE
         }
         \end($node->stmts);
         $totalKeys = \key($node->stmts);
+        \reset($node->stmts);
         for ($key = $jumpToKey; $key < $totalKeys; ++$key) {
             if (!isset($node->stmts[$key], $node->stmts[$key + 1])) {
                 break;
@@ -122,7 +123,7 @@ CODE_SAMPLE
     }
     /**
      * @param int|float $rangeLine
-     * @return int|float
+     * @return float|int
      */
     private function resolveRangeLineFromComment($rangeLine, int $line, int $endLine, Stmt $nextStmt)
     {

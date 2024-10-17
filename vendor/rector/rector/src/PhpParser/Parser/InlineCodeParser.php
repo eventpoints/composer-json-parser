@@ -1,33 +1,33 @@
 <?php
 
 declare (strict_types=1);
-namespace Rector\Core\PhpParser\Parser;
+namespace Rector\PhpParser\Parser;
 
-use RectorPrefix202312\Nette\Utils\FileSystem;
-use RectorPrefix202312\Nette\Utils\Strings;
+use RectorPrefix202410\Nette\Utils\FileSystem;
+use RectorPrefix202410\Nette\Utils\Strings;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Scalar\Encapsed;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt;
-use Rector\Core\PhpParser\Node\Value\ValueResolver;
-use Rector\Core\PhpParser\Printer\BetterStandardPrinter;
-use Rector\Core\Util\StringUtils;
+use Rector\PhpParser\Node\Value\ValueResolver;
+use Rector\PhpParser\Printer\BetterStandardPrinter;
+use Rector\Util\StringUtils;
 final class InlineCodeParser
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Printer\BetterStandardPrinter
+     * @var \Rector\PhpParser\Printer\BetterStandardPrinter
      */
     private $betterStandardPrinter;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Parser\SimplePhpParser
+     * @var \Rector\PhpParser\Parser\SimplePhpParser
      */
     private $simplePhpParser;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\Value\ValueResolver
+     * @var \Rector\PhpParser\Node\Value\ValueResolver
      */
     private $valueResolver;
     /**
@@ -65,25 +65,28 @@ final class InlineCodeParser
      * @see https://regex101.com/r/nSO3Eq/1
      */
     private const BACKREFERENCE_NO_DOUBLE_QUOTE_START_REGEX = '#(?<!")(?<backreference>\\$\\d+)#';
-    public function __construct(BetterStandardPrinter $betterStandardPrinter, \Rector\Core\PhpParser\Parser\SimplePhpParser $simplePhpParser, ValueResolver $valueResolver)
+    public function __construct(BetterStandardPrinter $betterStandardPrinter, \Rector\PhpParser\Parser\SimplePhpParser $simplePhpParser, ValueResolver $valueResolver)
     {
         $this->betterStandardPrinter = $betterStandardPrinter;
         $this->simplePhpParser = $simplePhpParser;
         $this->valueResolver = $valueResolver;
     }
     /**
+     * @api downgrade
+     *
      * @return Stmt[]
      */
-    public function parse(string $content) : array
+    public function parseFile(string $fileName) : array
     {
-        // to cover files too
-        if (\is_file($content)) {
-            $content = FileSystem::read($content);
-        }
-        // wrap code so php-parser can interpret it
-        $content = StringUtils::isMatch($content, self::OPEN_PHP_TAG_REGEX) ? $content : '<?php ' . $content;
-        $content = StringUtils::isMatch($content, self::ENDING_SEMI_COLON_REGEX) ? $content : $content . ';';
-        return $this->simplePhpParser->parseString($content);
+        $fileContent = FileSystem::read($fileName);
+        return $this->parseCode($fileContent);
+    }
+    /**
+     * @return Stmt[]
+     */
+    public function parseString(string $fileContent) : array
+    {
+        return $this->parseCode($fileContent);
     }
     public function stringify(Expr $expr) : string
     {
@@ -104,6 +107,16 @@ final class InlineCodeParser
             return $this->resolveConcatValue($expr);
         }
         return $this->betterStandardPrinter->print($expr);
+    }
+    /**
+     * @return Stmt[]
+     */
+    private function parseCode(string $code) : array
+    {
+        // wrap code so php-parser can interpret it
+        $code = StringUtils::isMatch($code, self::OPEN_PHP_TAG_REGEX) ? $code : '<?php ' . $code;
+        $code = StringUtils::isMatch($code, self::ENDING_SEMI_COLON_REGEX) ? $code : $code . ';';
+        return $this->simplePhpParser->parseString($code);
     }
     private function resolveEncapsedValue(Encapsed $encapsed) : string
     {

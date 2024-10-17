@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace RectorPrefix202312\Symfony\Component\Filesystem;
+namespace RectorPrefix202410\Symfony\Component\Filesystem;
 
-use RectorPrefix202312\Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use RectorPrefix202312\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
-use RectorPrefix202312\Symfony\Component\Filesystem\Exception\IOException;
+use RectorPrefix202410\Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use RectorPrefix202410\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
+use RectorPrefix202410\Symfony\Component\Filesystem\Exception\IOException;
 /**
  * Provides basic utility to manipulate the file system.
  *
@@ -66,6 +66,8 @@ class Filesystem
             if ($originIsLocal) {
                 // Like `cp`, preserve executable permission bits
                 self::box('chmod', $targetFile, \fileperms($targetFile) | \fileperms($originFile) & 0111);
+                // Like `cp`, preserve the file modification time
+                self::box('touch', $targetFile, \filemtime($originFile));
                 if ($bytesCopied !== ($bytesOrigin = \filesize($originFile))) {
                     throw new IOException(\sprintf('Failed to copy the whole content of "%s" to "%s" (%g of %g bytes copied).', $originFile, $targetFile, $bytesCopied, $bytesOrigin), 0, null, $originFile);
                 }
@@ -119,7 +121,7 @@ class Filesystem
      * @throws IOException When touch fails
      * @param string|iterable $files
      */
-    public function touch($files, int $time = null, int $atime = null)
+    public function touch($files, ?int $time = null, ?int $atime = null)
     {
         foreach ($this->toIterable($files) as $file) {
             if (!($time ? self::box('touch', $file, $time, $atime) : self::box('touch', $file))) {
@@ -155,7 +157,7 @@ class Filesystem
                 }
             } elseif (\is_dir($file)) {
                 if (!$isRecursive) {
-                    $tmpName = \dirname(\realpath($file)) . '/.' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-_'));
+                    $tmpName = \dirname(\realpath($file)) . '/.!' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-!'));
                     if (\file_exists($tmpName)) {
                         try {
                             self::doRemove([$tmpName], \true);
@@ -178,7 +180,7 @@ class Filesystem
                     }
                     throw new IOException(\sprintf('Failed to remove directory "%s": ', $file) . $lastError);
                 }
-            } elseif (!self::box('unlink', $file) && (\strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
+            } elseif (!self::box('unlink', $file) && (self::$lastError && \strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
                 throw new IOException(\sprintf('Failed to remove file "%s": ', $file) . self::$lastError);
             }
         }
@@ -209,6 +211,9 @@ class Filesystem
     /**
      * Change the owner of an array of files or directories.
      *
+     * This method always throws on Windows, as the underlying PHP function is not supported.
+     * @see https://www.php.net/chown
+     *
      * @param string|int $user      A user name or number
      * @param bool       $recursive Whether change the owner recursively or not
      *
@@ -236,6 +241,9 @@ class Filesystem
     }
     /**
      * Change the group of an array of files or directories.
+     *
+     * This method always throws on Windows, as the underlying PHP function is not supported.
+     * @see https://www.php.net/chgrp
      *
      * @param string|int $group     A group name or number
      * @param bool       $recursive Whether change the group recursively or not
@@ -471,7 +479,7 @@ class Filesystem
      *
      * @throws IOException When file type is unknown
      */
-    public function mirror(string $originDir, string $targetDir, \Traversable $iterator = null, array $options = [])
+    public function mirror(string $originDir, string $targetDir, ?\Traversable $iterator = null, array $options = [])
     {
         $targetDir = \rtrim($targetDir, '/\\');
         $originDir = \rtrim($originDir, '/\\');
@@ -592,10 +600,13 @@ class Filesystem
             if (\false === self::box('file_put_contents', $tmpFile, $content)) {
                 throw new IOException(\sprintf('Failed to write file "%s": ', $filename) . self::$lastError, 0, null, $filename);
             }
-            self::box('chmod', $tmpFile, \file_exists($filename) ? \fileperms($filename) : 0666 & ~\umask());
+            self::box('chmod', $tmpFile, self::box('fileperms', $filename) ?: 0666 & ~\umask());
             $this->rename($tmpFile, $filename, \true);
         } finally {
             if (\file_exists($tmpFile)) {
+                if ('\\' === \DIRECTORY_SEPARATOR && !\is_writable($tmpFile)) {
+                    self::box('chmod', $tmpFile, self::box('fileperms', $tmpFile) | 0200);
+                }
                 self::box('unlink', $tmpFile);
             }
         }

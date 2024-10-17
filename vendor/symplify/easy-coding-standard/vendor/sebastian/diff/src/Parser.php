@@ -9,7 +9,7 @@ declare (strict_types=1);
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\SebastianBergmann\Diff;
+namespace ECSPrefix202410\SebastianBergmann\Diff;
 
 use function array_pop;
 use function assert;

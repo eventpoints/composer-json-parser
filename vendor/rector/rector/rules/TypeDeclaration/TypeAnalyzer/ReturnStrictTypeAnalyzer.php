@@ -20,13 +20,17 @@ use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
-use PHPStan\Reflection\FunctionVariantWithPhpDocs;
+use PHPStan\Reflection\Native\NativeFunctionReflection;
+use PHPStan\Reflection\Native\NativeMethodReflection;
+use PHPStan\Reflection\ParametersAcceptorWithPhpDocs;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\StaticType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeTraverser;
-use Rector\Core\Reflection\ReflectionResolver;
+use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\NodeTypeResolver\PHPStan\ParametersAcceptorSelectorVariantsWrapper;
 use Rector\PHPStanStaticTypeMapper\Enum\TypeKind;
+use Rector\Reflection\ReflectionResolver;
 use Rector\StaticTypeMapper\StaticTypeMapper;
 use Rector\StaticTypeMapper\ValueObject\Type\FullyQualifiedObjectType;
 use Rector\TypeDeclaration\NodeAnalyzer\TypeNodeUnwrapper;
@@ -34,7 +38,7 @@ final class ReturnStrictTypeAnalyzer
 {
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
@@ -94,22 +98,41 @@ final class ReturnStrictTypeAnalyzer
      */
     public function resolveMethodCallReturnNode($call) : ?Node
     {
+        $returnType = $this->resolveMethodCallReturnType($call);
+        if (!$returnType instanceof Type) {
+            return null;
+        }
+        return $this->staticTypeMapper->mapPHPStanTypeToPhpParserNode($returnType, TypeKind::RETURN);
+    }
+    /**
+     * @param \PhpParser\Node\Expr\MethodCall|\PhpParser\Node\Expr\StaticCall|\PhpParser\Node\Expr\FuncCall $call
+     */
+    public function resolveMethodCallReturnType($call) : ?Type
+    {
         $methodReflection = $this->reflectionResolver->resolveFunctionLikeReflectionFromCall($call);
         if ($methodReflection === null) {
             return null;
         }
-        $parametersAcceptor = $methodReflection->getVariants()[0];
-        if ($parametersAcceptor instanceof FunctionVariantWithPhpDocs) {
-            // native return type is needed, as docblock can be false
-            $returnType = $parametersAcceptor->getNativeReturnType();
-        } else {
-            $returnType = $parametersAcceptor->getReturnType();
-        }
-        if ($returnType instanceof MixedType) {
+        $scope = $call->getAttribute(AttributeKey::SCOPE);
+        if (!$scope instanceof Scope) {
             return null;
         }
-        $returnType = $this->normalizeStaticType($call, $returnType);
-        return $this->staticTypeMapper->mapPHPStanTypeToPhpParserNode($returnType, TypeKind::RETURN);
+        $parametersAcceptorWithPhpDocs = ParametersAcceptorSelectorVariantsWrapper::select($methodReflection, $call, $scope);
+        if ($methodReflection instanceof NativeFunctionReflection || $methodReflection instanceof NativeMethodReflection) {
+            $returnType = $parametersAcceptorWithPhpDocs->getReturnType();
+        } elseif ($parametersAcceptorWithPhpDocs instanceof ParametersAcceptorWithPhpDocs) {
+            // native return type is needed, as docblock can be false
+            $returnType = $parametersAcceptorWithPhpDocs->getNativeReturnType();
+        } else {
+            $returnType = $parametersAcceptorWithPhpDocs->getReturnType();
+        }
+        if ($returnType instanceof MixedType) {
+            if ($returnType->isExplicitMixed()) {
+                return $returnType;
+            }
+            return null;
+        }
+        return $this->normalizeStaticType($call, $returnType);
     }
     /**
      * @param \PhpParser\Node\Expr\MethodCall|\PhpParser\Node\Expr\StaticCall|\PhpParser\Node\Expr\FuncCall $call

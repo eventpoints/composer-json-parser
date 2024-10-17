@@ -6,10 +6,14 @@ namespace Rector\DeadCode\Rector\Foreach_;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Foreach_;
-use Rector\Core\Contract\PhpParser\Node\StmtsAwareInterface;
-use Rector\Core\NodeManipulator\StmtsManipulator;
-use Rector\Core\PhpParser\Node\BetterNodeFinder;
-use Rector\Core\Rector\AbstractRector;
+use PhpParser\NodeFinder;
+use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
+use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
+use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
+use Rector\Comments\NodeDocBlock\DocBlockUpdater;
+use Rector\Contract\PhpParser\Node\StmtsAwareInterface;
+use Rector\NodeManipulator\StmtsManipulator;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -19,18 +23,30 @@ final class RemoveUnusedForeachKeyRector extends AbstractRector
 {
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\BetterNodeFinder
+     * @var \PhpParser\NodeFinder
      */
-    private $betterNodeFinder;
+    private $nodeFinder;
     /**
      * @readonly
-     * @var \Rector\Core\NodeManipulator\StmtsManipulator
+     * @var \Rector\NodeManipulator\StmtsManipulator
      */
     private $stmtsManipulator;
-    public function __construct(BetterNodeFinder $betterNodeFinder, StmtsManipulator $stmtsManipulator)
+    /**
+     * @readonly
+     * @var \Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory
+     */
+    private $phpDocInfoFactory;
+    /**
+     * @readonly
+     * @var \Rector\Comments\NodeDocBlock\DocBlockUpdater
+     */
+    private $docBlockUpdater;
+    public function __construct(NodeFinder $nodeFinder, StmtsManipulator $stmtsManipulator, PhpDocInfoFactory $phpDocInfoFactory, DocBlockUpdater $docBlockUpdater)
     {
-        $this->betterNodeFinder = $betterNodeFinder;
+        $this->nodeFinder = $nodeFinder;
         $this->stmtsManipulator = $stmtsManipulator;
+        $this->phpDocInfoFactory = $phpDocInfoFactory;
+        $this->docBlockUpdater = $docBlockUpdater;
     }
     public function getRuleDefinition() : RuleDefinition
     {
@@ -72,17 +88,30 @@ CODE_SAMPLE
                 continue;
             }
             $keyVar = $stmt->keyVar;
-            $isNodeUsed = (bool) $this->betterNodeFinder->findFirst($stmt->stmts, function (Node $node) use($keyVar) : bool {
+            $isNodeUsed = (bool) $this->nodeFinder->findFirst($stmt->stmts, function (Node $node) use($keyVar) : bool {
                 return $this->nodeComparator->areNodesEqual($node, $keyVar);
             });
             if ($isNodeUsed) {
                 continue;
             }
-            if ($this->stmtsManipulator->isVariableUsedInNextStmt($node, $key + 1, (string) $this->getName($keyVar))) {
+            $keyVarName = (string) $this->getName($keyVar);
+            if ($this->stmtsManipulator->isVariableUsedInNextStmt($node, $key + 1, $keyVarName)) {
                 continue;
             }
             $stmt->keyVar = null;
             $hasChanged = \true;
+            $phpDocInfo = $this->phpDocInfoFactory->createFromNode($stmt);
+            if (!$phpDocInfo instanceof PhpDocInfo) {
+                continue;
+            }
+            $varTagValues = $phpDocInfo->getPhpDocNode()->getVarTagValues();
+            foreach ($varTagValues as $varTagValue) {
+                $variableName = $varTagValue->variableName;
+                if ($varTagValue->variableName === '$' . $keyVarName) {
+                    $phpDocInfo->removeByType(VarTagValueNode::class, $variableName);
+                    $this->docBlockUpdater->updateRefactoredNodeWithPhpDocInfo($stmt);
+                }
+            }
         }
         if ($hasChanged) {
             return $node;

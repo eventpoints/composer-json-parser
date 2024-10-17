@@ -15,20 +15,24 @@ use PhpParser\Node\Scalar\Encapsed;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
+use PHPStan\Reflection\FunctionReflection;
 use PHPStan\Reflection\Native\NativeFunctionReflection;
+use PHPStan\Reflection\Native\NativeParameterWithPhpDocsReflection;
+use PHPStan\Reflection\ParametersAcceptor;
 use PHPStan\Type\ErrorType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\NullType;
 use PHPStan\Type\Type;
-use Rector\Core\NodeAnalyzer\ArgsAnalyzer;
-use Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer;
-use Rector\Core\PhpParser\Node\Value\ValueResolver;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\Reflection\ReflectionResolver;
-use Rector\Core\ValueObject\PhpVersionFeature;
+use PHPStan\Type\UnionType;
+use Rector\NodeAnalyzer\ArgsAnalyzer;
+use Rector\NodeAnalyzer\PropertyFetchAnalyzer;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Rector\NodeTypeResolver\PHPStan\ParametersAcceptorSelectorVariantsWrapper;
 use Rector\Php81\Enum\NameNullToStrictNullFunctionMap;
+use Rector\PhpParser\Node\Value\ValueResolver;
+use Rector\Rector\AbstractRector;
+use Rector\Reflection\ReflectionResolver;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -39,22 +43,22 @@ final class NullToStrictStringFuncCallArgRector extends AbstractRector implement
 {
     /**
      * @readonly
-     * @var \Rector\Core\Reflection\ReflectionResolver
+     * @var \Rector\Reflection\ReflectionResolver
      */
     private $reflectionResolver;
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\ArgsAnalyzer
+     * @var \Rector\NodeAnalyzer\ArgsAnalyzer
      */
     private $argsAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\NodeAnalyzer\PropertyFetchAnalyzer
+     * @var \Rector\NodeAnalyzer\PropertyFetchAnalyzer
      */
     private $propertyFetchAnalyzer;
     /**
      * @readonly
-     * @var \Rector\Core\PhpParser\Node\Value\ValueResolver
+     * @var \Rector\PhpParser\Node\Value\ValueResolver
      */
     private $valueResolver;
     public function __construct(ReflectionResolver $reflectionResolver, ArgsAnalyzer $argsAnalyzer, PropertyFetchAnalyzer $propertyFetchAnalyzer, ValueResolver $valueResolver)
@@ -112,9 +116,14 @@ CODE_SAMPLE
         }
         $classReflection = $scope->getClassReflection();
         $isTrait = $classReflection instanceof ClassReflection && $classReflection->isTrait();
+        $functionReflection = $this->reflectionResolver->resolveFunctionLikeReflectionFromCall($node);
+        if (!$functionReflection instanceof FunctionReflection) {
+            return null;
+        }
+        $parametersAcceptor = ParametersAcceptorSelectorVariantsWrapper::select($functionReflection, $node, $scope);
         $isChanged = \false;
         foreach ($positions as $position) {
-            $result = $this->processNullToStrictStringOnNodePosition($node, $args, $position, $isTrait, $scope);
+            $result = $this->processNullToStrictStringOnNodePosition($node, $args, $position, $isTrait, $scope, $parametersAcceptor);
             if ($result instanceof Node) {
                 $node = $result;
                 $isChanged = \true;
@@ -153,7 +162,7 @@ CODE_SAMPLE
      * @param Arg[] $args
      * @param int|string $position
      */
-    private function processNullToStrictStringOnNodePosition(FuncCall $funcCall, array $args, $position, bool $isTrait, Scope $scope) : ?FuncCall
+    private function processNullToStrictStringOnNodePosition(FuncCall $funcCall, array $args, $position, bool $isTrait, Scope $scope, ParametersAcceptor $parametersAcceptor) : ?FuncCall
     {
         if (!isset($args[$position])) {
             return null;
@@ -168,21 +177,52 @@ CODE_SAMPLE
         if ($type->isString()->yes()) {
             return null;
         }
-        if (!$type instanceof MixedType && !$type instanceof NullType) {
+        $nativeType = $this->nodeTypeResolver->getNativeType($argValue);
+        if ($nativeType->isString()->yes()) {
+            return null;
+        }
+        if ($this->shouldSkipType($type)) {
             return null;
         }
         if ($argValue instanceof Encapsed) {
             return null;
         }
-        if ($this->isAnErrorTypeFromParentScope($argValue, $scope)) {
+        if ($this->isAnErrorType($argValue, $nativeType, $scope)) {
             return null;
         }
         if ($this->shouldSkipTrait($argValue, $type, $isTrait)) {
             return null;
         }
+        $parameter = $parametersAcceptor->getParameters()[$position] ?? null;
+        if ($parameter instanceof NativeParameterWithPhpDocsReflection && $parameter->getType() instanceof UnionType) {
+            $parameterType = $parameter->getType();
+            if (!$this->isValidUnionType($parameterType)) {
+                return null;
+            }
+        }
         $args[$position]->value = new CastString_($argValue);
         $funcCall->args = $args;
         return $funcCall;
+    }
+    private function isValidUnionType(Type $type) : bool
+    {
+        if (!$type instanceof UnionType) {
+            return \false;
+        }
+        foreach ($type->getTypes() as $childType) {
+            if ($childType->isString()->yes()) {
+                continue;
+            }
+            if ($childType->isNull()->yes()) {
+                continue;
+            }
+            return \false;
+        }
+        return \true;
+    }
+    private function shouldSkipType(Type $type) : bool
+    {
+        return !$type instanceof MixedType && !$type instanceof NullType && !$this->isValidUnionType($type);
     }
     private function shouldSkipTrait(Expr $expr, Type $type, bool $isTrait) : bool
     {
@@ -200,8 +240,11 @@ CODE_SAMPLE
         }
         return \true;
     }
-    private function isAnErrorTypeFromParentScope(Expr $expr, Scope $scope) : bool
+    private function isAnErrorType(Expr $expr, Type $type, Scope $scope) : bool
     {
+        if ($type instanceof ErrorType) {
+            return \true;
+        }
         $parentScope = $scope->getParentScope();
         if ($parentScope instanceof Scope) {
             return $parentScope->getType($expr) instanceof ErrorType;

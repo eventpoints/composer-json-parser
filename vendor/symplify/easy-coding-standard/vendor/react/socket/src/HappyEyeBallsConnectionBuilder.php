@@ -1,13 +1,13 @@
 <?php
 
-namespace ECSPrefix202402\React\Socket;
+namespace ECSPrefix202410\React\Socket;
 
-use ECSPrefix202402\React\Dns\Model\Message;
-use ECSPrefix202402\React\Dns\Resolver\ResolverInterface;
-use ECSPrefix202402\React\EventLoop\LoopInterface;
-use ECSPrefix202402\React\EventLoop\TimerInterface;
-use ECSPrefix202402\React\Promise;
-use ECSPrefix202402\React\Promise\PromiseInterface;
+use ECSPrefix202410\React\Dns\Model\Message;
+use ECSPrefix202410\React\Dns\Resolver\ResolverInterface;
+use ECSPrefix202410\React\EventLoop\LoopInterface;
+use ECSPrefix202410\React\EventLoop\TimerInterface;
+use ECSPrefix202410\React\Promise;
+use ECSPrefix202410\React\Promise\PromiseInterface;
 /**
  * @internal
  */

@@ -13,7 +13,12 @@ declare (strict_types=1);
 namespace PhpCsFixer\Tokenizer\Analyzer\Analysis;
 
 /**
+ * @author VeeWee <toonverwerft@gmail.com>
+ * @author Greg Korba <greg@codito.dev>
+ *
  * @internal
+ *
+ * @phpstan-type _ImportType 'class'|'constant'|'function'
  */
 final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analysis\StartEndTokenAwareAnalysis
 {
@@ -23,7 +28,8 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
     public const TYPE_CONSTANT = 3;
     /**
      * The fully qualified use namespace.
-     * @var string
+     *
+     * @var class-string
      */
     private $fullName;
     /**
@@ -31,6 +37,11 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
      * @var string
      */
     private $shortName;
+    /**
+     * Is the use statement part of multi-use (`use A, B, C;`, `use A\{B, C};`)?
+     * @var bool
+     */
+    private $isInMulti;
     /**
      * Is the use statement being aliased?
      * @var bool
@@ -47,19 +58,43 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
      */
     private $endIndex;
     /**
+     * The start index of the single import in the multi-use statement.
+     * @var int|null
+     */
+    private $chunkStartIndex;
+    /**
+     * The end index of the single import in the multi-use statement.
+     * @var int|null
+     */
+    private $chunkEndIndex;
+    /**
      * The type of import: class, function or constant.
-     * @var int
+     *
+     * @var self::TYPE_*
      */
     private $type;
-    public function __construct(string $fullName, string $shortName, bool $isAliased, int $startIndex, int $endIndex, int $type)
+    /**
+     * @param self::TYPE_* $type
+     * @param class-string $fullName
+     */
+    public function __construct(int $type, string $fullName, string $shortName, bool $isAliased, bool $isInMulti, int $startIndex, int $endIndex, ?int $chunkStartIndex = null, ?int $chunkEndIndex = null)
     {
+        if (\true === $isInMulti && (null === $chunkStartIndex || null === $chunkEndIndex)) {
+            throw new \LogicException('Chunk start and end index must be set when the import is part of a multi-use statement.');
+        }
+        $this->type = $type;
         $this->fullName = $fullName;
         $this->shortName = $shortName;
         $this->isAliased = $isAliased;
+        $this->isInMulti = $isInMulti;
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
-        $this->type = $type;
+        $this->chunkStartIndex = $chunkStartIndex;
+        $this->chunkEndIndex = $chunkEndIndex;
     }
+    /**
+     * @return class-string
+     */
     public function getFullName() : string
     {
         return $this->fullName;
@@ -72,6 +107,10 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
     {
         return $this->isAliased;
     }
+    public function isInMulti() : bool
+    {
+        return $this->isInMulti;
+    }
     public function getStartIndex() : int
     {
         return $this->startIndex;
@@ -80,9 +119,27 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
     {
         return $this->endIndex;
     }
+    public function getChunkStartIndex() : ?int
+    {
+        return $this->chunkStartIndex;
+    }
+    public function getChunkEndIndex() : ?int
+    {
+        return $this->chunkEndIndex;
+    }
+    /**
+     * @return self::TYPE_*
+     */
     public function getType() : int
     {
         return $this->type;
+    }
+    /**
+     * @return _ImportType
+     */
+    public function getHumanFriendlyType() : string
+    {
+        return [self::TYPE_CLASS => 'class', self::TYPE_FUNCTION => 'function', self::TYPE_CONSTANT => 'constant'][$this->type];
     }
     public function isClass() : bool
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Psr\SimpleCache;
+namespace ECSPrefix202410\Psr\SimpleCache;
 
 /**
  * Interface used for all types of exceptions thrown by the implementing library.

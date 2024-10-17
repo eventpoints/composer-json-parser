@@ -3,17 +3,17 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Parallel;
 
-use ECSPrefix202402\Clue\React\NDJson\Decoder;
-use ECSPrefix202402\Clue\React\NDJson\Encoder;
+use ECSPrefix202410\Clue\React\NDJson\Decoder;
+use ECSPrefix202410\Clue\React\NDJson\Encoder;
 use Symplify\EasyCodingStandard\Application\SingleFileProcessor;
 use Symplify\EasyCodingStandard\Parallel\ValueObject\Bridge;
 use Symplify\EasyCodingStandard\Utils\ParametersMerger;
 use Symplify\EasyCodingStandard\ValueObject\Configuration;
 use Symplify\EasyCodingStandard\ValueObject\Error\SystemError;
-use ECSPrefix202402\Symplify\EasyParallel\Enum\Action;
-use ECSPrefix202402\Symplify\EasyParallel\Enum\Content;
-use ECSPrefix202402\Symplify\EasyParallel\Enum\ReactCommand;
-use ECSPrefix202402\Symplify\EasyParallel\Enum\ReactEvent;
+use ECSPrefix202410\Symplify\EasyParallel\Enum\Action;
+use ECSPrefix202410\Symplify\EasyParallel\Enum\Content;
+use ECSPrefix202410\Symplify\EasyParallel\Enum\ReactCommand;
+use ECSPrefix202410\Symplify\EasyParallel\Enum\ReactEvent;
 use Throwable;
 final class WorkerRunner
 {

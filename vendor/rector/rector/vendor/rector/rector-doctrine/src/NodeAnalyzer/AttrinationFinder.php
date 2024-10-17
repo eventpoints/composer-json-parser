@@ -32,8 +32,6 @@ final class AttrinationFinder
         $this->attributeFinder = $attributeFinder;
     }
     /**
-     * @api
-     * @param class-string $name
      * @param \PhpParser\Node\Stmt\Property|\PhpParser\Node\Stmt\Class_|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Param $node
      * @return \Rector\BetterPhpDocParser\PhpDoc\DoctrineAnnotationTagValueNode|\PhpParser\Node\Attribute|null
      */
@@ -46,7 +44,6 @@ final class AttrinationFinder
         return $this->attributeFinder->findAttributeByClass($node, $name);
     }
     /**
-     * @param class-string $name
      * @param \PhpParser\Node\Stmt\Property|\PhpParser\Node\Stmt\Class_|\PhpParser\Node\Stmt\ClassMethod|\PhpParser\Node\Param $node
      */
     public function hasByOne($node, string $name) : bool
@@ -59,15 +56,32 @@ final class AttrinationFinder
         return $attribute instanceof Attribute;
     }
     /**
-     * @param class-string[] $names
+     * @param string[] $classNames
+     * @param \PhpParser\Node\Stmt\Class_|\PhpParser\Node\Stmt\Property $property
      */
-    public function hasByMany(Property $property, array $names) : bool
+    public function hasByMany($property, array $classNames) : bool
     {
         $phpDocInfo = $this->phpDocInfoFactory->createFromNode($property);
-        if ($phpDocInfo instanceof PhpDocInfo && $phpDocInfo->hasByAnnotationClasses($names)) {
+        if ($phpDocInfo instanceof PhpDocInfo && $phpDocInfo->hasByAnnotationClasses($classNames)) {
             return \true;
         }
-        $attribute = $this->attributeFinder->findAttributeByClasses($property, $names);
+        $attribute = $this->attributeFinder->findAttributeByClasses($property, $classNames);
         return $attribute instanceof Attribute;
+    }
+    /**
+     * @param string[] $classNames
+     * @param \PhpParser\Node\Stmt\Class_|\PhpParser\Node\Stmt\Property $property
+     * @return \Rector\BetterPhpDocParser\PhpDoc\DoctrineAnnotationTagValueNode|\PhpParser\Node\Attribute|null
+     */
+    public function getByMany($property, array $classNames)
+    {
+        $phpDocInfo = $this->phpDocInfoFactory->createFromNode($property);
+        if ($phpDocInfo instanceof PhpDocInfo) {
+            $foundDoctrineAnnotationTagValueNode = $phpDocInfo->getByAnnotationClasses($classNames);
+            if ($foundDoctrineAnnotationTagValueNode instanceof DoctrineAnnotationTagValueNode) {
+                return $foundDoctrineAnnotationTagValueNode;
+            }
+        }
+        return $this->attributeFinder->findAttributeByClasses($property, $classNames);
     }
 }

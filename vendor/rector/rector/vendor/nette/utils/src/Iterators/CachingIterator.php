@@ -5,9 +5,9 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202312\Nette\Iterators;
+namespace RectorPrefix202410\Nette\Iterators;
 
-use RectorPrefix202312\Nette;
+use RectorPrefix202410\Nette;
 /**
  * Smarter caching iterator.
  *
@@ -23,24 +23,17 @@ use RectorPrefix202312\Nette;
 class CachingIterator extends \CachingIterator implements \Countable
 {
     use Nette\SmartObject;
-    /** @var int */
+    /**
+     * @var int
+     */
     private $counter = 0;
-    public function __construct($iterator)
+    /**
+     * @param iterable|\stdClass $iterable
+     */
+    public function __construct($iterable)
     {
-        if (\is_array($iterator) || $iterator instanceof \stdClass) {
-            $iterator = new \ArrayIterator($iterator);
-        } elseif ($iterator instanceof \IteratorAggregate) {
-            do {
-                $iterator = $iterator->getIterator();
-            } while ($iterator instanceof \IteratorAggregate);
-            \assert($iterator instanceof \Iterator);
-        } elseif ($iterator instanceof \Iterator) {
-        } elseif ($iterator instanceof \Traversable) {
-            $iterator = new \IteratorIterator($iterator);
-        } else {
-            throw new Nette\InvalidArgumentException(\sprintf('Invalid argument passed to %s; array or Traversable expected, %s given.', self::class, \is_object($iterator) ? \get_class($iterator) : \gettype($iterator)));
-        }
-        parent::__construct($iterator, 0);
+        $iterable = $iterable instanceof \stdClass ? new \ArrayIterator($iterable) : Nette\Utils\Iterables::toIterator($iterable);
+        parent::__construct($iterable, 0);
     }
     /**
      * Is the current element the first one?

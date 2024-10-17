@@ -9,18 +9,18 @@
  */
 namespace PHP_CodeSniffer\Tests;
 
-use ECSPrefix202402\PHPUnit\Framework\TestSuite as PHPUnit_TestSuite;
-use ECSPrefix202402\PHPUnit\Framework\TestResult;
+use ECSPrefix202410\PHPUnit\Framework\TestResult;
+use ECSPrefix202410\PHPUnit\Framework\TestSuite as PHPUnit_TestSuite;
 class TestSuite extends PHPUnit_TestSuite
 {
     /**
      * Runs the tests and collects their result in a TestResult.
      *
-     * @param \PHPUnit\Framework\TestResult $result A test result.
+     * @param \PHPUnit\Framework\TestResult|null $result A test result.
      *
      * @return \PHPUnit\Framework\TestResult
      */
-    public function run(TestResult $result = null) : TestResult
+    public function run(?TestResult $result = null) : TestResult
     {
         $result = parent::run($result);
         printPHPCodeSnifferTestOutput();

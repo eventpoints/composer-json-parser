@@ -1,7 +1,7 @@
 <?php
 
 declare (strict_types=1);
-namespace RectorPrefix202312;
+namespace RectorPrefix202410;
 
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\BooleanType;
@@ -15,11 +15,12 @@ use PHPStan\Type\ObjectType;
 use PHPStan\Type\ObjectWithoutClassType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\UnionType;
+use PHPStan\Type\VoidType;
 use Rector\Config\RectorConfig;
-use Rector\Core\Util\Reflection\PrivatesAccessor;
 use Rector\StaticTypeMapper\ValueObject\Type\SimpleStaticType;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationRector;
 use Rector\TypeDeclaration\ValueObject\AddReturnTypeDeclaration;
+use Rector\Util\Reflection\PrivatesAccessor;
 // https://github.com/symfony/symfony/blob/6.1/UPGRADE-6.0.md
 // @see https://github.com/symfony/symfony/blob/6.1/.github/expected-missing-return-types.diff
 return static function (RectorConfig $rectorConfig) : void {
@@ -103,6 +104,8 @@ return static function (RectorConfig $rectorConfig) : void {
         new AddReturnTypeDeclaration('Symfony\\Component\\Form\\FormTypeGuesserInterface', 'guessPattern', $nullableValueGuessType),
         new AddReturnTypeDeclaration('Symfony\\Component\\Form\\FormTypeInterface', 'getBlockPrefix', new StringType()),
         new AddReturnTypeDeclaration('Symfony\\Component\\Form\\FormTypeInterface', 'getParent', $nullableStringType),
+        new AddReturnTypeDeclaration('Symfony\\Component\\Form\\FormTypeInterface', 'buildForm', new VoidType()),
+        new AddReturnTypeDeclaration('Symfony\\Component\\Form\\FormTypeInterface', 'configureOptions', new VoidType()),
         new AddReturnTypeDeclaration('Symfony\\Component\\HttpKernel\\CacheWarmer\\CacheWarmerInterface', 'isOptional', new BooleanType()),
         new AddReturnTypeDeclaration('Symfony\\Component\\HttpKernel\\CacheWarmer\\WarmableInterface', 'warmUp', $arrayType),
         new AddReturnTypeDeclaration('Symfony\\Component\\HttpKernel\\DataCollector\\DataCollector', 'getCasters', $arrayType),

@@ -90,7 +90,9 @@ final class RuleSet implements \PhpCsFixer\RuleSet\RuleSetInterface
             }
         }
         // filter out all resolvedRules that are off
-        $resolvedRules = \array_filter($resolvedRules);
+        $resolvedRules = \array_filter($resolvedRules, static function ($value) : bool {
+            return \false !== $value;
+        });
         $this->rules = $resolvedRules;
     }
     /**

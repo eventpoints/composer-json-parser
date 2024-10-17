@@ -15,9 +15,9 @@ use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Return_;
-use Rector\Core\Rector\AbstractRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
 use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\Rector\AbstractRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -41,10 +41,10 @@ final class EventSubscriberInterfaceToAttributeRector extends AbstractRector imp
         return new RuleDefinition('Replace EventSubscriberInterface with AsDoctrineListener attribute(s)', [new CodeSample(<<<'CODE_SAMPLE'
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PostUpdateEventArgs;
-use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\EventSubscriberInterface;
 use Doctrine\ORM\Events;
 
-class MyEventSubscriber implements EventSubscriber
+class MyEventSubscriber implements EventSubscriberInterface
 {
     public function getSubscribedEvents()
     {
@@ -100,7 +100,7 @@ CODE_SAMPLE
      */
     public function refactor(Node $node) : ?Node
     {
-        if (!$this->hasImplements($node, 'Doctrine\\Common\\EventSubscriber')) {
+        if (!$this->hasImplements($node, 'Doctrine\\Common\\EventSubscriber') && !$this->hasImplements($node, 'Doctrine\\Bundle\\DoctrineBundle\\EventSubscriber\\EventSubscriberInterface')) {
             return null;
         }
         $this->subscriberClass = $node;
@@ -115,7 +115,7 @@ CODE_SAMPLE
         if ($stmts[0] instanceof Return_ && $stmts[0]->expr instanceof Array_) {
             $this->handleArray($stmts);
         }
-        $this->removeImplements($node, ['Doctrine\\Common\\EventSubscriber']);
+        $this->removeImplements($node, ['Doctrine\\Common\\EventSubscriber', 'Doctrine\\Bundle\\DoctrineBundle\\EventSubscriber\\EventSubscriberInterface']);
         unset($node->stmts[$getSubscribedEventsClassMethod->getAttribute(AttributeKey::STMT_KEY)]);
         return $node;
     }

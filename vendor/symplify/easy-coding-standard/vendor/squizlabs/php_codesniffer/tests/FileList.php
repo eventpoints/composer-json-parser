@@ -9,6 +9,9 @@
  */
 namespace PHP_CodeSniffer\Tests;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 class FileList
 {
     /**
@@ -46,12 +49,12 @@ class FileList
     public function __construct($directory, $rootPath = '', $filter = '')
     {
         $this->rootPath = $rootPath;
-        $directory = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::UNIX_PATHS);
-        $flattened = new \RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD);
+        $directory = new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::UNIX_PATHS);
+        $flattened = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
         if ($filter === '') {
             $filter = \sprintf($this->baseRegex, \preg_quote($this->rootPath));
         }
-        $this->fileIterator = new \RegexIterator($flattened, $filter);
+        $this->fileIterator = new RegexIterator($flattened, $filter);
         return $this;
     }
     //end __construct()

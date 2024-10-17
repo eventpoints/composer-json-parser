@@ -13,7 +13,7 @@ declare (strict_types=1);
 namespace PhpCsFixer\Console\Report\FixReport;
 
 use PhpCsFixer\Console\Application;
-use ECSPrefix202402\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202410\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *
@@ -98,8 +98,8 @@ final class XmlReporter implements \PhpCsFixer\Console\Report\FixReport\Reporter
     }
     private function createAboutElement(\DOMDocument $dom, string $about) : \DOMElement
     {
-        $XML = $dom->createElement('about');
-        $XML->setAttribute('value', $about);
-        return $XML;
+        $xml = $dom->createElement('about');
+        $xml->setAttribute('value', $about);
+        return $xml;
     }
 }

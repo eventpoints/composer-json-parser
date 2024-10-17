@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Encryption;
+namespace ECSPrefix202410\Illuminate\Contracts\Encryption;
 
 interface Encrypter
 {

@@ -29,7 +29,7 @@ use PhpCsFixer\Tokenizer\TokensAnalyzer;
 final class ClassKeywordRemoveFixer extends AbstractFixer implements DeprecatedFixerInterface
 {
     /**
-     * @var string[]
+     * @var array<array-key, string>
      */
     private $imports = [];
     public function getDefinition() : FixerDefinitionInterface

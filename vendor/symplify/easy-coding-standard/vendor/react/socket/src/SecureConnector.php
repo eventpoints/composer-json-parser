@@ -1,10 +1,10 @@
 <?php
 
-namespace ECSPrefix202402\React\Socket;
+namespace ECSPrefix202410\React\Socket;
 
-use ECSPrefix202402\React\EventLoop\Loop;
-use ECSPrefix202402\React\EventLoop\LoopInterface;
-use ECSPrefix202402\React\Promise;
+use ECSPrefix202410\React\EventLoop\Loop;
+use ECSPrefix202410\React\EventLoop\LoopInterface;
+use ECSPrefix202410\React\Promise;
 use BadMethodCallException;
 use InvalidArgumentException;
 use UnexpectedValueException;
@@ -13,8 +13,17 @@ final class SecureConnector implements ConnectorInterface
     private $connector;
     private $streamEncryption;
     private $context;
-    public function __construct(ConnectorInterface $connector, LoopInterface $loop = null, array $context = array())
+    /**
+     * @param ConnectorInterface $connector
+     * @param ?LoopInterface $loop
+     * @param array $context
+     */
+    public function __construct(ConnectorInterface $connector, $loop = null, array $context = array())
     {
+        if ($loop !== null && !$loop instanceof LoopInterface) {
+            // manual type check to support legacy PHP < 7.1
+            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|React\\EventLoop\\LoopInterface');
+        }
         $this->connector = $connector;
         $this->streamEncryption = new StreamEncryption($loop ?: Loop::get(), \false);
         $this->context = $context;
@@ -78,7 +87,7 @@ final class SecureConnector implements ConnectorInterface
             }
             throw $e;
         });
-        return new \ECSPrefix202402\React\Promise\Promise(function ($resolve, $reject) use($promise) {
+        return new \ECSPrefix202410\React\Promise\Promise(function ($resolve, $reject) use($promise) {
             $promise->then($resolve, $reject);
         }, function ($_, $reject) use(&$promise, $uri, &$connected) {
             if ($connected) {

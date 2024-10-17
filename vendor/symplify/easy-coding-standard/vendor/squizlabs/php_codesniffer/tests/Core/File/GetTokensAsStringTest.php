@@ -86,7 +86,7 @@ final class GetTokensAsStringTest extends AbstractMethodUnitTest
      * @param int        $length         Token length to get.
      * @param string     $expected       The expected function return value.
      *
-     * @dataProvider dataGetTokensAsString()
+     * @dataProvider dataGetTokensAsString
      *
      * @return void
      */
@@ -136,7 +136,7 @@ final class GetTokensAsStringTest extends AbstractMethodUnitTest
      * @param int        $length         Token length to get.
      * @param string     $expected       The expected function return value.
      *
-     * @dataProvider dataGetOrigContent()
+     * @dataProvider dataGetOrigContent
      *
      * @return void
      */

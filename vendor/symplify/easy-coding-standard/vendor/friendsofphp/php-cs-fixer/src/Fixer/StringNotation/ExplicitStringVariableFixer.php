@@ -29,23 +29,24 @@ final class ExplicitStringVariableFixer extends AbstractFixer
         return new FixerDefinition('Converts implicit variables into explicit ones in double-quoted strings or heredoc syntax.', [new CodeSample(<<<'EOT'
 <?php
 
-namespace ECSPrefix202402;
+namespace ECSPrefix202410;
 
 $a = "My name is {$name} !";
 $b = "I live in {$state->country} !";
 $c = "I have {$farm[0]} chickens !";
 
 EOT
-)], 'The reasoning behind this rule is the following:' . "\n" . '- When there are two valid ways of doing the same thing, using both is confusing, there should be a coding standard to follow.' . "\n" . '- PHP manual marks `"$var"` syntax as implicit and `"${var}"` syntax as explicit: explicit code should always be preferred.' . "\n" . '- Explicit syntax allows word concatenation inside strings, e.g. `"${var}IsAVar"`, implicit doesn\'t.' . "\n" . '- Explicit syntax is easier to detect for IDE/editors and therefore has colors/highlight with higher contrast, which is easier to read.' . "\n" . 'Backtick operator is skipped because it is harder to handle; you can use `backtick_to_shell_exec` fixer to normalize backticks to strings.');
+)], 'The reasoning behind this rule is the following:' . "\n" . '- When there are two valid ways of doing the same thing, using both is confusing, there should be a coding standard to follow.' . "\n" . '- PHP manual marks `"$var"` syntax as implicit and `"{$var}"` syntax as explicit: explicit code should always be preferred.' . "\n" . '- Explicit syntax allows word concatenation inside strings, e.g. `"{$var}IsAVar"`, implicit doesn\'t.' . "\n" . '- Explicit syntax is easier to detect for IDE/editors and therefore has colors/highlight with higher contrast, which is easier to read.' . "\n" . 'Backtick operator is skipped because it is harder to handle; you can use `backtick_to_shell_exec` fixer to normalize backticks to strings.');
     }
     /**
      * {@inheritdoc}
      *
+     * Must run before NoUselessConcatOperatorFixer.
      * Must run after BacktickToShellExecFixer.
      */
     public function getPriority() : int
     {
-        return 0;
+        return 6;
     }
     public function isCandidate(Tokens $tokens) : bool
     {

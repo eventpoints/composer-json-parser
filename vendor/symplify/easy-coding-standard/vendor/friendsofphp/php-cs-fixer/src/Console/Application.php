@@ -19,16 +19,19 @@ use PhpCsFixer\Console\Command\HelpCommand;
 use PhpCsFixer\Console\Command\ListFilesCommand;
 use PhpCsFixer\Console\Command\ListSetsCommand;
 use PhpCsFixer\Console\Command\SelfUpdateCommand;
+use PhpCsFixer\Console\Command\WorkerCommand;
 use PhpCsFixer\Console\SelfUpdate\GithubClient;
 use PhpCsFixer\Console\SelfUpdate\NewVersionChecker;
 use PhpCsFixer\PharChecker;
+use PhpCsFixer\Runner\Parallel\WorkerException;
 use PhpCsFixer\ToolInfo;
 use PhpCsFixer\Utils;
-use ECSPrefix202402\Symfony\Component\Console\Application as BaseApplication;
-use ECSPrefix202402\Symfony\Component\Console\Command\ListCommand;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Application as BaseApplication;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Command\ListCommand;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
@@ -38,12 +41,16 @@ use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
 final class Application extends BaseApplication
 {
     public const NAME = 'PHP CS Fixer';
-    public const VERSION = '3.49.0';
-    public const VERSION_CODENAME = 'Insomnia';
+    public const VERSION = '3.64.0';
+    public const VERSION_CODENAME = 'Space Sets';
     /**
      * @var \PhpCsFixer\ToolInfo
      */
     private $toolInfo;
+    /**
+     * @var \Symfony\Component\Console\Command\Command|null
+     */
+    private $executedCommand;
     public function __construct()
     {
         parent::__construct(self::NAME, self::VERSION);
@@ -55,6 +62,7 @@ final class Application extends BaseApplication
         $this->add(new ListFilesCommand($this->toolInfo));
         $this->add(new ListSetsCommand());
         $this->add(new SelfUpdateCommand(new NewVersionChecker(new GithubClient()), $this->toolInfo, new PharChecker()));
+        $this->add(new WorkerCommand($this->toolInfo));
     }
     public static function getMajorVersion() : int
     {
@@ -131,5 +139,31 @@ final class Application extends BaseApplication
     protected function getDefaultCommands() : array
     {
         return [new HelpCommand(), new ListCommand()];
+    }
+    /**
+     * @throws \Throwable
+     */
+    protected function doRunCommand(Command $command, InputInterface $input, OutputInterface $output) : int
+    {
+        $this->executedCommand = $command;
+        return parent::doRunCommand($command, $input, $output);
+    }
+    protected function doRenderThrowable(\Throwable $e, OutputInterface $output) : void
+    {
+        // Since parallel analysis utilises child processes, and they have their own output,
+        // we need to capture the output of the child process to determine it there was an exception.
+        // Default render format is not machine-friendly, so we need to override it for `worker` command,
+        // in order to be able to easily parse exception data for further displaying on main process' side.
+        if ($this->executedCommand instanceof WorkerCommand) {
+            $output->writeln(WorkerCommand::ERROR_PREFIX . \json_encode(['class' => \get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine(), 'code' => $e->getCode(), 'trace' => $e->getTraceAsString()]));
+            return;
+        }
+        parent::doRenderThrowable($e, $output);
+        if ($output->isVeryVerbose() && $e instanceof WorkerException) {
+            $output->writeln('<comment>Original trace from worker:</comment>');
+            $output->writeln('');
+            $output->writeln($e->getOriginalTraceAsString());
+            $output->writeln('');
+        }
     }
 }

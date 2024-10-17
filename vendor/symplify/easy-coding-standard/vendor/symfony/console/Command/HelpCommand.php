@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202402\Symfony\Component\Console\Command;
+namespace ECSPrefix202410\Symfony\Component\Console\Command;
 
-use ECSPrefix202402\Symfony\Component\Console\Descriptor\ApplicationDescription;
-use ECSPrefix202402\Symfony\Component\Console\Helper\DescriptorHelper;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202402\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202402\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Descriptor\ApplicationDescription;
+use ECSPrefix202410\Symfony\Component\Console\Helper\DescriptorHelper;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202410\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202410\Symfony\Component\Console\Output\OutputInterface;
 /**
  * HelpCommand displays the help for a given command.
  *

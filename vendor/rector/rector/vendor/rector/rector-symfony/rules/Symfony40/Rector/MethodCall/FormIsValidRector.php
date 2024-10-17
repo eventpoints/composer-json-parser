@@ -9,7 +9,7 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\If_;
 use PHPStan\Type\ObjectType;
-use Rector\Core\Rector\AbstractRector;
+use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -50,7 +50,7 @@ CODE_SAMPLE
         }
         // mark child calls with known is submitted
         if ($this->isName($methodCall->name, 'isSubmitted')) {
-            $this->traverseNodesWithCallable($node->stmts, function (Node $node) {
+            $this->traverseNodesWithCallable($node->stmts, static function (Node $node) {
                 $node->setAttribute('has_is_submitted', \true);
                 return null;
             });

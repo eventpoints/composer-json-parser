@@ -40,6 +40,7 @@ final class MemberVarScopeUnitTest extends AbstractSniffUnitTest
      */
     public function getWarningList()
     {
+        // Warning from getMemberProperties() about parse error.
         return [71 => 1];
     }
     //end getWarningList()

@@ -21,6 +21,9 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\ImplementsTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\MethodTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\MethodTagValueParameterNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\MixinTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\ParamClosureThisTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\ParamImmediatelyInvokedCallableTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\ParamLaterInvokedCallableTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamOutTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocChildNode;
@@ -29,6 +32,9 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTextNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PureUnlessCallableIsImpureTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\RequireExtendsTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\RequireImplementsTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\SelfOutTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TemplateTagValueNode;
@@ -39,6 +45,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\UsesTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeItemNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeUnsealedTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\CallableTypeParameterNode;
@@ -88,7 +95,7 @@ final class Printer
      *
      * @var array<string, string>
      */
-    private $listInsertionMap = [PhpDocNode::class . '->children' => "\n * ", UnionTypeNode::class . '->types' => '|', IntersectionTypeNode::class . '->types' => '&', ArrayShapeNode::class . '->items' => ', ', ObjectShapeNode::class . '->items' => ', ', CallableTypeNode::class . '->parameters' => ', ', GenericTypeNode::class . '->genericTypes' => ', ', ConstExprArrayNode::class . '->items' => ', ', MethodTagValueNode::class . '->parameters' => ', ', DoctrineArray::class . '->items' => ', ', DoctrineAnnotation::class . '->arguments' => ', '];
+    private $listInsertionMap = [PhpDocNode::class . '->children' => "\n * ", UnionTypeNode::class . '->types' => '|', IntersectionTypeNode::class . '->types' => '&', ArrayShapeNode::class . '->items' => ', ', ObjectShapeNode::class . '->items' => ', ', CallableTypeNode::class . '->parameters' => ', ', CallableTypeNode::class . '->templateTypes' => ', ', GenericTypeNode::class . '->genericTypes' => ', ', ConstExprArrayNode::class . '->items' => ', ', MethodTagValueNode::class . '->parameters' => ', ', DoctrineArray::class . '->items' => ', ', DoctrineAnnotation::class . '->arguments' => ', '];
     /**
      * [$find, $extraLeft, $extraRight]
      *
@@ -96,7 +103,7 @@ final class Printer
      */
     private $emptyListInsertionMap = [CallableTypeNode::class . '->parameters' => ['(', '', ''], ArrayShapeNode::class . '->items' => ['{', '', ''], ObjectShapeNode::class . '->items' => ['{', '', ''], DoctrineArray::class . '->items' => ['{', '', ''], DoctrineAnnotation::class . '->arguments' => ['(', '', '']];
     /** @var array<string, list<class-string<TypeNode>>> */
-    private $parenthesesMap = [CallableTypeNode::class . '->returnType' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class], ArrayTypeNode::class . '->type' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class, ConstTypeNode::class, NullableTypeNode::class], OffsetAccessTypeNode::class . '->type' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class, ConstTypeNode::class, NullableTypeNode::class]];
+    private $parenthesesMap = [CallableTypeNode::class . '->returnType' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class], ArrayTypeNode::class . '->type' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class, ConstTypeNode::class, NullableTypeNode::class], OffsetAccessTypeNode::class . '->type' => [CallableTypeNode::class, UnionTypeNode::class, IntersectionTypeNode::class, NullableTypeNode::class]];
     /** @var array<string, list<class-string<TypeNode>>> */
     private $parenthesesListMap = [IntersectionTypeNode::class . '->types' => [IntersectionTypeNode::class, UnionTypeNode::class, NullableTypeNode::class], UnionTypeNode::class . '->types' => [IntersectionTypeNode::class, UnionTypeNode::class, NullableTypeNode::class]];
     public function printFormatPreserving(PhpDocNode $node, PhpDocNode $originalNode, TokenIterator $originalTokens) : string
@@ -154,6 +161,12 @@ final class Printer
             $isOptional = $node->isOptional ? '=' : '';
             return trim("{$type}{$isReference}{$isVariadic}{$node->parameterName}") . $isOptional;
         }
+        if ($node instanceof ArrayShapeUnsealedTypeNode) {
+            if ($node->keyType !== null) {
+                return sprintf('<%s, %s>', $this->printType($node->keyType), $this->printType($node->valueType));
+            }
+            return sprintf('<%s>', $this->printType($node->valueType));
+        }
         if ($node instanceof DoctrineAnnotation) {
             return (string) $node;
         }
@@ -210,6 +223,14 @@ final class Printer
             $type = $this->printType($node->type);
             return trim("{$type} {$node->description}");
         }
+        if ($node instanceof RequireExtendsTagValueNode) {
+            $type = $this->printType($node->type);
+            return trim("{$type} {$node->description}");
+        }
+        if ($node instanceof RequireImplementsTagValueNode) {
+            $type = $this->printType($node->type);
+            return trim("{$type} {$node->description}");
+        }
         if ($node instanceof ParamOutTagValueNode) {
             $type = $this->printType($node->type);
             return trim("{$type} {$node->parameterName} {$node->description}");
@@ -219,6 +240,18 @@ final class Printer
             $variadic = $node->isVariadic ? '...' : '';
             $type = $this->printType($node->type);
             return trim("{$type} {$reference}{$variadic}{$node->parameterName} {$node->description}");
+        }
+        if ($node instanceof ParamImmediatelyInvokedCallableTagValueNode) {
+            return trim("{$node->parameterName} {$node->description}");
+        }
+        if ($node instanceof ParamLaterInvokedCallableTagValueNode) {
+            return trim("{$node->parameterName} {$node->description}");
+        }
+        if ($node instanceof ParamClosureThisTagValueNode) {
+            return trim("{$node->type} {$node->parameterName} {$node->description}");
+        }
+        if ($node instanceof PureUnlessCallableIsImpureTagValueNode) {
+            return trim("{$node->parameterName} {$node->description}");
         }
         if ($node instanceof PropertyTagValueNode) {
             $type = $this->printType($node->type);
@@ -233,9 +266,10 @@ final class Printer
             return trim($type . ' ' . $node->description);
         }
         if ($node instanceof TemplateTagValueNode) {
-            $bound = $node->bound !== null ? ' of ' . $this->printType($node->bound) : '';
+            $upperBound = $node->bound !== null ? ' of ' . $this->printType($node->bound) : '';
+            $lowerBound = $node->lowerBound !== null ? ' super ' . $this->printType($node->lowerBound) : '';
             $default = $node->default !== null ? ' = ' . $this->printType($node->default) : '';
-            return trim("{$node->name}{$bound}{$default} {$node->description}");
+            return trim("{$node->name}{$upperBound}{$lowerBound}{$default} {$node->description}");
         }
         if ($node instanceof ThrowsTagValueNode) {
             $type = $this->printType($node->type);
@@ -265,7 +299,7 @@ final class Printer
                 return $this->printType($item);
             }, $node->items);
             if (!$node->sealed) {
-                $items[] = '...';
+                $items[] = '...' . ($node->unsealedType === null ? '' : $this->print($node->unsealedType));
             }
             return $node->kind . '{' . implode(', ', $items) . '}';
         }
@@ -284,10 +318,13 @@ final class Printer
             } else {
                 $returnType = $this->printType($node->returnType);
             }
+            $template = $node->templateTypes !== [] ? '<' . implode(', ', array_map(function (TemplateTagValueNode $templateNode) : string {
+                return $this->print($templateNode);
+            }, $node->templateTypes)) . '>' : '';
             $parameters = implode(', ', array_map(function (CallableTypeParameterNode $parameterNode) : string {
                 return $this->print($parameterNode);
             }, $node->parameters));
-            return "{$node->identifier}({$parameters}): {$returnType}";
+            return "{$node->identifier}{$template}({$parameters}): {$returnType}";
         }
         if ($node instanceof ConditionalTypeForParameterNode) {
             return sprintf('(%s %s %s ? %s : %s)', $node->parameterName, $node->negated ? 'is not' : 'is', $this->printType($node->targetType), $this->printType($node->if), $this->printType($node->else));
@@ -361,7 +398,7 @@ final class Printer
     }
     private function printOffsetAccessType(TypeNode $type) : string
     {
-        if ($type instanceof CallableTypeNode || $type instanceof UnionTypeNode || $type instanceof IntersectionTypeNode || $type instanceof ConstTypeNode || $type instanceof NullableTypeNode) {
+        if ($type instanceof CallableTypeNode || $type instanceof UnionTypeNode || $type instanceof IntersectionTypeNode || $type instanceof NullableTypeNode) {
             return $this->wrapInParentheses($type);
         }
         return $this->printType($type);

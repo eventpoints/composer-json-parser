@@ -83,7 +83,7 @@ abstract class AbstractProxyFixer extends \PhpCsFixer\AbstractFixer
         }
     }
     /**
-     * @return FixerInterface[]
+     * @return list<FixerInterface>
      */
     protected abstract function createProxyFixers() : array;
 }

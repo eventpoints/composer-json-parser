@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Auth\Access;
+namespace ECSPrefix202410\Illuminate\Contracts\Auth\Access;
 
 interface Authorizable
 {

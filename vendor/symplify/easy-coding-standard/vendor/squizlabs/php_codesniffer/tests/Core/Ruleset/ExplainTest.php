@@ -12,7 +12,7 @@ namespace PHP_CodeSniffer\Tests\Core\Ruleset;
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Runner;
 use PHP_CodeSniffer\Tests\ConfigDouble;
-use ECSPrefix202402\PHPUnit\Framework\TestCase;
+use ECSPrefix202410\PHPUnit\Framework\TestCase;
 /**
  * Test the Ruleset::explain() function.
  *
@@ -211,7 +211,7 @@ final class ExplainTest extends TestCase
         $expected .= '  Squiz.Scope.MethodScope' . \PHP_EOL;
         $this->expectOutputString($expected);
         $runner = new Runner();
-        $exitCode = $runner->runPHPCS();
+        $runner->runPHPCS();
     }
     //end testExplainWillExplainEachStandardSeparately()
 }

@@ -12,5 +12,5 @@ final class SwiftMailerSetList implements SetListInterface
     /**
      * @var string
      */
-    public const ANNOTATIONS_TO_ATTRIBUTES = __DIR__ . '/../../config/sets/swiftmailer/swiftmailer-to-symfony-mailer.php';
+    public const SWIFT_TO_SYMFONY = __DIR__ . '/../../config/sets/swiftmailer/swiftmailer-to-symfony-mailer.php';
 }

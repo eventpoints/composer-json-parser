@@ -46,6 +46,7 @@ final class ESLintUnitTest extends AbstractSniffUnitTest
         parent::setUpPrerequisites();
         $cwd = \getcwd();
         \file_put_contents($cwd . '/.eslintrc.json', self::ESLINT_CONFIG);
+        \putenv('ESLINT_USE_FLAT_CONFIG=false');
     }
     //end setUpPrerequisites()
     /**

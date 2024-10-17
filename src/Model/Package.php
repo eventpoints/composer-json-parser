@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace ComposerJsonParser\Model;
+namespace KerrialNewham\ComposerJsonParser\Model;
 
-use ComposerJsonParser\Enum\PackageTypeEnum;
+use KerrialNewham\ComposerJsonParser\Enum\PackageTypeEnum;
 
 final readonly class Package
 {
@@ -12,8 +12,7 @@ final readonly class Package
         private string $name,
         private PackageTypeEnum $type,
         private null|PackageVersion $packageVersion = null
-    )
-    {
+    ) {
     }
 
     public function getName(): string
@@ -30,5 +29,4 @@ final readonly class Package
     {
         return $this->type;
     }
-
 }

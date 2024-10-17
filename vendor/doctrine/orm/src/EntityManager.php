@@ -24,7 +24,6 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\FilterCollection;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Repository\RepositoryFactory;
-use Throwable;
 
 use function array_keys;
 use function is_array;
@@ -63,27 +62,27 @@ class EntityManager implements EntityManagerInterface
     /**
      * The metadata factory, used to retrieve the ORM metadata of entity classes.
      */
-    private readonly ClassMetadataFactory $metadataFactory;
+    private ClassMetadataFactory $metadataFactory;
 
     /**
      * The UnitOfWork used to coordinate object-level transactions.
      */
-    private readonly UnitOfWork $unitOfWork;
+    private UnitOfWork $unitOfWork;
 
     /**
      * The event manager that is the central point of the event system.
      */
-    private readonly EventManager $eventManager;
+    private EventManager $eventManager;
 
     /**
      * The proxy factory used to create dynamic proxies.
      */
-    private readonly ProxyFactory $proxyFactory;
+    private ProxyFactory $proxyFactory;
 
     /**
      * The repository factory used to create dynamic repositories.
      */
-    private readonly RepositoryFactory $repositoryFactory;
+    private RepositoryFactory $repositoryFactory;
 
     /**
      * The expression builder instance used to generate query expressions.
@@ -112,8 +111,8 @@ class EntityManager implements EntityManagerInterface
      * @param Connection $conn The database connection used by the EntityManager.
      */
     public function __construct(
-        private readonly Connection $conn,
-        private readonly Configuration $config,
+        private Connection $conn,
+        private Configuration $config,
         EventManager|null $eventManager = null,
     ) {
         if (! $config->getMetadataDriverImpl()) {
@@ -178,18 +177,24 @@ class EntityManager implements EntityManagerInterface
     {
         $this->conn->beginTransaction();
 
+        $successful = false;
+
         try {
             $return = $func($this);
 
             $this->flush();
             $this->conn->commit();
 
-            return $return;
-        } catch (Throwable $e) {
-            $this->close();
-            $this->conn->rollBack();
+            $successful = true;
 
-            throw $e;
+            return $return;
+        } finally {
+            if (! $successful) {
+                $this->close();
+                if ($this->conn->isTransactionActive()) {
+                    $this->conn->rollBack();
+                }
+            }
         }
     }
 
@@ -479,9 +484,9 @@ class EntityManager implements EntityManagerInterface
     /**
      * Gets the repository for an entity class.
      *
-     * @psalm-param class-string<T> $className
+     * @param class-string<T> $className The name of the entity.
      *
-     * @psalm-return EntityRepository<T>
+     * @return EntityRepository<T> The repository class.
      *
      * @template T of object
      */

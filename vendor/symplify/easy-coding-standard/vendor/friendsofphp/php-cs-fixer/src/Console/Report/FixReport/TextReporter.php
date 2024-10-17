@@ -59,6 +59,6 @@ final class TextReporter implements \PhpCsFixer\Console\Report\FixReport\Reporte
         if (0 === $time || 0 === $memory) {
             return '';
         }
-        return \PHP_EOL . \sprintf('%s %d of %d %s in %.3f seconds, %.3f MB memory used' . \PHP_EOL, $isDryRun ? 'Found' : 'Fixed', $identifiedFiles, $files, $isDryRun ? 'files that can be fixed' : 'files', $time / 1000, $memory / 1024 / 1024);
+        return \PHP_EOL . \sprintf('%s %d of %d %s in %.3f seconds, %.2f MB memory used' . \PHP_EOL, $isDryRun ? 'Found' : 'Fixed', $identifiedFiles, $files, $isDryRun ? 'files that can be fixed' : 'files', $time / 1000, $memory / 1024 / 1024);
     }
 }

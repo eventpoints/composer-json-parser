@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\DependencyInjection;
 
-use ECSPrefix202402\Illuminate\Container\Container;
+use ECSPrefix202410\Illuminate\Container\Container;
 use PHP_CodeSniffer\Fixer;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
@@ -11,14 +11,18 @@ use PhpCsFixer\Differ\DifferInterface;
 use PhpCsFixer\Differ\UnifiedDiffer;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\WhitespacesFixerConfig;
-use ECSPrefix202402\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202410\SebastianBergmann\Diff\Parser as DiffParser;
+use ECSPrefix202410\Symfony\Component\Console\Style\SymfonyStyle;
 use Symplify\EasyCodingStandard\Application\SingleFileProcessor;
 use Symplify\EasyCodingStandard\Caching\Cache;
 use Symplify\EasyCodingStandard\Caching\CacheFactory;
 use Symplify\EasyCodingStandard\Caching\ChangedFilesDetector;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
+use Symplify\EasyCodingStandard\Console\Output\CheckstyleOutputFormatter;
 use Symplify\EasyCodingStandard\Console\Output\ConsoleOutputFormatter;
+use Symplify\EasyCodingStandard\Console\Output\GitlabOutputFormatter;
 use Symplify\EasyCodingStandard\Console\Output\JsonOutputFormatter;
+use Symplify\EasyCodingStandard\Console\Output\JUnitOutputFormatter;
 use Symplify\EasyCodingStandard\Console\Output\OutputFormatterCollector;
 use Symplify\EasyCodingStandard\Console\Style\EasyCodingStandardStyle;
 use Symplify\EasyCodingStandard\Console\Style\EasyCodingStandardStyleFactory;
@@ -31,7 +35,7 @@ use Symplify\EasyCodingStandard\Skipper\Skipper\Skipper;
 use Symplify\EasyCodingStandard\Skipper\Skipper\SkipSkipper;
 use Symplify\EasyCodingStandard\SniffRunner\Application\SniffFileProcessor;
 use Symplify\EasyCodingStandard\SniffRunner\DataCollector\SniffMetadataCollector;
-use ECSPrefix202402\Webmozart\Assert\Assert;
+use ECSPrefix202410\Webmozart\Assert\Assert;
 final class LazyContainerFactory
 {
     /**
@@ -69,9 +73,14 @@ final class LazyContainerFactory
             $cacheFactory = $container->make(CacheFactory::class);
             return $cacheFactory->create();
         });
+        // diffing
+        $ecsConfig->singleton(DiffParser::class);
         // output
+        $ecsConfig->singleton(GitlabOutputFormatter::class);
+        $ecsConfig->singleton(CheckstyleOutputFormatter::class);
         $ecsConfig->singleton(ConsoleOutputFormatter::class);
         $ecsConfig->singleton(JsonOutputFormatter::class);
+        $ecsConfig->singleton(JUnitOutputFormatter::class);
         $ecsConfig->singleton(OutputFormatterCollector::class);
         $ecsConfig->when(OutputFormatterCollector::class)->needs('$outputFormatters')->giveTagged(OutputFormatterInterface::class);
         $ecsConfig->singleton(DifferInterface::class, static function () : DifferInterface {

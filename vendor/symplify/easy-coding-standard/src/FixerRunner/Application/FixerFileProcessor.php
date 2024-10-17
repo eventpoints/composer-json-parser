@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\FixerRunner\Application;
 
-use ECSPrefix202402\Nette\Utils\FileSystem;
+use ECSPrefix202410\Nette\Utils\FileSystem;
 use PhpCsFixer\Differ\DifferInterface;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\Tokenizer\Token;
@@ -46,11 +46,6 @@ final class FixerFileProcessor implements FileProcessorInterface
     private $easyCodingStandardStyle;
     /**
      * @readonly
-     * @var \Symfony\Component\Filesystem\Filesystem
-     */
-    private $filesystem;
-    /**
-     * @readonly
      * @var \Symplify\EasyCodingStandard\Error\FileDiffFactory
      */
     private $fileDiffFactory;
@@ -59,17 +54,22 @@ final class FixerFileProcessor implements FileProcessorInterface
      */
     private $fixers = [];
     /**
+     * @readonly
+     * @var bool
+     */
+    private $isDebug;
+    /**
      * @param FixerInterface[] $fixers
      */
-    public function __construct(FileToTokensParser $fileToTokensParser, Skipper $skipper, DifferInterface $differ, EasyCodingStandardStyle $easyCodingStandardStyle, \ECSPrefix202402\Symfony\Component\Filesystem\Filesystem $filesystem, FileDiffFactory $fileDiffFactory, array $fixers)
+    public function __construct(FileToTokensParser $fileToTokensParser, Skipper $skipper, DifferInterface $differ, EasyCodingStandardStyle $easyCodingStandardStyle, FileDiffFactory $fileDiffFactory, array $fixers)
     {
         $this->fileToTokensParser = $fileToTokensParser;
         $this->skipper = $skipper;
         $this->differ = $differ;
         $this->easyCodingStandardStyle = $easyCodingStandardStyle;
-        $this->filesystem = $filesystem;
         $this->fileDiffFactory = $fileDiffFactory;
         $this->fixers = $this->sortFixers($fixers);
+        $this->isDebug = $easyCodingStandardStyle->isDebug();
     }
     /**
      * @return FixerInterface[]
@@ -104,7 +104,7 @@ final class FixerFileProcessor implements FileProcessorInterface
         $fileDiffs[] = $this->fileDiffFactory->createFromDiffAndAppliedCheckers($filePath, $diff, $appliedFixers);
         $tokenGeneratedCode = $tokens->generateCode();
         if ($configuration->isFixer()) {
-            $this->filesystem->dumpFile($filePath, $tokenGeneratedCode);
+            FileSystem::write($filePath, $tokenGeneratedCode, null);
         }
         Tokens::clearCache();
         return [Bridge::FILE_DIFFS => $fileDiffs];
@@ -150,7 +150,7 @@ final class FixerFileProcessor implements FileProcessorInterface
             return \false;
         }
         // show current fixer in --debug / -vvv
-        if ($this->easyCodingStandardStyle->isDebug()) {
+        if ($this->isDebug) {
             $this->easyCodingStandardStyle->writeln('     [fixer] ' . \get_class($fixer));
         }
         try {

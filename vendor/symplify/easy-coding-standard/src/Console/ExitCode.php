@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console;
 
-use ECSPrefix202402\Symfony\Component\Console\Command\Command;
+use ECSPrefix202410\Symfony\Component\Console\Command\Command;
 final class ExitCode
 {
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Illuminate\Contracts\Routing;
+namespace ECSPrefix202410\Illuminate\Contracts\Routing;
 
 interface UrlGenerator
 {

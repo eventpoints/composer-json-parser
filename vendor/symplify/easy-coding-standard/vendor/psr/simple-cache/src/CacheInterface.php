@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202402\Psr\SimpleCache;
+namespace ECSPrefix202410\Psr\SimpleCache;
 
 interface CacheInterface
 {

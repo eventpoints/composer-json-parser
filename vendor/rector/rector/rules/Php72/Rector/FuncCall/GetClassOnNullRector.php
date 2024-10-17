@@ -12,15 +12,13 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\NodeTraverser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Type\NullType;
-use Rector\Core\Rector\AbstractScopeAwareRector;
-use Rector\Core\ValueObject\PhpVersionFeature;
 use Rector\NodeTypeResolver\Node\AttributeKey;
+use Rector\Rector\AbstractScopeAwareRector;
+use Rector\ValueObject\PhpVersionFeature;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
- * @changelog http://php.net/manual/en/migration72.incompatible.php#migration72.incompatible.no-null-to-get_class https://3v4l.org/sk0fp
- *
  * @see \Rector\Tests\Php72\Rector\FuncCall\GetClassOnNullRector\GetClassOnNullRectorTest
  */
 final class GetClassOnNullRector extends AbstractScopeAwareRector implements MinPhpVersionInterface

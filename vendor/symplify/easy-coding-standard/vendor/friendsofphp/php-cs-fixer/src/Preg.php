@@ -23,8 +23,19 @@ namespace PhpCsFixer;
 final class Preg
 {
     /**
-     * @param null|string[]         $matches
-     * @param int-mask<0, 256, 512> $flags
+     * @param array<array-key, mixed>                               $matches
+     * @param int-mask<PREG_OFFSET_CAPTURE, PREG_UNMATCHED_AS_NULL> $flags
+     *
+     * @param-out ($flags is PREG_OFFSET_CAPTURE
+     *     ? array<array-key, array{string, 0|positive-int}|array{'', -1}>
+     *     : ($flags is PREG_UNMATCHED_AS_NULL
+     *         ? array<array-key, string|null>
+     *         : ($flags is int-mask<PREG_OFFSET_CAPTURE, PREG_UNMATCHED_AS_NULL>&768
+     *             ? array<array-key, array{string, 0|positive-int}|array{null, -1}>
+     *             : array<array-key, string>
+     *         )
+     *     )
+     * ) $matches
      *
      * @throws PregException
      */
@@ -38,10 +49,34 @@ final class Preg
         if (\false !== $result && \PREG_NO_ERROR === \preg_last_error()) {
             return 1 === $result;
         }
-        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, (array) $pattern);
+        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, $pattern);
     }
     /**
-     * @param null|string[] $matches
+     * @param array<array-key, mixed>                                                                   $matches
+     * @param int-mask<PREG_PATTERN_ORDER, PREG_SET_ORDER, PREG_OFFSET_CAPTURE, PREG_UNMATCHED_AS_NULL> $flags
+     *
+     * @param-out ($flags is PREG_PATTERN_ORDER
+     *     ? array<list<string>>
+     *     : ($flags is PREG_SET_ORDER
+     *         ? list<array<string>>
+     *         : ($flags is int-mask<PREG_PATTERN_ORDER, PREG_OFFSET_CAPTURE>&(256|257)
+     *             ? array<list<array{string, int}>>
+     *             : ($flags is int-mask<PREG_SET_ORDER, PREG_OFFSET_CAPTURE>&258
+     *                 ? list<array<array{string, int}>>
+     *                 : ($flags is int-mask<PREG_PATTERN_ORDER, PREG_UNMATCHED_AS_NULL>&(512|513)
+     *                     ? array<list<?string>>
+     *                     : ($flags is int-mask<PREG_SET_ORDER, PREG_UNMATCHED_AS_NULL>&514
+     *                         ? list<array<?string>>
+     *                         : ($flags is int-mask<PREG_SET_ORDER, PREG_OFFSET_CAPTURE, PREG_UNMATCHED_AS_NULL>&770
+     *                             ? list<array<array{?string, int}>>
+     *                             : ($flags is 0 ? array<list<string>> : array<mixed>)
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
+     * ) $matches
      *
      * @throws PregException
      */
@@ -55,10 +90,12 @@ final class Preg
         if (\false !== $result && \PREG_NO_ERROR === \preg_last_error()) {
             return $result;
         }
-        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, (array) $pattern);
+        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, $pattern);
     }
     /**
-     * @param string|string[] $subject
+     * @param array<array-key, string>|string $subject
+     *
+     * @param-out int $count
      *
      * @throws PregException
      */
@@ -72,9 +109,11 @@ final class Preg
         if (null !== $result && \PREG_NO_ERROR === \preg_last_error()) {
             return $result;
         }
-        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, (array) $pattern);
+        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, $pattern);
     }
     /**
+     * @param-out int $count
+     *
      * @throws PregException
      */
     public static function replaceCallback(string $pattern, callable $callback, string $subject, int $limit = -1, ?int &$count = null) : string
@@ -87,10 +126,10 @@ final class Preg
         if (null !== $result && \PREG_NO_ERROR === \preg_last_error()) {
             return $result;
         }
-        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, (array) $pattern);
+        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, $pattern);
     }
     /**
-     * @return string[]
+     * @return list<string>
      *
      * @throws PregException
      */
@@ -104,30 +143,14 @@ final class Preg
         if (\false !== $result && \PREG_NO_ERROR === \preg_last_error()) {
             return $result;
         }
-        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, (array) $pattern);
+        throw self::newPregException(\preg_last_error(), \preg_last_error_msg(), __METHOD__, $pattern);
     }
-    /**
-     * @param string|string[] $pattern
-     *
-     * @return string|string[]
-     */
-    private static function addUtf8Modifier($pattern)
+    private static function addUtf8Modifier(string $pattern) : string
     {
-        if (\is_array($pattern)) {
-            return \array_map(__METHOD__, $pattern);
-        }
         return $pattern . 'u';
     }
-    /**
-     * @param string|string[] $pattern
-     *
-     * @return string|string[]
-     */
-    private static function removeUtf8Modifier($pattern)
+    private static function removeUtf8Modifier(string $pattern) : string
     {
-        if (\is_array($pattern)) {
-            return \array_map(__METHOD__, $pattern);
-        }
         if ('' === $pattern) {
             return '';
         }
@@ -136,33 +159,25 @@ final class Preg
         return \substr($pattern, 0, $endDelimiterPosition) . \str_replace('u', '', \substr($pattern, $endDelimiterPosition));
     }
     /**
-     * Create PregException.
-     *
-     * Create the generic PregException message and if possible due to finding
-     * an invalid pattern, tell more about such kind of error in the message.
-     *
-     * @param string[] $patterns
+     * Create the generic PregException message and tell more about such kind of error in the message.
      */
-    private static function newPregException(int $error, string $errorMsg, string $method, array $patterns) : \PhpCsFixer\PregException
+    private static function newPregException(int $error, string $errorMsg, string $method, string $pattern) : \PhpCsFixer\PregException
     {
-        foreach ($patterns as $pattern) {
-            $result = null;
-            $errorMessage = null;
-            try {
-                $result = \PhpCsFixer\ExecutorWithoutErrorHandler::execute(static function () use($pattern) {
-                    return \preg_match($pattern, '');
-                });
-            } catch (\PhpCsFixer\ExecutorWithoutErrorHandlerException $e) {
-                $result = \false;
-                $errorMessage = $e->getMessage();
-            }
-            if (\false !== $result) {
-                continue;
-            }
-            $code = \preg_last_error();
-            $message = \sprintf('(code: %d) %s', $code, \preg_replace('~preg_[a-z_]+[()]{2}: ~', '', $errorMessage));
-            return new \PhpCsFixer\PregException(\sprintf('%s(): Invalid PCRE pattern "%s": %s (version: %s)', $method, $pattern, $message, \PCRE_VERSION), $code);
+        $result = null;
+        $errorMessage = null;
+        try {
+            $result = \PhpCsFixer\ExecutorWithoutErrorHandler::execute(static function () use($pattern) {
+                return \preg_match($pattern, '');
+            });
+        } catch (\PhpCsFixer\ExecutorWithoutErrorHandlerException $e) {
+            $result = \false;
+            $errorMessage = $e->getMessage();
         }
-        return new \PhpCsFixer\PregException(\sprintf('Error occurred when calling %s: %s.', $method, $errorMsg), $error);
+        if (\false !== $result) {
+            return new \PhpCsFixer\PregException(\sprintf('Unknown error occurred when calling %s: %s.', $method, $errorMsg), $error);
+        }
+        $code = \preg_last_error();
+        $message = \sprintf('(code: %d) %s', $code, \preg_replace('~preg_[a-z_]+[()]{2}: ~', '', $errorMessage));
+        return new \PhpCsFixer\PregException(\sprintf('%s(): Invalid PCRE pattern "%s": %s (version: %s)', $method, $pattern, $message, \PCRE_VERSION), $code);
     }
 }
