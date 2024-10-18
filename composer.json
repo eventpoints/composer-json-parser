@@ -2,7 +2,7 @@
     "name": "kerrialn/composer-json-parser",
     "description": "Access your composer.json as an object",
     "version": "1.1.0",
-    "homepage" : "https://github.com/eventpoints/composer-json-parser",
+    "homepage" : "https://github.com/kerrialn/composer-json-parser",
     "type": "library",
     "license": "MIT",
     "minimum-stability": "stable",
