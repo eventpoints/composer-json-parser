@@ -8,6 +8,20 @@
 
 ### Usage
 
+Basic usage
+````php
+        $composer = (new Parser())
+            ->withName()
+             ->withRequire()
+              ->withRequireDev()
+               ->withAutoload()
+                ->withMinimumStability()
+                 ->withScripts()
+                  ->getComposer();
+        // Will output a Composer object
+````
+
+Need to find a specific package? 
 ````php
 declare(strict_types=1);
 
