@@ -1,6 +1,6 @@
 # Composer Json Parser
 
-## Convert your composer.json file to an object and find any data quickly.
+A tool that converts your composer.json file to an object and allows you to find any composer data quickly.
 
 ### Install
 
