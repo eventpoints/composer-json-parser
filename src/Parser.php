@@ -84,7 +84,7 @@ final class Parser
     public function withRequireDev(): self
     {
         if (array_key_exists('require-dev', $this->composerJsonData)) {
-            $this->extractRequirePackages($this->composerJsonData['require-dev']);
+            $this->extractRequireDevPackages($this->composerJsonData['require-dev']);
         }
         return $this;
     }
@@ -111,7 +111,7 @@ final class Parser
         foreach ($composerRequirePackages as $name => $version) {
             $package = new Package(
                 name: $name,
-                type: PackageTypeEnum::DEVELOPMENT,
+                type: PackageTypeEnum::REQUIRE,
                 packageVersion: $this->versionParser->parseVersionString($version)
             );
             $this->composer->addRequire($package);
@@ -135,6 +135,18 @@ final class Parser
 
             $script = new Script(name: $name, command: $command);
             $this->composer->addScript($script);
+        }
+    }
+
+    private function extractRequireDevPackages(array $composerRequireDevPackages) :void
+    {
+        foreach ($composerRequireDevPackages as $name => $version) {
+            $package = new Package(
+                name: $name,
+                type: PackageTypeEnum::DEVELOPMENT,
+                packageVersion: $this->versionParser->parseVersionString($version)
+            );
+            $this->composer->addDevRequire($package);
         }
     }
 }
