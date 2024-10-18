@@ -4,7 +4,7 @@ A tool that converts your composer.json file to an object and allows you to find
 
 ### Install
 
-`composer require eventpoints/composer-json-parser`
+`composer require kerrialn/composer-json-parser`
 
 ### Usage
 
